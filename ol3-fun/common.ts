@@ -54,5 +54,5 @@ export function debounce(func: () => void, wait = 50) {
 
 export function html(html: string) {
     let result = parser.parseFromString(html, "text/html");
-    return result.firstElementChild;
+    return result.body.firstElementChild;
 }
