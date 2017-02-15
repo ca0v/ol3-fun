@@ -1,4 +1,4 @@
-define("common", ["require", "exports"], function (require, exports) {
+define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     "use strict";
     var parser = new DOMParser();
     function getParameterByName(name, url) {
@@ -61,7 +61,7 @@ define("common", ["require", "exports"], function (require, exports) {
     }
     exports.html = html;
 });
-define("ol3-polyline", ["require", "exports", "openlayers"], function (require, exports, ol) {
+define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     var Polyline = ol.format.Polyline;
     var PolylineEncoder = (function () {
@@ -99,7 +99,7 @@ define("ol3-polyline", ["require", "exports", "openlayers"], function (require, 
     }());
     return PolylineEncoder;
 });
-define("snapshot", ["require", "exports", "openlayers"], function (require, exports, ol) {
+define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     var Snapshot = (function () {
         function Snapshot() {

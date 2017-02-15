@@ -10,6 +10,7 @@
         "moduleResolution": "node"
     },
     "include": [
+        "index.ts",
         "ol3-fun/**/*.ts",
         "typings/index.d.ts"
     ]

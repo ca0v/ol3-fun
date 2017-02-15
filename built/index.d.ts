@@ -1,4 +1,4 @@
-declare module "common" {
+declare module "ol3-fun/common" {
     export function getParameterByName(name: string, url?: string): string;
     export function doif<T>(v: T, cb: (v: T) => void): void;
     export function mixin<A extends any, B extends any>(a: A, b: B): A & B;
@@ -7,7 +7,7 @@ declare module "common" {
     export function debounce(func: () => void, wait?: number): () => void;
     export function html(html: string): Element;
 }
-declare module "ol3-polyline" {
+declare module "ol3-fun/ol3-polyline" {
     class PolylineEncoder {
         precision: number;
         stride: number;
@@ -20,7 +20,7 @@ declare module "ol3-polyline" {
     }
     export = PolylineEncoder;
 }
-declare module "snapshot" {
+declare module "ol3-fun/snapshot" {
     import ol = require("openlayers");
     class Snapshot {
         static render(canvas: HTMLCanvasElement, feature: ol.Feature): void;
