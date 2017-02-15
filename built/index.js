@@ -1,6 +1,30 @@
 define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     "use strict";
-    var parser = new DOMParser();
+    function parse(v, type) {
+        if (typeof type === "string")
+            return v;
+        if (typeof type === "number")
+            return parseFloat(v);
+        if (typeof type === "boolean")
+            return (v === "1" || v === "true");
+        if (Array.isArray(type)) {
+            return (v.split(",").map(function (v) { return parse(v, type[0]); }));
+        }
+        throw "unknown type: " + type;
+    }
+    exports.parse = parse;
+    function getQueryParameters(options, url) {
+        if (url === void 0) { url = window.location.href; }
+        var opts = options;
+        Object.keys(opts).forEach(function (k) {
+            doif(getParameterByName(k, url), function (v) {
+                var value = parse(v, opts[k]);
+                if (value !== undefined)
+                    opts[k] = value;
+            });
+        });
+    }
+    exports.getQueryParameters = getQueryParameters;
     function getParameterByName(name, url) {
         if (url === void 0) { url = window.location.href; }
         name = name.replace(/[\[\]]/g, "\\$&");
@@ -22,8 +46,14 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         return a;
     }
     exports.mixin = mixin;
-    function defaults(a, b) {
-        Object.keys(b).filter(function (k) { return a[k] == undefined; }).forEach(function (k) { return a[k] = b[k]; });
+    function defaults(a) {
+        var b = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            b[_i - 1] = arguments[_i];
+        }
+        b.forEach(function (b) {
+            Object.keys(b).filter(function (k) { return a[k] === undefined; }).forEach(function (k) { return a[k] = b[k]; });
+        });
         return a;
     }
     exports.defaults = defaults;
@@ -56,10 +86,31 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.debounce = debounce;
     function html(html) {
-        var result = parser.parseFromString(html, "text/html");
-        return result.firstElementChild;
+        var d = document;
+        var a = d.createElement("div");
+        var b = d.createDocumentFragment();
+        a.innerHTML = html;
+        while (a.firstChild)
+            b.appendChild(a.firstChild);
+        return b.firstElementChild;
     }
     exports.html = html;
+});
+define("ol3-fun/examples/index", ["require", "exports", "ol3-fun/common"], function (require, exports, common) {
+    "use strict";
+    function run() {
+        var html = "<tr><td>Test</td></tr>";
+        var tr = common.html(html);
+        console.assert(tr === null);
+        html = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
+        var table = common.html(html);
+        console.assert(table.outerHTML === html);
+        html = "<canvas width=\"100\" height=\"100\"></canvas>";
+        var canvas = common.html(html);
+        console.assert(canvas.outerHTML === html);
+        canvas.getContext("2d");
+    }
+    exports.run = run;
 });
 define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";

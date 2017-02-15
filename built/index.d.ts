@@ -1,11 +1,16 @@
 declare module "ol3-fun/common" {
+    export function parse<T>(v: string, type: T): T;
+    export function getQueryParameters(options: any, url?: string): void;
     export function getParameterByName(name: string, url?: string): string;
     export function doif<T>(v: T, cb: (v: T) => void): void;
     export function mixin<A extends any, B extends any>(a: A, b: B): A & B;
-    export function defaults<T extends any>(a: T, b: T): T;
+    export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B;
     export function cssin(name: string, css: string): () => void;
     export function debounce(func: () => void, wait?: number): () => void;
-    export function html(html: string): Element;
+    export function html(html: string): HTMLElement;
+}
+declare module "ol3-fun/examples/index" {
+    export function run(): void;
 }
 declare module "ol3-fun/ol3-polyline" {
     class PolylineEncoder {

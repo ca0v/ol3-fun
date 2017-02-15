@@ -1,4 +1,23 @@
-const parser = new DOMParser();
+export function parse<T>(v: string, type: T): T {
+    if (typeof type === "string") return <any>v;
+    if (typeof type === "number") return <any>parseFloat(v);
+    if (typeof type === "boolean") return <any>(v === "1" || v === "true");
+    if (Array.isArray(type)) {
+        return <any>(v.split(",").map(v => parse(v, (<any>type)[0])));
+    }
+    throw `unknown type: ${type}`;
+}
+
+
+export function getQueryParameters(options: any, url = window.location.href) {
+    let opts = <any>options;
+    Object.keys(opts).forEach(k => {
+        doif(getParameterByName(k, url), v => {
+            let value = parse(v, opts[k]);
+            if (value !== undefined) opts[k] = value;
+        });
+    });
+}
 
 export function getParameterByName(name: string, url = window.location.href) {
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -18,9 +37,11 @@ export function mixin<A extends any, B extends any>(a: A, b: B) {
     return <A & B>a;
 }
 
-export function defaults<T extends any>(a: T, b: T) {
-    Object.keys(b).filter(k => a[k] == undefined).forEach(k => a[k] = b[k]);
-    return a;
+export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B {
+    b.forEach(b => {
+        Object.keys(b).filter(k => a[k] === undefined).forEach(k => a[k] = b[k]);
+    });
+    return <A & B>a;
 }
 
 export function cssin(name: string, css: string) {
@@ -52,7 +73,15 @@ export function debounce(func: () => void, wait = 50) {
     };
 }
 
+/**
+ * poor $(html) substitute due to being 
+ * unable to create <td>, <tr> elements
+ */
 export function html(html: string) {
-    let result = parser.parseFromString(html, "text/html");
-    return result.body.firstElementChild;
+    let d = document;
+    let a = d.createElement("div");
+    let b = d.createDocumentFragment();
+    a.innerHTML = html;
+    while (a.firstChild) b.appendChild(a.firstChild);
+    return <HTMLElement>b.firstElementChild;
 }
