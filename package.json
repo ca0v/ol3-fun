@@ -1,0 +1,22 @@
+{
+  "name": "ol3-fun",
+  "version": "4.0.1",
+  "description": "OpenLayers Functions",
+  "main": "built/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ca0v/ol3-fun.git"
+  },
+  "keywords": [
+    "OpenLayers"
+  ],
+  "author": "coreyalix@hotmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ca0v/ol3-fun/issues"
+  },
+  "homepage": "https://github.com/ca0v/ol3-fun#readme"
+}
