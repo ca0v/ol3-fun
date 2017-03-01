@@ -14,4 +14,4 @@ Collection of utility function oriented around OpenLayers
 
 ## Consume
 
-Don't do it!
+* `bower install ol3-fun=git://github.com/ca0v/ol3-fun.git#v4.0.1 --save`

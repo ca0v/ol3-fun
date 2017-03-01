@@ -1,0 +1,37 @@
+{
+  "name": "ol3-fun",
+  "description": "OpenLayers Functions",
+  "homepage": "https://github.com/ca0v/ol3-fun",
+  "main": [
+    "index.ts",
+    "built/index.js"
+  ],
+  "devDependencies": {
+  },
+  "dependencies": {
+    "openlayers": "https://github.com/openlayers/openlayers/releases/download/v4.0.1/v4.0.1-dist.zip",
+    "requirejs": "^2.3.2"
+  },
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "openlayers"
+  ],
+  "authors": [
+    "Corey Alix <coreyalix@outlook.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "typings",
+    "ol3-fun/examples/**",
+    "*.html",
+    "*.md",
+    "*.yml"
+  ],
+  "private": true,
+  "typescript": {
+    "definition": "built/index.d.ts"
+  }
+}

@@ -131,6 +131,10 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.shuffle = shuffle;
 });
+define("index", ["require", "exports", "ol3-fun/common"], function (require, exports, common) {
+    "use strict";
+    return common;
+});
 define("ol3-fun/examples/html", ["require", "exports", "ol3-fun/common"], function (require, exports, common_1) {
     "use strict";
     function run() {
@@ -263,15 +267,6 @@ define("ol3-fun/examples/zoomToFeature", ["require", "exports", "openlayers", "o
             }),
             layers: [tiles, vectors]
         });
-        var graticule = new ol.Graticule({
-            maxLines: 500,
-            strokeStyle: new ol.style.Stroke({
-                color: 'rgba(255,120,0,0.9)',
-                width: 2,
-                lineDash: [0.5, 4]
-            })
-        });
-        graticule.setMap(map);
         var points = common_3.range(10).map(function (n) {
             return new ol.Feature(new ol.geom.Point(randomCoordinate(500)));
         });

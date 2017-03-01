@@ -11,6 +11,10 @@ declare module "ol3-fun/common" {
     export function range(n: number): any[];
     export function shuffle<T>(array: T[]): T[];
 }
+declare module "index" {
+    import common = require("ol3-fun/common");
+    export = common;
+}
 declare module "ol3-fun/examples/html" {
     export function run(): void;
 }
