@@ -15,21 +15,13 @@ declare module "index" {
     import common = require("ol3-fun/common");
     export = common;
 }
+declare module "ol3-fun/examples/debounce" {
+    export function run(): void;
+}
 declare module "ol3-fun/examples/html" {
     export function run(): void;
 }
 declare module "ol3-fun/examples/index" {
-    export function run(): void;
-}
-declare module "ol3-fun/navigation" {
-    import ol = require("openlayers");
-    export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
-        duration?: number;
-        padding?: number;
-        minResolution?: number;
-    }): void;
-}
-declare module "ol3-fun/examples/zoomToFeature" {
     export function run(): void;
 }
 declare module "ol3-fun/ol3-polyline" {
@@ -44,6 +36,28 @@ declare module "ol3-fun/ol3-polyline" {
         encode(points: number[][]): string;
     }
     export = PolylineEncoder;
+}
+declare module "ol3-fun/google-polyline" {
+    class PolylineEncoder {
+        private encodeCoordinate(coordinate, factor);
+        decode(str: string, precision?: number): number[][];
+        encode(coordinates: number[][], precision?: number): string;
+    }
+    export = PolylineEncoder;
+}
+declare module "ol3-fun/examples/polyline" {
+    export function run(): void;
+}
+declare module "ol3-fun/navigation" {
+    import ol = require("openlayers");
+    export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
+        duration?: number;
+        padding?: number;
+        minResolution?: number;
+    }): void;
+}
+declare module "ol3-fun/examples/zoomToFeature" {
+    export function run(): void;
 }
 declare module "ol3-fun/snapshot" {
     import ol = require("openlayers");
