@@ -12,7 +12,7 @@ export function run() {
     });
 
     let vectors = new ol.layer.Vector({
-        source: new ol.source.Vector,
+        source: new ol.source.Vector(),
         style: (feature: ol.Feature, resolution: number) => {
 
             let style = new ol.style.Style({

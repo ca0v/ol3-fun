@@ -70,7 +70,7 @@ export function debounce<T extends Function>(func: T, wait = 50, immediate = fal
     return <T><any>((...args: any[]) => {
         let later = () => {
             timeout = null;
-            if (!immediate) func.call(this, args);
+            if (!immediate) func.apply(this, args);
         };
         let callNow = immediate && !timeout;
 

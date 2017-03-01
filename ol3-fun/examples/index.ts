@@ -2,6 +2,7 @@ export function run() {
     let l = window.location;
     let path = `${l.origin}${l.pathname}?run=ol3-fun/examples/`;
     let labs = `
+    debounce
     html
     zoomToFeature
     index
