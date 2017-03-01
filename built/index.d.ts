@@ -6,10 +6,20 @@ declare module "ol3-fun/common" {
     export function mixin<A extends any, B extends any>(a: A, b: B): A & B;
     export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B;
     export function cssin(name: string, css: string): () => void;
-    export function debounce(func: () => void, wait?: number): () => void;
+    export function debounce<T extends Function>(func: T, wait?: number, immediate?: boolean): T;
     export function html(html: string): HTMLElement;
 }
+declare module "ol3-fun/examples/html" {
+    export function run(): void;
+}
 declare module "ol3-fun/examples/index" {
+    export function run(): void;
+}
+declare module "ol3-fun/navigation" {
+    import ol = require("openlayers");
+    export function zoomToFeature(map: ol.Map, feature: ol.Feature, duration?: number): void;
+}
+declare module "ol3-fun/examples/zoomToFeature" {
     export function run(): void;
 }
 declare module "ol3-fun/ol3-polyline" {
