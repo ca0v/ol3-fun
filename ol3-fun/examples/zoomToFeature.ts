@@ -58,17 +58,6 @@ export function run() {
         layers: [tiles, vectors]
     });
 
-    let graticule = new ol.Graticule({
-        // the style to use for the lines, optional.
-        maxLines: 500,
-        strokeStyle: new ol.style.Stroke({
-            color: 'rgba(255,120,0,0.9)',
-            width: 2,
-            lineDash: [0.5, 4]
-        })
-    });
-    graticule.setMap(map);
-
     let points = range(10).map(n =>
         new ol.Feature(new ol.geom.Point(randomCoordinate(500))));
 
