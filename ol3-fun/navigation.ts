@@ -1,23 +1,53 @@
 import ol = require("openlayers");
+import { defaults } from "./common";
 
 /**
- * A less disorienting way of changing the maps extent
+ * A less disorienting way of changing the maps extent (maybe!)
+ * Zoom out until new feature is visible
+ * Zoom to that feature
  */
-export function zoomToFeature(map: ol.Map, feature: ol.Feature, duration = 2500) {
-    let extent = feature.getGeometry().getExtent();
-    let w1 = ol.extent.getWidth(map.getView().calculateExtent(map.getSize()));
-    let w2 = ol.extent.getWidth(extent);
+export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
+    duration?: number;
+    padding?: number;
+    minResolution?: number;
+}) {
 
-    map.getView().animate(
-        {
-            center: ol.extent.getCenter(extent),
+    options = defaults(options || {}, {
+        duration: 1000,
+        padding: 256,
+        minResolution: 2 * map.getView().getMinResolution()
+    });
+
+    let view = map.getView();
+    let currentExtent = view.calculateExtent(map.getSize());
+    let targetExtent = feature.getGeometry().getExtent();
+
+    let doit = (duration: number) => {
+        view.fit(targetExtent, map.getSize(), {
+            padding: [options.padding, options.padding, options.padding, options.padding],
+            minResolution: options.minResolution,
             duration: duration
-        },
-        {
-            zoom: map.getView().getZoom() + Math.round(Math.log(w1 / w2) / Math.log(2)) - 1,
-            duration: duration
-        }, () => {
-            map.getView().fit(feature.getGeometry().getExtent(), map.getSize());
         });
+    }
+
+    if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+        // new extent is contained within current extent, pan and zoom in
+        doit(options.duration);
+    } else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+        // new extent is contained within current extent, pan and zoom out
+        doit(options.duration);
+    }
+    else {
+        // zoom out until target extent is in view
+        let fullExtent = ol.extent.createEmpty();
+        ol.extent.extend(fullExtent, currentExtent);
+        ol.extent.extend(fullExtent, targetExtent);
+        let dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
+        let duration = 0.25 * options.duration;
+        view.fit(fullExtent, map.getSize(), {
+            duration: duration
+        });
+        setTimeout(() => doit(0.75 * options.duration), duration);
+    }
 
 }
