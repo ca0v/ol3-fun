@@ -4,6 +4,7 @@ export function run() {
     let labs = `
     debounce
     html
+    polyline
     zoomToFeature
     index
     `;
