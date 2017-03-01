@@ -43,11 +43,13 @@ export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
         ol.extent.extend(fullExtent, currentExtent);
         ol.extent.extend(fullExtent, targetExtent);
         let dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
-        let duration = 0.25 * options.duration;
+        let duration = 0.5 * options.duration;
         view.fit(fullExtent, map.getSize(), {
+            padding: [options.padding, options.padding, options.padding, options.padding],
+            minResolution: options.minResolution,
             duration: duration
         });
-        setTimeout(() => doit(0.75 * options.duration), duration);
+        setTimeout(() => doit(0.5 * options.duration), duration);
     }
 
 }

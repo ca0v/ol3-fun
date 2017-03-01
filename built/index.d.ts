@@ -8,6 +8,8 @@ declare module "ol3-fun/common" {
     export function cssin(name: string, css: string): () => void;
     export function debounce<T extends Function>(func: T, wait?: number, immediate?: boolean): T;
     export function html(html: string): HTMLElement;
+    export function range(n: number): any[];
+    export function shuffle<T>(array: T[]): T[];
 }
 declare module "ol3-fun/examples/html" {
     export function run(): void;
@@ -17,7 +19,11 @@ declare module "ol3-fun/examples/index" {
 }
 declare module "ol3-fun/navigation" {
     import ol = require("openlayers");
-    export function zoomToFeature(map: ol.Map, feature: ol.Feature, duration?: number): void;
+    export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
+        duration?: number;
+        padding?: number;
+        minResolution?: number;
+    }): void;
 }
 declare module "ol3-fun/examples/zoomToFeature" {
     export function run(): void;

@@ -2,8 +2,8 @@ import ol = require("openlayers");
 import { zoomToFeature } from "../navigation";
 import { range, shuffle } from "../common";
 
-function randomCoordinate() {
-    return <ol.Coordinate>[-8238299 + 1000 * Math.random(), 4970071 + 1000 * Math.random()];
+function randomCoordinate(size = 100, [x, y] = [-8238299, 4970071]) {
+    return <ol.Coordinate>[x + size * Math.random(), y + size * Math.random()];
 }
 
 export function run() {
@@ -14,7 +14,35 @@ export function run() {
     let vectors = new ol.layer.Vector({
         source: new ol.source.Vector,
         style: (feature: ol.Feature, resolution: number) => {
-            return new ol.style.Style();
+
+            let style = new ol.style.Style({
+            });
+
+            switch (feature.getGeometry().getType()) {
+                case "Point":
+                    style.setImage(new ol.style.Circle({
+                        radius: 20,
+                        fill: new ol.style.Fill({
+                            color: "rgba(60, 60, 60, 0.1)"
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: "rgba(60, 66, 60, 0.1)",
+                            width: 1
+                        })
+                    }));
+                    break;
+                case "Polygon":
+                    style.setFill(new ol.style.Fill({
+                        color: "rgba(60, 6, 60, 0.1)"
+                    }));
+                    style.setStroke(new ol.style.Stroke({
+                        color: "rgba(60, 60, 60, 0.1)",
+                        width: 1
+                    }));
+                    break;
+            }
+
+            return style;
         }
     });
 
@@ -42,11 +70,11 @@ export function run() {
     graticule.setMap(map);
 
     let points = range(10).map(n =>
-        new ol.Feature(new ol.geom.Point(randomCoordinate())));
+        new ol.Feature(new ol.geom.Point(randomCoordinate(500))));
 
     let polys = range(10).map(n => {
-        let p0 = randomCoordinate();
-        let geom = new ol.geom.Polygon([[p0, randomCoordinate(), randomCoordinate(), p0]]);
+        let p0 = randomCoordinate(1000);
+        let geom = new ol.geom.Polygon([[p0, randomCoordinate(10, p0), randomCoordinate(10, p0), p0]]);
         let feature = new ol.Feature(geom);
         return feature;
     });

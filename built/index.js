@@ -109,6 +109,27 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         return b.firstElementChild;
     }
     exports.html = html;
+    function range(n) {
+        var result = new Array(n);
+        for (var i = 0; i < n; i++)
+            result[i] = i;
+        return result;
+    }
+    exports.range = range;
+    function shuffle(array) {
+        var currentIndex = array.length;
+        var temporaryValue;
+        var randomIndex;
+        while (0 !== currentIndex) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+        return array;
+    }
+    exports.shuffle = shuffle;
 });
 define("ol3-fun/examples/html", ["require", "exports", "ol3-fun/common"], function (require, exports, common_1) {
     "use strict";
@@ -150,34 +171,97 @@ define("ol3-fun/examples/index", ["require", "exports"], function (require, expo
     exports.run = run;
     ;
 });
-define("ol3-fun/navigation", ["require", "exports", "openlayers"], function (require, exports, ol) {
+define("ol3-fun/navigation", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_2) {
     "use strict";
-    function zoomToFeature(map, feature, duration) {
-        if (duration === void 0) { duration = 2500; }
-        var extent = feature.getGeometry().getExtent();
-        var w1 = ol.extent.getWidth(map.getView().calculateExtent(map.getSize()));
-        var w2 = ol.extent.getWidth(extent);
-        map.getView().animate({
-            center: ol.extent.getCenter(extent),
-            duration: duration
-        }, {
-            zoom: map.getView().getZoom() + Math.round(Math.log(w1 / w2) / Math.log(2)) - 1,
-            duration: duration
-        }, function () {
-            map.getView().fit(feature.getGeometry().getExtent(), map.getSize());
+    function zoomToFeature(map, feature, options) {
+        options = common_2.defaults(options || {}, {
+            duration: 1000,
+            padding: 256,
+            minResolution: 2 * map.getView().getMinResolution()
         });
+        var view = map.getView();
+        var currentExtent = view.calculateExtent(map.getSize());
+        var targetExtent = feature.getGeometry().getExtent();
+        var doit = function (duration) {
+            view.fit(targetExtent, map.getSize(), {
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration
+            });
+        };
+        if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else {
+            var fullExtent = ol.extent.createEmpty();
+            ol.extent.extend(fullExtent, currentExtent);
+            ol.extent.extend(fullExtent, targetExtent);
+            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
+            var duration = 0.5 * options.duration;
+            view.fit(fullExtent, map.getSize(), {
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration
+            });
+            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
+        }
     }
     exports.zoomToFeature = zoomToFeature;
 });
-define("ol3-fun/examples/zoomToFeature", ["require", "exports", "ol3-fun/navigation"], function (require, exports, navigation_1) {
+define("ol3-fun/examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/navigation", "ol3-fun/common"], function (require, exports, ol, navigation_1, common_3) {
     "use strict";
+    function randomCoordinate(size, _a) {
+        if (size === void 0) { size = 100; }
+        var _b = _a === void 0 ? [-8238299, 4970071] : _a, x = _b[0], y = _b[1];
+        return [x + size * Math.random(), y + size * Math.random()];
+    }
     function run() {
+        var tiles = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+        var vectors = new ol.layer.Vector({
+            source: new ol.source.Vector,
+            style: function (feature, resolution) {
+                var style = new ol.style.Style({});
+                switch (feature.getGeometry().getType()) {
+                    case "Point":
+                        style.setImage(new ol.style.Circle({
+                            radius: 20,
+                            fill: new ol.style.Fill({
+                                color: "rgba(60, 60, 60, 0.1)"
+                            }),
+                            stroke: new ol.style.Stroke({
+                                color: "rgba(60, 66, 60, 0.1)",
+                                width: 1
+                            })
+                        }));
+                        break;
+                    case "Polygon":
+                        style.setFill(new ol.style.Fill({
+                            color: "rgba(60, 6, 60, 0.1)"
+                        }));
+                        style.setStroke(new ol.style.Stroke({
+                            color: "rgba(60, 60, 60, 0.1)",
+                            width: 1
+                        }));
+                        break;
+                }
+                return style;
+            }
+        });
         var map = new ol.Map({
+            loadTilesWhileAnimating: true,
+            loadTilesWhileInteracting: true,
             target: document.getElementsByClassName("map")[0],
             view: new ol.View({
-                center: [0, 0],
-                zoom: 15
-            })
+                center: [-8200000, 4000000],
+                zoom: 3,
+                projection: "EPSG:3857"
+            }),
+            layers: [tiles, vectors]
         });
         var graticule = new ol.Graticule({
             maxLines: 500,
@@ -188,11 +272,66 @@ define("ol3-fun/examples/zoomToFeature", ["require", "exports", "ol3-fun/navigat
             })
         });
         graticule.setMap(map);
-        setTimeout(function () {
-            var feature = new ol.Feature();
-            feature.setGeometry(new ol.geom.Point([-115, 35]));
-            navigation_1.zoomToFeature(map, feature);
-        }, 5000);
+        var points = common_3.range(10).map(function (n) {
+            return new ol.Feature(new ol.geom.Point(randomCoordinate(500)));
+        });
+        var polys = common_3.range(10).map(function (n) {
+            var p0 = randomCoordinate(1000);
+            var geom = new ol.geom.Polygon([[p0, randomCoordinate(10, p0), randomCoordinate(10, p0), p0]]);
+            var feature = new ol.Feature(geom);
+            return feature;
+        });
+        var geoms = [].concat(points, polys);
+        common_3.shuffle(geoms);
+        vectors.getSource().addFeatures(geoms);
+        var select = new ol.interaction.Select({
+            style: function (feature) {
+                var style = new ol.style.Style({
+                    text: new ol.style.Text({
+                        text: 1 + geoms.indexOf(feature) + "",
+                        fill: new ol.style.Fill({
+                            color: "black"
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: "white",
+                            width: 2
+                        })
+                    })
+                });
+                switch (feature.getGeometry().getType()) {
+                    case "Point":
+                        style.setImage(new ol.style.Circle({
+                            radius: 20,
+                            fill: new ol.style.Fill({
+                                color: "rgba(60, 6, 60, 0.6)"
+                            }),
+                            stroke: new ol.style.Stroke({
+                                color: "rgba(60, 6, 60, 0.6)",
+                                width: 1
+                            })
+                        }));
+                        break;
+                    case "Polygon":
+                        style.setFill(new ol.style.Fill({
+                            color: "rgba(60, 6, 60, 0.6)"
+                        }));
+                        style.setStroke(new ol.style.Stroke({
+                            color: "rgba(60, 6, 60, 0.6)",
+                            width: 1
+                        }));
+                        break;
+                }
+                return style;
+            }
+        });
+        select.setMap(map);
+        geoms.forEach(function (f, i) { return setTimeout(function () {
+            var features = select.getFeatures();
+            features.insertAt(0, f);
+            navigation_1.zoomToFeature(map, f);
+            while (features.getLength() > 2)
+                features.removeAt(2);
+        }, 1000 + i * 2000); });
     }
     exports.run = run;
 });
@@ -236,6 +375,25 @@ define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (r
 });
 define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
+    function getStyle(feature) {
+        var style = feature.getStyle();
+        if (!style) {
+            var styleFn = feature.getStyleFunction();
+            if (styleFn) {
+                style = styleFn(0);
+            }
+        }
+        if (!style) {
+            style = new ol.style.Style({
+                text: new ol.style.Text({
+                    text: "?"
+                })
+            });
+        }
+        if (!Array.isArray(style))
+            style = [style];
+        return style;
+    }
     var Snapshot = (function () {
         function Snapshot() {
         }
@@ -250,7 +408,7 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
             geom.scale(scale, -scale);
             geom.translate(canvas.width / 2, canvas.height / 2);
             var vtx = ol.render.toContext(canvas.getContext("2d"));
-            var styles = feature.getStyleFunction()(0);
+            var styles = getStyle(feature);
             if (!Array.isArray(styles))
                 styles = [styles];
             styles.forEach(function (style) { return vtx.drawFeature(feature, style); });
