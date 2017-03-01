@@ -65,12 +65,19 @@ export function cssin(name: string, css: string) {
     };
 }
 
-export function debounce(func: () => void, wait = 50) {
-    let h: number;
-    return () => {
-        clearTimeout(h);
-        h = setTimeout(() => func(), wait);
-    };
+export function debounce<T extends Function>(func: T, wait = 50, immediate = false): T {
+    let timeout: number;
+    return <T><any>((...args: any[]) => {
+        let later = () => {
+            timeout = null;
+            if (!immediate) func.call(this, args);
+        };
+        let callNow = immediate && !timeout;
+
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.call(this, args);
+    });
 }
 
 /**

@@ -1,16 +1,38 @@
-import common = require("../common");
-
 export function run() {
-    let html = "<tr><td>Test</td></tr>";
-    let tr = <HTMLTableRowElement>common.html(html);
-    console.assert(tr === null);
+    let l = window.location;
+    let path = `${l.origin}${l.pathname}?run=ol3-fun/examples/`;
+    let labs = `
+    html
+    zoomToFeature
+    index
+    `;
 
-    html = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
-    let table = <HTMLTableElement>common.html(html);
-    console.assert(table.outerHTML === html);
+    let styles = document.createElement("style");
+    document.head.appendChild(styles);
 
-    html = `<canvas width="100" height="100"></canvas>`;
-    let canvas = <HTMLCanvasElement>common.html(html);
-    console.assert(canvas.outerHTML === html);
-    canvas.getContext("2d");
-}
+    styles.innerText += `
+    #map {
+        display: none;
+    }
+    .test {
+        margin: 20px;
+    }
+    `;
+
+    let labDiv = document.createElement("div");
+    document.body.appendChild(labDiv);
+
+    labDiv.innerHTML = labs
+        .split(/ /)
+        .map(v => v.trim())
+        .filter(v => !!v)
+        //.sort()
+        .map(lab => `<div class='test'><a href='${path}${lab}&debug=1'>${lab}</a></div>`)
+        .join("\n");
+
+
+    let testDiv = document.createElement("div");
+    document.body.appendChild(testDiv);
+
+    testDiv.innerHTML = `<a href='${l.origin}${l.pathname}?run=ol3-fun/tests/index'>tests</a>`;
+};

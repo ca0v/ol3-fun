@@ -1,5 +1,23 @@
 import ol = require("openlayers");
 
+function getStyle(feature: ol.Feature) {
+    let style = feature.getStyle();
+    if (!style) {
+        let styleFn = feature.getStyleFunction();
+        if (styleFn) {
+            style = styleFn(0);
+        }
+    }
+    if (!style) {
+        style = new ol.style.Style({
+            text: new ol.style.Text({
+                text: "?"
+            })
+        });
+    }
+    if (!Array.isArray(style)) style = <any>[style];
+    return <ol.style.Style[]>style;
+}
 
 class Snapshot {
 
@@ -17,7 +35,7 @@ class Snapshot {
         geom.translate(canvas.width / 2, canvas.height / 2);
 
         let vtx = ol.render.toContext(canvas.getContext("2d"));
-        let styles = <ol.style.Style[]><any>feature.getStyleFunction()(0);
+        let styles = <ol.style.Style[]><any>getStyle(feature);
         if (!Array.isArray(styles)) styles = <any>[styles];
         styles.forEach(style => vtx.drawFeature(feature, style));
     }

@@ -76,13 +76,27 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         };
     }
     exports.cssin = cssin;
-    function debounce(func, wait) {
+    function debounce(func, wait, immediate) {
+        var _this = this;
         if (wait === void 0) { wait = 50; }
-        var h;
-        return function () {
-            clearTimeout(h);
-            h = setTimeout(function () { return func(); }, wait);
-        };
+        if (immediate === void 0) { immediate = false; }
+        var timeout;
+        return (function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var later = function () {
+                timeout = null;
+                if (!immediate)
+                    func.call(_this, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow)
+                func.call(_this, args);
+        });
     }
     exports.debounce = debounce;
     function html(html) {
@@ -96,19 +110,89 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.html = html;
 });
-define("ol3-fun/examples/index", ["require", "exports", "ol3-fun/common"], function (require, exports, common) {
+define("ol3-fun/examples/html", ["require", "exports", "ol3-fun/common"], function (require, exports, common_1) {
     "use strict";
     function run() {
         var html = "<tr><td>Test</td></tr>";
-        var tr = common.html(html);
+        var tr = common_1.html(html);
         console.assert(tr === null);
         html = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
-        var table = common.html(html);
+        var table = common_1.html(html);
         console.assert(table.outerHTML === html);
         html = "<canvas width=\"100\" height=\"100\"></canvas>";
-        var canvas = common.html(html);
+        var canvas = common_1.html(html);
         console.assert(canvas.outerHTML === html);
         canvas.getContext("2d");
+    }
+    exports.run = run;
+});
+define("ol3-fun/examples/index", ["require", "exports"], function (require, exports) {
+    "use strict";
+    function run() {
+        var l = window.location;
+        var path = "" + l.origin + l.pathname + "?run=ol3-fun/examples/";
+        var labs = "\n    html\n    zoomToFeature\n    index\n    ";
+        var styles = document.createElement("style");
+        document.head.appendChild(styles);
+        styles.innerText += "\n    #map {\n        display: none;\n    }\n    .test {\n        margin: 20px;\n    }\n    ";
+        var labDiv = document.createElement("div");
+        document.body.appendChild(labDiv);
+        labDiv.innerHTML = labs
+            .split(/ /)
+            .map(function (v) { return v.trim(); })
+            .filter(function (v) { return !!v; })
+            .map(function (lab) { return "<div class='test'><a href='" + path + lab + "&debug=1'>" + lab + "</a></div>"; })
+            .join("\n");
+        var testDiv = document.createElement("div");
+        document.body.appendChild(testDiv);
+        testDiv.innerHTML = "<a href='" + l.origin + l.pathname + "?run=ol3-fun/tests/index'>tests</a>";
+    }
+    exports.run = run;
+    ;
+});
+define("ol3-fun/navigation", ["require", "exports", "openlayers"], function (require, exports, ol) {
+    "use strict";
+    function zoomToFeature(map, feature, duration) {
+        if (duration === void 0) { duration = 2500; }
+        var extent = feature.getGeometry().getExtent();
+        var w1 = ol.extent.getWidth(map.getView().calculateExtent(map.getSize()));
+        var w2 = ol.extent.getWidth(extent);
+        map.getView().animate({
+            center: ol.extent.getCenter(extent),
+            duration: duration
+        }, {
+            zoom: map.getView().getZoom() + Math.round(Math.log(w1 / w2) / Math.log(2)) - 1,
+            duration: duration
+        }, function () {
+            map.getView().fit(feature.getGeometry().getExtent(), map.getSize());
+        });
+    }
+    exports.zoomToFeature = zoomToFeature;
+});
+define("ol3-fun/examples/zoomToFeature", ["require", "exports", "ol3-fun/navigation"], function (require, exports, navigation_1) {
+    "use strict";
+    function run() {
+        var map = new ol.Map({
+            target: document.getElementsByClassName("map")[0],
+            view: new ol.View({
+                center: [0, 0],
+                zoom: 15
+            })
+        });
+        var graticule = new ol.Graticule({
+            maxLines: 500,
+            strokeStyle: new ol.style.Stroke({
+                color: 'rgba(255,120,0,0.9)',
+                width: 2,
+                lineDash: [0.5, 4]
+            })
+        });
+        graticule.setMap(map);
+        setTimeout(function () {
+            var feature = new ol.Feature();
+            feature.setGeometry(new ol.geom.Point([-115, 35]));
+            navigation_1.zoomToFeature(map, feature);
+        }, 5000);
     }
     exports.run = run;
 });
