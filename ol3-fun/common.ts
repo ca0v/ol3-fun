@@ -8,7 +8,6 @@ export function parse<T>(v: string, type: T): T {
     throw `unknown type: ${type}`;
 }
 
-
 export function getQueryParameters(options: any, url = window.location.href) {
     let opts = <any>options;
     Object.keys(opts).forEach(k => {
@@ -91,6 +90,12 @@ export function html(html: string) {
     a.innerHTML = html;
     while (a.firstChild) b.appendChild(a.firstChild);
     return <HTMLElement>b.firstElementChild;
+}
+
+export function pair<A, B>(a1: A[], a2: B[]) {
+    let result: Array<[A, B]> = [];
+    a1.forEach(v1 => a2.forEach(v2 => result.push([v1, v2])));
+    return result;
 }
 
 export function range(n: number) {
