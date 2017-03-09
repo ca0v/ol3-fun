@@ -43,13 +43,28 @@ export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B {
     return <A & B>a;
 }
 
+/**
+ * Adds exactly one instance of the CSS to the app with a mechanism
+ * for disposing by invoking the destructor returned by this method.
+ * Note the css will not be removed until the dependency count reaches
+ * 0 meaning the number of calls to cssin('id') must match the number
+ * of times the destructor is invoked.
+ * let d1 = cssin('foo', '.foo { background: white }');
+ * let d2 = cssin('foo', '.foo { background: white }');
+ * d1(); // reduce dependency count
+ * d2(); // really remove the css
+ * @param name unique id for this style tag
+ * @param css css content
+ * @returns destructor
+ */
 export function cssin(name: string, css: string) {
     let id = `style-${name}`;
     let styleTag = <HTMLStyleElement>document.getElementById(id);
     if (!styleTag) {
         styleTag = document.createElement("style");
         styleTag.id = id;
-        styleTag.innerText = css;
+        styleTag.type = "text/css";
+        styleTag.appendChild(document.createTextNode(css));
         document.head.appendChild(styleTag);
     }
 
