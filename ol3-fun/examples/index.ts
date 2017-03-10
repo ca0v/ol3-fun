@@ -3,6 +3,7 @@ export function run() {
     let path = `${l.origin}${l.pathname}?run=ol3-fun/examples/`;
     let labs = `
     debounce
+    goto
     html
     polyline
     zoomToFeature
