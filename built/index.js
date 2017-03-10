@@ -63,7 +63,8 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         if (!styleTag) {
             styleTag = document.createElement("style");
             styleTag.id = id;
-            styleTag.innerText = css;
+            styleTag.type = "text/css";
+            styleTag.appendChild(document.createTextNode(css));
             document.head.appendChild(styleTag);
         }
         var dataset = styleTag.dataset;
@@ -109,6 +110,12 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         return b.firstElementChild;
     }
     exports.html = html;
+    function pair(a1, a2) {
+        var result = [];
+        a1.forEach(function (v1) { return a2.forEach(function (v2) { return result.push([v1, v2]); }); });
+        return result;
+    }
+    exports.pair = pair;
     function range(n) {
         var result = new Array(n);
         for (var i = 0; i < n; i++)
@@ -131,11 +138,134 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.shuffle = shuffle;
 });
-define("index", ["require", "exports", "ol3-fun/common"], function (require, exports, common) {
+define("ol3-fun/navigation", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_1) {
     "use strict";
-    return common;
+    function zoomToFeature(map, feature, options) {
+        options = common_1.defaults(options || {}, {
+            duration: 1000,
+            padding: 256,
+            minResolution: 2 * map.getView().getMinResolution()
+        });
+        var view = map.getView();
+        var currentExtent = view.calculateExtent(map.getSize());
+        var targetExtent = feature.getGeometry().getExtent();
+        var doit = function (duration) {
+            view.fit(targetExtent, {
+                size: map.getSize(),
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration
+            });
+        };
+        if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else {
+            var fullExtent = ol.extent.createEmpty();
+            ol.extent.extend(fullExtent, currentExtent);
+            ol.extent.extend(fullExtent, targetExtent);
+            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
+            var duration = 0.5 * options.duration;
+            view.fit(fullExtent, {
+                size: map.getSize(),
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration
+            });
+            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
+        }
+    }
+    exports.zoomToFeature = zoomToFeature;
 });
-define("ol3-fun/examples/debounce", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_1) {
+define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) {
+    "use strict";
+    function decDegFromMatch(m) {
+        var signIndex = {
+            "-": -1,
+            "N": 1,
+            "S": -1,
+            "E": 1,
+            "W": -1
+        };
+        var latLonIndex = {
+            "-": "",
+            "N": "lat",
+            "S": "lat",
+            "E": "lon",
+            "W": "lon"
+        };
+        var degrees, minutes, seconds, sign, latLon;
+        sign = signIndex[m[2]] || signIndex[m[1]] || signIndex[m[6]] || 1;
+        degrees = Number(m[3]);
+        minutes = m[4] ? Number(m[4]) : 0;
+        seconds = m[5] ? Number(m[5]) : 0;
+        latLon = latLonIndex[m[1]] || latLonIndex[m[6]];
+        if (!inRange(degrees, 0, 180))
+            throw 'Degrees out of range';
+        if (!inRange(minutes, 0, 60))
+            throw 'Minutes out of range';
+        if (!inRange(seconds, 0, 60))
+            throw 'Seconds out of range';
+        return {
+            decDeg: sign * (degrees + minutes / 60 + seconds / 3600),
+            latLon: latLon
+        };
+    }
+    function inRange(value, a, b) {
+        return value >= a && value <= b;
+    }
+    function parse(dmsString) {
+        dmsString = dmsString.trim();
+        var dmsRe = /([NSEW])?(-)?(\d+(?:\.\d+)?)[°º:d\s]?\s?(?:(\d+(?:\.\d+)?)['’‘′:]\s?(?:(\d{1,2}(?:\.\d+)?)(?:"|″|’’|'')?)?)?\s?([NSEW])?/i;
+        var dmsString2;
+        var m1 = dmsString.match(dmsRe);
+        if (!m1)
+            throw 'Could not parse string';
+        if (m1[1]) {
+            m1[6] = undefined;
+            dmsString2 = dmsString.substr(m1[0].length - 1).trim();
+        }
+        else {
+            dmsString2 = dmsString.substr(m1[0].length).trim();
+        }
+        var decDeg1 = decDegFromMatch(m1);
+        var m2 = dmsString2.match(dmsRe);
+        var decDeg2 = m2 && decDegFromMatch(m2);
+        if (typeof decDeg1.latLon === 'undefined') {
+            if (!isNaN(decDeg1.decDeg) && decDeg2 && isNaN(decDeg2.decDeg)) {
+                return decDeg1.decDeg;
+            }
+            else if (!isNaN(decDeg1.decDeg) && decDeg2 && !isNaN(decDeg2.decDeg)) {
+                decDeg1.latLon = 'lat';
+                decDeg2.latLon = 'lon';
+            }
+            else {
+                throw 'Could not parse string';
+            }
+        }
+        if (typeof decDeg2.latLon === 'undefined') {
+            decDeg2.latLon = decDeg1.latLon === 'lat' ? 'lon' : 'lat';
+        }
+        return _a = {},
+            _a[decDeg1.latLon] = decDeg1.decDeg,
+            _a[decDeg2.latLon] = decDeg2.decDeg,
+            _a;
+        var _a;
+    }
+    exports.parse = parse;
+});
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms"], function (require, exports, common, navigation, dms) {
+    "use strict";
+    var index = common.defaults(common, {
+        dms: dms,
+        navigation: navigation
+    });
+    return index;
+});
+define("ol3-fun/examples/debounce", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_2) {
     "use strict";
     function run() {
         var map = new ol.Map({
@@ -157,8 +287,8 @@ define("ol3-fun/examples/debounce", ["require", "exports", "openlayers", "ol3-fu
             source: new ol.source.Vector()
         });
         map.addLayer(vectors);
-        var clearAll = common_1.debounce(function () { return vectors.getSource().clear(); }, 1000);
-        var onClick = common_1.debounce(function (args) {
+        var clearAll = common_2.debounce(function () { return vectors.getSource().clear(); }, 1000);
+        var onClick = common_2.debounce(function (args) {
             vectors.getSource().addFeature(new ol.Feature(new ol.geom.Point(args.coordinate)));
             clearAll();
         }, 100);
@@ -166,18 +296,87 @@ define("ol3-fun/examples/debounce", ["require", "exports", "openlayers", "ol3-fu
     }
     exports.run = run;
 });
-define("ol3-fun/examples/html", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_2) {
+define("ol3-fun/examples/goto", ["require", "exports", "openlayers", "ol3-fun/common", "ol3-fun/parse-dms"], function (require, exports, ol, common_3, parse_dms_1) {
     "use strict";
-    common_2.cssin("html", "\n\n.notebook {\n    background: white;\n    border: 1px solid rgba(66,66,66,1);\n    padding: 4px;\n}\n\n.notebook:after {\n    content: \"+\";\n    position: absolute;\n    left: calc(50% - 5px);\n}\n\n.notebook textarea {\n    width: 240px;\n    height: 80px;\n    background: rgb(250, 250, 210);\n    resize: none;\n}\n");
+    common_3.cssin("html", "\n\n.notebook {\n    background: white;\n    border: 1px solid rgba(66,66,66,1);\n    padding: 4px;\n}\n\n.notebook:after {\n    content: \"+\";\n    position: absolute;\n    left: calc(50% - 5px);\n}\n\n.notebook textarea {\n    width: 240px;\n    height: 80px;\n    background: rgb(250, 250, 210);\n    resize: none;\n}\n\n.parse-container {\n    position: absolute;\n    top: 1em;\n    right: 1em;\n}\n");
     function run() {
         var html = "<tr><td>Test</td></tr>";
-        var tr = common_2.html(html);
+        var tr = common_3.html(html);
         console.assert(tr === null);
         html = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
-        var table = common_2.html(html);
+        var table = common_3.html(html);
         console.assert(table.outerHTML === html);
         html = "<canvas width=\"100\" height=\"100\"></canvas>";
-        var canvas = common_2.html(html);
+        var canvas = common_3.html(html);
+        console.assert(canvas.outerHTML === html);
+        console.assert(!!canvas.getContext("2d"));
+        var map = new ol.Map({
+            loadTilesWhileAnimating: true,
+            loadTilesWhileInteracting: true,
+            controls: ol.control.defaults({
+                attribution: false,
+                rotate: true
+            }),
+            interactions: ol.interaction.defaults({
+                zoomDuration: 1000
+            }),
+            overlays: [],
+            target: document.getElementsByClassName("map")[0],
+            view: new ol.View({
+                center: [-8800000, 4000000],
+                zoom: 15,
+                projection: "EPSG:3857"
+            }),
+            layers: [new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })]
+        });
+        map.on("click", function (args) {
+            var location = new ol.geom.Point(args.coordinate);
+            location.transform(map.getView().getProjection(), "EPSG:4326");
+            var overlay = new ol.Overlay({
+                insertFirst: true,
+                positioning: "bottom-center",
+                offset: [0, -5],
+                element: common_3.html("\n            <div class='notebook'>\n            <h3>Hello World</h3>\n            <table>\n                <tr><td>X lon</td><td>" + location.getFirstCoordinate()[0] + "</td></tr>\n                <tr><td>Y lat</td><td>" + location.getFirstCoordinate()[1] + "</td></tr>\n            </table>\n            <textarea placeholder='Describe Location'></textarea>\n            </div>\n            "),
+                position: args.coordinate
+            });
+            map.addOverlay(overlay);
+        });
+        {
+            document.body.appendChild(common_3.html("<div class='parse-container'><label>Enter Coordinates:</label><input class='parse' placeholder=\"59&deg;12'7.7&quot;N 02&deg;15'39.6&quot;W\"/></div>"));
+            var parseInput_1 = document.body.getElementsByClassName("parse")[0];
+            parseInput_1.addEventListener("change", function () {
+                var result = parse_dms_1.parse(parseInput_1.value);
+                if (typeof result === "number") {
+                    alert(result);
+                }
+                else {
+                    var location_1 = new ol.geom.Point([result.lon, result.lat]);
+                    location_1.transform("EPSG:4326", map.getView().getProjection());
+                    map.getView().setCenter(location_1.getFirstCoordinate());
+                }
+            });
+        }
+        var vectors = new ol.layer.Vector({
+            source: new ol.source.Vector()
+        });
+        map.addLayer(vectors);
+    }
+    exports.run = run;
+});
+define("ol3-fun/examples/html", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_4) {
+    "use strict";
+    common_4.cssin("html", "\n\n.notebook {\n    background: white;\n    border: 1px solid rgba(66,66,66,1);\n    padding: 4px;\n}\n\n.notebook:after {\n    content: \"+\";\n    position: absolute;\n    left: calc(50% - 5px);\n}\n\n.notebook textarea {\n    width: 240px;\n    height: 80px;\n    background: rgb(250, 250, 210);\n    resize: none;\n}\n");
+    function run() {
+        var html = "<tr><td>Test</td></tr>";
+        var tr = common_4.html(html);
+        console.assert(tr === null);
+        html = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
+        var table = common_4.html(html);
+        console.assert(table.outerHTML === html);
+        html = "<canvas width=\"100\" height=\"100\"></canvas>";
+        var canvas = common_4.html(html);
         console.assert(canvas.outerHTML === html);
         console.assert(!!canvas.getContext("2d"));
         var map = new ol.Map({
@@ -206,7 +405,7 @@ define("ol3-fun/examples/html", ["require", "exports", "openlayers", "ol3-fun/co
                 insertFirst: true,
                 positioning: "bottom-center",
                 offset: [0, -5],
-                element: common_2.html("\n            <div class='notebook'>\n            <h3>Hello World</h3>\n            <table>\n                <tr><td>X lon</td><td>" + args.coordinate[0] + "</td></tr>\n                <tr><td>Y lat</td><td>" + args.coordinate[1] + "</td></tr>\n            </table>\n            <textarea placeholder='Describe Location'></textarea>\n            </div>\n            "),
+                element: common_4.html("\n            <div class='notebook'>\n            <h3>Hello World</h3>\n            <table>\n                <tr><td>X lon</td><td>" + args.coordinate[0] + "</td></tr>\n                <tr><td>Y lat</td><td>" + args.coordinate[1] + "</td></tr>\n            </table>\n            <textarea placeholder='Describe Location'></textarea>\n            </div>\n            "),
                 position: args.coordinate
             });
             map.addOverlay(overlay);
@@ -223,7 +422,7 @@ define("ol3-fun/examples/index", ["require", "exports"], function (require, expo
     function run() {
         var l = window.location;
         var path = "" + l.origin + l.pathname + "?run=ol3-fun/examples/";
-        var labs = "\n    debounce\n    html\n    polyline\n    zoomToFeature\n    index\n    ";
+        var labs = "\n    debounce\n    goto\n    html\n    polyline\n    zoomToFeature\n    index\n    ";
         var styles = document.createElement("style");
         document.head.appendChild(styles);
         styles.innerText += "\n    #map {\n        display: none;\n    }\n    .test {\n        margin: 20px;\n    }\n    ";
@@ -428,47 +627,7 @@ define("ol3-fun/examples/polyline", ["require", "exports", "openlayers", "ol3-fu
     }
     exports.run = run;
 });
-define("ol3-fun/navigation", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_3) {
-    "use strict";
-    function zoomToFeature(map, feature, options) {
-        options = common_3.defaults(options || {}, {
-            duration: 1000,
-            padding: 256,
-            minResolution: 2 * map.getView().getMinResolution()
-        });
-        var view = map.getView();
-        var currentExtent = view.calculateExtent(map.getSize());
-        var targetExtent = feature.getGeometry().getExtent();
-        var doit = function (duration) {
-            view.fit(targetExtent, map.getSize(), {
-                padding: [options.padding, options.padding, options.padding, options.padding],
-                minResolution: options.minResolution,
-                duration: duration
-            });
-        };
-        if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-            doit(options.duration);
-        }
-        else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-            doit(options.duration);
-        }
-        else {
-            var fullExtent = ol.extent.createEmpty();
-            ol.extent.extend(fullExtent, currentExtent);
-            ol.extent.extend(fullExtent, targetExtent);
-            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
-            var duration = 0.5 * options.duration;
-            view.fit(fullExtent, map.getSize(), {
-                padding: [options.padding, options.padding, options.padding, options.padding],
-                minResolution: options.minResolution,
-                duration: duration
-            });
-            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
-        }
-    }
-    exports.zoomToFeature = zoomToFeature;
-});
-define("ol3-fun/examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/navigation", "ol3-fun/common"], function (require, exports, ol, navigation_1, common_4) {
+define("ol3-fun/examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/navigation", "ol3-fun/common"], function (require, exports, ol, navigation_1, common_5) {
     "use strict";
     function randomCoordinate(size, _a) {
         if (size === void 0) { size = 100; }
@@ -520,17 +679,17 @@ define("ol3-fun/examples/zoomToFeature", ["require", "exports", "openlayers", "o
             }),
             layers: [tiles, vectors]
         });
-        var points = common_4.range(10).map(function (n) {
+        var points = common_5.range(10).map(function (n) {
             return new ol.Feature(new ol.geom.Point(randomCoordinate(500)));
         });
-        var polys = common_4.range(10).map(function (n) {
+        var polys = common_5.range(10).map(function (n) {
             var p0 = randomCoordinate(1000);
             var geom = new ol.geom.Polygon([[p0, randomCoordinate(10, p0), randomCoordinate(10, p0), p0]]);
             var feature = new ol.Feature(geom);
             return feature;
         });
         var geoms = [].concat(points, polys);
-        common_4.shuffle(geoms);
+        common_5.shuffle(geoms);
         vectors.getSource().addFeatures(geoms);
         var select = new ol.interaction.Select({
             style: function (feature) {

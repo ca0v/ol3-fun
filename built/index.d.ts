@@ -8,14 +8,37 @@ declare module "ol3-fun/common" {
     export function cssin(name: string, css: string): () => void;
     export function debounce<T extends Function>(func: T, wait?: number, immediate?: boolean): T;
     export function html(html: string): HTMLElement;
+    export function pair<A, B>(a1: A[], a2: B[]): [A, B][];
     export function range(n: number): any[];
     export function shuffle<T>(array: T[]): T[];
 }
+declare module "ol3-fun/navigation" {
+    import ol = require("openlayers");
+    export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
+        duration?: number;
+        padding?: number;
+        minResolution?: number;
+    }): void;
+}
+declare module "ol3-fun/parse-dms" {
+    export function parse(dmsString: string): number | {
+        [x: string]: number;
+    };
+}
 declare module "index" {
     import common = require("ol3-fun/common");
-    export = common;
+    import navigation = require("ol3-fun/navigation");
+    import dms = require("ol3-fun/parse-dms");
+    let index: typeof common & {
+        dms: typeof dms;
+        navigation: typeof navigation;
+    };
+    export = index;
 }
 declare module "ol3-fun/examples/debounce" {
+    export function run(): void;
+}
+declare module "ol3-fun/examples/goto" {
     export function run(): void;
 }
 declare module "ol3-fun/examples/html" {
@@ -47,14 +70,6 @@ declare module "ol3-fun/google-polyline" {
 }
 declare module "ol3-fun/examples/polyline" {
     export function run(): void;
-}
-declare module "ol3-fun/navigation" {
-    import ol = require("openlayers");
-    export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
-        duration?: number;
-        padding?: number;
-        minResolution?: number;
-    }): void;
 }
 declare module "ol3-fun/examples/zoomToFeature" {
     export function run(): void;
