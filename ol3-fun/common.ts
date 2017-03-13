@@ -64,8 +64,8 @@ export function cssin(name: string, css: string) {
         styleTag = document.createElement("style");
         styleTag.id = id;
         styleTag.type = "text/css";
-        styleTag.appendChild(document.createTextNode(css));
         document.head.appendChild(styleTag);
+        styleTag.appendChild(document.createTextNode(css));
     }
 
     let dataset = styleTag.dataset;
@@ -99,12 +99,9 @@ export function debounce<T extends Function>(func: T, wait = 50, immediate = fal
  * unable to create <td>, <tr> elements
  */
 export function html(html: string) {
-    let d = document;
-    let a = d.createElement("div");
-    let b = d.createDocumentFragment();
+    let a = document.createElement("div");
     a.innerHTML = html;
-    while (a.firstChild) b.appendChild(a.firstChild);
-    return <HTMLElement>b.firstElementChild;
+    return <HTMLElement>(a.firstElementChild || a.firstChild);
 }
 
 export function pair<A, B>(a1: A[], a2: B[]) {

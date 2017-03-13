@@ -10,10 +10,11 @@
 <body>
     <div id="map" class="map"></div>
     <script>
-        (() => {
+        (function() {
             window.module = window.module || {};
 
-            function getParameterByName(name, url = window.location.href) {
+            function getParameterByName(name, url) {
+                url = url || window.location.href;
                 name = name.replace(/[\[\]]/g, "\\$&");
                 var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
                     results = regex.exec(url);
@@ -23,24 +24,30 @@
             }
 
             let debug = getParameterByName("debug") === "1";
+            let localhost = window.location.hostname === "localhost";
+
+            let deps = ["built/index"];
 
             require.config({
 
                 packages: [
+                    {
+                        name: 'openlayers',
+                        location: localhost ? "./bower_components/openlayers" : 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.0.1',
+                        main: debug ? 'ol-debug' : 'ol'
+                    },
+                    {
+                        name: 'jquery',
+                        location: localhost ? "./bower_components/jquery/dist" : 'https://cdn.rawgit.com/jquery/jquery-dist/3.1.1/dist',
+                        main: debug ? 'jquery' : 'jquery.min'
+                    }
                 ],
 
-                paths: {
-                    "openlayers": "https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol" + (debug ? "-debug" : ""),
-                    "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery" + (!debug ? ".min" : "")
-                },
+                deps: deps,
 
-                deps: [
-                    debug ? "built/index" : "built/index"
-                ],
-
-                callback: () => {
+                callback: function () {
                     window.module = window.module || {};
-                    require([getParameterByName("run") || "ol3-fun/examples/index"], test => test.run());
+                    require([getParameterByName("run") || "ol3-fun/examples/index"], function(test) { test.run(); });
                 }
             });
 

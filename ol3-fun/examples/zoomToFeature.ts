@@ -63,7 +63,11 @@ export function run() {
 
     let polys = range(10).map(n => {
         let p0 = randomCoordinate(1000);
-        let geom = new ol.geom.Polygon([[p0, randomCoordinate(10, p0), randomCoordinate(10, p0), p0]]);
+        let geom = new ol.geom.Polygon([[
+            p0,
+            randomCoordinate(50, [p0[0] + 50, p0[1] + 50]),
+            [p0[0] + 100, p0[1] + 100],
+            p0]]);
         let feature = new ol.Feature(geom);
         return feature;
     });
@@ -123,6 +127,12 @@ export function run() {
         features.insertAt(0, f);
         zoomToFeature(map, f);
         while (features.getLength() > 2) features.removeAt(2);
+        if (i === geoms.length - 1) {
+            setTimeout(() => {
+                features.clear();
+                geoms.forEach(f => features.push(f));
+            }, 1000);
+        }
     }, 1000 + i * 2000));
 
 }
