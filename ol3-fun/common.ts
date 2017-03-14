@@ -1,3 +1,29 @@
+/**
+ * Generate a UUID
+ * @returns UUID
+ *
+ * Adapted from http://stackoverflow.com/a/2117523/526860
+ */
+function uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+export function asArray<T extends HTMLInputElement>(list: NodeList) {
+    let result = <Array<T>>new Array(list.length);
+    for (let i = 0; i < list.length; i++) {
+        result.push(<T>list[i]);
+    }
+    return result;
+}
+
+// ie11 compatible
+export function toggle(e: HTMLElement, className: string, toggle = false) {
+    !toggle ? e.classList.remove(className) : e.classList.add(className);
+}
+
 export function parse<T>(v: string, type: T): T {
     if (typeof type === "string") return <any>v;
     if (typeof type === "number") return <any>parseFloat(v);
