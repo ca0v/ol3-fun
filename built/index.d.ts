@@ -1,4 +1,6 @@
 declare module "ol3-fun/common" {
+    export function asArray<T extends HTMLInputElement>(list: NodeList): T[];
+    export function toggle(e: HTMLElement, className: string, toggle?: boolean): void;
     export function parse<T>(v: string, type: T): T;
     export function getQueryParameters(options: any, url?: string): void;
     export function getParameterByName(name: string, url?: string): string;

@@ -1,5 +1,24 @@
 define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     "use strict";
+    function uuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+    function asArray(list) {
+        var result = new Array(list.length);
+        for (var i = 0; i < list.length; i++) {
+            result.push(list[i]);
+        }
+        return result;
+    }
+    exports.asArray = asArray;
+    function toggle(e, className, toggle) {
+        if (toggle === void 0) { toggle = false; }
+        !toggle ? e.classList.remove(className) : e.classList.add(className);
+    }
+    exports.toggle = toggle;
     function parse(v, type) {
         if (typeof type === "string")
             return v;
@@ -64,8 +83,8 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
             styleTag = document.createElement("style");
             styleTag.id = id;
             styleTag.type = "text/css";
-            styleTag.appendChild(document.createTextNode(css));
             document.head.appendChild(styleTag);
+            styleTag.appendChild(document.createTextNode(css));
         }
         var dataset = styleTag.dataset;
         dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
@@ -101,13 +120,9 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.debounce = debounce;
     function html(html) {
-        var d = document;
-        var a = d.createElement("div");
-        var b = d.createDocumentFragment();
+        var a = document.createElement("div");
         a.innerHTML = html;
-        while (a.firstChild)
-            b.appendChild(a.firstChild);
-        return b.firstElementChild;
+        return (a.firstElementChild || a.firstChild);
     }
     exports.html = html;
     function pair(a1, a2) {
@@ -684,7 +699,12 @@ define("ol3-fun/examples/zoomToFeature", ["require", "exports", "openlayers", "o
         });
         var polys = common_5.range(10).map(function (n) {
             var p0 = randomCoordinate(1000);
-            var geom = new ol.geom.Polygon([[p0, randomCoordinate(10, p0), randomCoordinate(10, p0), p0]]);
+            var geom = new ol.geom.Polygon([[
+                    p0,
+                    randomCoordinate(50, [p0[0] + 50, p0[1] + 50]),
+                    [p0[0] + 100, p0[1] + 100],
+                    p0
+                ]]);
             var feature = new ol.Feature(geom);
             return feature;
         });
@@ -738,6 +758,12 @@ define("ol3-fun/examples/zoomToFeature", ["require", "exports", "openlayers", "o
             navigation_1.zoomToFeature(map, f);
             while (features.getLength() > 2)
                 features.removeAt(2);
+            if (i === geoms.length - 1) {
+                setTimeout(function () {
+                    features.clear();
+                    geoms.forEach(function (f) { return features.push(f); });
+                }, 1000);
+            }
         }, 1000 + i * 2000); });
     }
     exports.run = run;
