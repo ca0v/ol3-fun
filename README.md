@@ -15,4 +15,4 @@ Collection of utility function oriented around OpenLayers
 
 ## Consume
 
-* `npm install https://github.com/ca0v/ol3-fun/tarball/v4.0.1`
+* `npm install https://github.com/ca0v/ol3-fun/tarball/v5.1.3`
