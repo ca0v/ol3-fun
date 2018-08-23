@@ -1,4 +1,6 @@
 bower_components
+node_modules
 typings
 *.js
 *.js.map
+*.d.ts

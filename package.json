@@ -4,7 +4,13 @@
   "description": "OpenLayers Functions",
   "main": "built/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rmdir .\\built /s/q",
+    "build": "tsc -p tsconfig.json",
+    "common-build": "tsc -p tsconfig-karma.json -w",
+    "uglify": "pushd built && uglifyjs index.max.js --source-map \"content='index.max.js.map',url='index.js.map'\" --output=index.js --compress --mangle && popd",
+    "start-karma": "karma start test/karma.config.js",
+    "karma": "start npm run common-build && npm run start-karma",
+    "test": "npm run karma -- --single-run"
   },
   "repository": {
     "type": "git",
@@ -18,5 +24,25 @@
   "bugs": {
     "url": "https://github.com/ca0v/ol3-fun/issues"
   },
-  "homepage": "https://github.com/ca0v/ol3-fun#readme"
+  "homepage": "https://github.com/ca0v/ol3-fun#readme",
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "ol": "^5.1.3",
+    "requirejs": "^2.3.5"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.3.6",
+    "@types/ol": "^4.6.2",
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.1",
+    "expect.js": "^0.3.1",
+    "karma": "^3.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-mocha": "^1.3.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^3.0.0",
+    "mocha": "^5.2.0",
+    "uglify-js": "^3.4.7",
+    "webpack": "^4.17.1"
+  }
 }

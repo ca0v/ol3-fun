@@ -4,7 +4,7 @@
  *
  * Adapted from http://stackoverflow.com/a/2117523/526860
  */
-function uuid() {
+export function uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -14,7 +14,7 @@ function uuid() {
 export function asArray<T extends HTMLInputElement>(list: NodeList) {
     let result = <Array<T>>new Array(list.length);
     for (let i = 0; i < list.length; i++) {
-        result.push(<T>list[i]);
+        result[i] = <T>list[i];
     }
     return result;
 }

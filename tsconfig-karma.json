@@ -1,16 +1,16 @@
 {
     "compilerOptions": {
         "removeComments": true,
-        "declaration": true,
-        "module": "amd",
-        "target": "es3",
+        "declaration": false,
+        "module": "commonjs",
+        "target": "es2015",
         "noImplicitAny": true,
-        "sourceMap": true,
-        "outFile": "./built/index.max.js",
+        "sourceMap": false,
         "moduleResolution": "node"
     },
     "include": [
         "index.ts",
-        "ol3-fun/**/*.ts"
+        "ol3-fun/**/*.ts",
+        "test/**/*.ts"
     ]
 }
