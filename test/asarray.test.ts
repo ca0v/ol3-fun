@@ -1,13 +1,13 @@
-import { expect } from "expect.js";
+require("expect.js");
 import { asArray, uuid } from "../ol3-fun/common";
 
-function should(result: boolean) {
-    if (!result) throw "oops";
+function should(result: boolean, msg: string) {
+    if (!result) throw msg || "oops";
 }
 
 describe("expect", () => {
     it("expect", () => {
-        should(expect === undefined); // not sure how to get this reference
+        should(!!expect, "expect is defined");
     });
 });
 
@@ -19,7 +19,7 @@ describe("asArray tests", () => {
         console.log("list", list);
         let result = asArray(list);
         console.log("result", result, result.length);
-        should(result.length === list.length);
+        should(result.length === list.length, "array size matches list size");
         done();
     });
 
@@ -27,6 +27,6 @@ describe("asArray tests", () => {
 
 describe("uuid tests", () => {
     it("uuid", () => {
-        should(uuid().length === 36);
+        should(uuid().length === 36, "uuid has 36 characters");
     });
 });
