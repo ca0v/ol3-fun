@@ -4,12 +4,14 @@
   "description": "OpenLayers Functions",
   "main": "built/index.js",
   "scripts": {
-    "clean": "rmdir .\\built /s/q",
-    "build": "tsc -p tsconfig.json",
-    "common-build": "tsc -p tsconfig-karma.json -w",
+    "clean": "rmdir .\\built /s/q & del test\\*.js /s",
     "uglify": "pushd built && uglifyjs index.max.js --source-map \"content='index.max.js.map',url='index.js.map'\" --output=index.js --compress --mangle && popd",
-    "start-karma": "karma start test/karma.config.js",
-    "karma": "start npm run common-build && npm run start-karma",
+    "build-for-rawgit": "tsc -p tsconfig-examples.json",
+    "build-for-karma": "tsc -p tsconfig-karma.json",
+    "build-for-amd": "tsc -p tsconfig-amd.json --outFile built/ol3-fun.max.js",
+    "build": "npm run build-for-amd && npm run build-for-rawgit && npm run build-for-karma && npm run uglify",
+    "start-karma": "karma start built/test/karma.config.js",
+    "karma": "start npm run build-for-karma -- -w && start npm run start-karma",
     "test": "npm run karma -- --single-run"
   },
   "repository": {
@@ -31,7 +33,9 @@
     "requirejs": "^2.3.5"
   },
   "devDependencies": {
+    "@types/expect": "^1.20.3",
     "@types/jquery": "^3.3.6",
+    "@types/mocha": "^5.2.5",
     "@types/ol": "^4.6.2",
     "buble": "^0.19.3",
     "buble-loader": "^0.5.1",
