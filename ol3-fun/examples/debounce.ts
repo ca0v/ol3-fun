@@ -3,6 +3,10 @@ import { debounce } from "../common";
 
 export function run() {
 
+    let msgs = ["Allowing 0.1 seconds between clicks, click the map multiple times to create markers, they will clear after 1 second of being idle", "uses debounce to prevent user from clicking too fast and to clear markers after on second if no clicking"];
+    console.log(msgs);
+    alert(msgs.join("\n"));
+
     let map = new ol.Map({
         loadTilesWhileAnimating: true,
         loadTilesWhileInteracting: true,

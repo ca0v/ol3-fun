@@ -10,7 +10,7 @@
 <body>
     <div id="map" class="map"></div>
     <script>
-        (function() {
+        (function () {
             window.module = window.module || {};
 
             function getParameterByName(name, url) {
@@ -26,7 +26,7 @@
             let debug = getParameterByName("debug") === "1";
             let localhost = window.location.hostname === "localhost";
 
-            let deps = ["built/index"];
+            let deps = [debug ? "built/index.max" : "built/index"];
 
             require.config({
 
@@ -47,7 +47,7 @@
 
                 callback: function () {
                     window.module = window.module || {};
-                    require([getParameterByName("run") || "ol3-fun/examples/index"], function(test) { test.run(); });
+                    require([getParameterByName("run") || "ol3-fun/examples/index"], function (test) { test.run(); });
                 }
             });
 

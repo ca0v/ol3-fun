@@ -89,7 +89,7 @@ export function parse(dmsString: string) {
         decDeg2.latLon = decDeg1.latLon === 'lat' ? 'lon' : 'lat';
     }
 
-    return {
+    return <{ lon: number; lat: number }>{
         [decDeg1.latLon]: decDeg1.decDeg,
         [decDeg2.latLon]: decDeg2.decDeg
     };

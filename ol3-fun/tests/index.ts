@@ -1,12 +1,8 @@
 export function run() {
     let l = window.location;
-    let path = `${l.origin}${l.pathname}?run=ol3-fun/examples/`;
+    let path = `${l.origin}${l.pathname}?run=ol3-fun/tests/`;
     let labs = `
-    debounce
-    goto
-    polyline
-    zoomToFeature
-    index
+    html
     `;
 
     let styles = document.createElement("style");
@@ -32,9 +28,4 @@ export function run() {
         .map(lab => `<div class='test'><a href='${path}${lab}&debug=1'>${lab}</a></div>`)
         .join("\n");
 
-    {
-        let testDiv = document.createElement("div");
-        document.body.appendChild(testDiv);
-        testDiv.innerHTML = `<a href='${l.origin}${l.pathname}?run=ol3-fun/tests/index&debug=1'>tests</a>`;
-    }
 };

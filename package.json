@@ -12,6 +12,7 @@
     "build": "npm run build-for-amd && npm run build-for-rawgit && npm run build-for-karma && npm run uglify",
     "start-karma": "karma start built/test/karma.config.js",
     "karma": "start npm run build-for-karma -- -w && start npm run start-karma",
+    "live": "live-server --port=5000 --wait=2000 --ignorePattern=.*\\.ts --entry-file=rawgit.html?debug=1",
     "test": "npm run karma -- --single-run"
   },
   "repository": {
@@ -45,6 +46,7 @@
     "karma-mocha": "^1.3.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^3.0.0",
+    "live-server": "^1.2.0",
     "mocha": "^5.2.0",
     "uglify-js": "^3.4.8",
     "webpack": "^4.17.1"

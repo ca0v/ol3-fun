@@ -6,7 +6,7 @@ declare var require: any;
 // unsure how to do this using standard syntax and typings don't seem to correlate with the "expect" I'm getting
 // // Type definitions for Expect 1.20, expect.version = '0.3.1' so I might be loading the wrong defs!
 //import expect from "expect";
-var expect = require("expect");
+import expect = require("expect"); // only works when using karma+webpack
 
 import { asArray, uuid } from "../ol3-fun/common";
 
