@@ -35,6 +35,6 @@ export function run() {
     }, 100);
 
 
-    map.on("click", onClick);
+    map.on("click", <any>onClick);
 
 }

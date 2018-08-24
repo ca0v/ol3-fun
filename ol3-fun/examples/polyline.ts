@@ -82,13 +82,13 @@ const sample_input = [
 function updateEncoder() {
     let input = <HTMLTextAreaElement>$(".simplified textarea")[0];
     let geom = new ol.geom.LineString(<Array<ol.Coordinate>>JSON.parse(input.value));
-    let encoded = encoder.encode(geom.getCoordinates(), PRECISION);
+    let encoded = encoder.encode(geom.getCoordinates());
     $(".encoded textarea").val(encoded).change();
 }
 
 function updateDecoder() {
     let input = <HTMLTextAreaElement>$(".encoded textarea")[0];
-    $(".decoded textarea").val(JSON.stringify(encoder.decode(input.value, PRECISION))).change();
+    $(".decoded textarea").val(JSON.stringify(encoder.decode(input.value))).change();
     updateCanvas(".decoded canvas", ".decoded textarea");
 }
 
@@ -154,7 +154,7 @@ export function run() {
     $(ux).appendTo(".map");
 
     $("#use-google").change(args => {
-        encoder = $("#use-google:checked").length ? new GoogleEncoder() : new PolylineEncoder(6, 2);
+        encoder = $("#use-google:checked").length ? new GoogleEncoder() : new PolylineEncoder(PRECISION, 2);
         $(".simplified textarea").change();
     }).change();
 
