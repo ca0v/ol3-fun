@@ -1,8 +1,6 @@
-/* eslint-env node, es6 */
+declare var module: any;
 
-import path from 'path';
-
-module.exports = function (karma) {
+module.exports = function (karma: any) {
     karma.set({
         browserDisconnectTolerance: 2,
         frameworks: ['mocha'],

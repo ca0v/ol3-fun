@@ -1,4 +1,10 @@
-require("expect.js");
+// already loaded as globals...not sure how, requires declaration for tsc to compile...what's going on here?
+declare var describe: any;
+declare var it: any;
+declare var require: any;
+
+let expect = require("expect.js");
+
 import { asArray, uuid } from "../ol3-fun/common";
 
 function should(result: boolean, msg: string) {
