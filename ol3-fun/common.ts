@@ -131,8 +131,9 @@ export function html(html: string) {
 }
 
 export function pair<A, B>(a1: A[], a2: B[]) {
-    let result: Array<[A, B]> = [];
-    a1.forEach(v1 => a2.forEach(v2 => result.push([v1, v2])));
+    let result: Array<[A, B]> = new Array(a1.length * a2.length);
+    let i = 0;
+    a1.forEach(v1 => a2.forEach(v2 => result[i++] = [v1, v2]));
     return result;
 }
 
