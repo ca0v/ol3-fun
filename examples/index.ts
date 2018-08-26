@@ -1,8 +1,17 @@
+import "./debounce";
+import "./goto";
+import "./polyline";
+import "./zoomToFeature";
+
 export function run() {
     let l = window.location;
-    let path = `${l.origin}${l.pathname}?run=ol3-fun/tests/`;
+    let path = `${l.origin}${l.pathname}?run=examples/`;
     let labs = `
-    html
+    debounce
+    goto
+    polyline
+    zoomToFeature
+    index
     `;
 
     let styles = document.createElement("style");

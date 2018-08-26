@@ -6,12 +6,11 @@
         "target": "es3",
         "noImplicitAny": true,
         "sourceMap": true,
-        "outFile": "./built/index.max.js",
+        "outFile": "../built/examples.max.js",
         "moduleResolution": "node"
     },
     "include": [
-        "index.ts",
-        "ol3-fun/**/*.ts"
+        "index.ts"
     ],
     "exclude": [
     ]

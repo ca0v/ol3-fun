@@ -1,6 +1,6 @@
 import ol = require("openlayers");
-import { zoomToFeature } from "../navigation";
-import { range, shuffle } from "../common";
+import { zoomToFeature } from "../ol3-fun/navigation";
+import { range, shuffle } from "../ol3-fun/common";
 
 function randomCoordinate(size = 100, [x, y] = [-8238299, 4970071]) {
     return <ol.Coordinate>[x + size * Math.random(), y + size * Math.random()];

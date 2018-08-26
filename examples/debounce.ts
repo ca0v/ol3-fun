@@ -1,5 +1,5 @@
 import ol = require("openlayers");
-import { debounce } from "../common";
+import { debounce } from "../ol3-fun/common";
 
 export function run() {
 

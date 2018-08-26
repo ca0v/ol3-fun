@@ -1,6 +1,6 @@
 import ol = require("openlayers");
-import { cssin, html as toHtml } from "../common";
-import { parse as dms } from "../parse-dms";
+import { cssin, html as toHtml } from "../ol3-fun/common";
+import { parse as dms } from "../ol3-fun/parse-dms";
 
 cssin("html", `
 

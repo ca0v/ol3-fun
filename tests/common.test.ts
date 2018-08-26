@@ -14,6 +14,7 @@ import {
     parse,
     range,
     shuffle,
+    html,
     toggle,
     uuid
 } from "../ol3-fun/common";
@@ -170,4 +171,18 @@ describe("cssin tests", () => {
 
 describe("html tests", () => {
 
+    it("", () => {
+        let markup = "<tr>A<td>B</td></tr>";
+        let tr = <HTMLTableRowElement>html(markup);
+        should(tr.nodeValue === "AB", "setting innerHTML on a 'div' will not assign tr elements");
+
+        markup = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
+        let table = <HTMLTableElement>html(markup);
+        should(table.outerHTML === markup, "preserves tr when within a table");
+
+        markup = `<canvas width="100" height="100"></canvas>`;
+        let canvas = <HTMLCanvasElement>html(markup);
+        should(canvas.outerHTML === markup, "canvas markup preserved");
+        should(!!canvas.getContext("2d"), "cnvas has 2d context");
+    });
 });

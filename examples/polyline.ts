@@ -1,6 +1,6 @@
 import ol = require("openlayers");
-import PolylineEncoder = require("../ol3-polyline");
-import GoogleEncoder = require("../google-polyline");
+import PolylineEncoder = require("../ol3-fun/ol3-polyline");
+import GoogleEncoder = require("../ol3-fun/google-polyline");
 
 import $ = require("jquery");
 
