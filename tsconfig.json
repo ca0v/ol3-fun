@@ -6,7 +6,7 @@
         "target": "es5",
         "noImplicitAny": true,
         "sourceMap": true,
-        "outFile": "./built/index.max.js",
+        "outFile": "./built/ol3-fun.max.js",
         "moduleResolution": "node"
     },
     "include": [
@@ -14,6 +14,7 @@
         "ol3-fun/**/*.ts"
     ],
     "exclude": [
-        "ol3-fun/examples"
+        "ol3-fun/examples",
+        "ol3-fun/tests"
     ]
 }

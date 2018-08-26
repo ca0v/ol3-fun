@@ -19,9 +19,23 @@ export function asArray<T extends HTMLInputElement>(list: NodeList) {
     return result;
 }
 
-// ie11 compatible
-export function toggle(e: HTMLElement, className: string, toggle = false) {
-    !toggle ? e.classList.remove(className) : e.classList.add(className);
+/***
+ * ie11 compatible version of e.classList.toggle
+ * if class exists then remove it and return false, if not, then add it and return true.
+ * @param force true to add specified class value, false to remove it.
+ * @returns true if className exists.
+ */
+export function toggle(e: HTMLElement, className: string, force? : boolean) {
+    let exists = e.classList.contains(className);
+    if (exists && force !== true) {
+        e.classList.remove(className);
+        return false;
+    };
+    if (!exists && force !== false) {
+        e.classList.add(className);
+        return true;
+    }
+    return exists;
 }
 
 export function parse<T>(v: string, type: T): T {
@@ -115,7 +129,7 @@ export function debounce<T extends Function>(func: T, wait = 50, immediate = fal
         let callNow = immediate && !timeout;
 
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = window.setTimeout(later, wait);
         if (callNow) func.call(this, args);
     });
 }

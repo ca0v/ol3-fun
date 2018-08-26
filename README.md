@@ -1,6 +1,14 @@
 # OpenLayers Fun-ctions
 Collection of utility function oriented around OpenLayers
 
+## Goals for 5.1.3 release
+
+* automated testing
+* eliminate typescript warnings
+* npm support
+* document usage and methods
+* integrate with ol 5.1.3
+
 ## Examples
 
 * [v5.1.3](https://rawgit.com/ca0v/ol3-fun/v5.1.3/rawgit.html)

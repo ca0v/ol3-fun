@@ -11,9 +11,10 @@
     "build-for-amd": "tsc -p tsconfig-amd.json --outFile built/ol3-fun.max.js",
     "build": "npm run build-for-amd && npm run build-for-rawgit && npm run build-for-karma && npm run uglify",
     "start-karma": "karma start built/test/karma.config.js",
-    "karma": "start npm run build-for-karma -- -w && start npm run start-karma",
+    "karma": "npm run build-for-karma && start npm run start-karma && npm run build-for-karma -- -w",
     "live": "live-server --port=5000 --wait=2000 --ignorePattern=.*\\.ts --entry-file=rawgit.html?debug=1",
-    "test": "npm run karma -- --single-run"
+    "install": "tsc",
+    "test": "npm run start-karma -- --single-run"
   },
   "repository": {
     "type": "git",
