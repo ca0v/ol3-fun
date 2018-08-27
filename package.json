@@ -14,7 +14,7 @@
     "start-karma": "karma start built/tests/karma.config.js",
     "karma": "npm run build-for-karma && start npm run start-karma && npm run build-for-karma -- -w",
     "live": "live-server --port=5000 --wait=2000 --ignorePattern=.*\\.ts --entry-file=rawgit.html?debug=1",
-    "install": "npm run build",
+    "install": "npm run build-for-amd & npm run uglify-for-amd",
     "test": "npm run build-for-karma && npm run start-karma -- --single-run"
   },
   "repository": {
