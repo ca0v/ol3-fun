@@ -4,7 +4,9 @@
         "declaration": false,
         "module": "commonjs",
         "target": "es6",
-        "noImplicitAny": false,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
         "sourceMap": false,
         "outDir": "../built",
         "moduleResolution": "node"
