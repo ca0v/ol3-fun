@@ -37,11 +37,11 @@ class Snapshot {
         let scale = isPoint ? 1 : Math.min(canvas.width / w, canvas.height / h);
 
         // this will modify the geometry on the cloned feature
-        let ff = 2/3; // fudge-factor, something is happening I don't understand
+        let ff = 1 / (window.devicePixelRatio || 1);
         scale *= ff;
         geom.translate(-cx, -cy); // center at 0,0
         geom.scale(scale, -scale); // fill the canvas, flipping the y axis
-        geom.translate(Math.ceil(canvas.width * ff / 2), Math.ceil(canvas.height * ff / 2));  // move center to center of canvas
+        geom.translate(Math.ceil(ff * canvas.width / 2), Math.ceil(ff * canvas.height  / 2));  // move center to center of canvas
 
         console.log(scale, cx, cy, w, h, geom.getCoordinates());
 
