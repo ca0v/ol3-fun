@@ -19,7 +19,7 @@ function getParameterByName(name, url) {
 var debug = getParameterByName("debug") === "1";
 var localhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 loadCss(localhost ? "../node_modules/mocha/mocha.css" : "https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0/mocha.css");
-loadCss(localhost ? "../node_modules/ol/build/ol.css" : "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.1.3/css/ol.css");
+loadCss("../static/ol/v5.1.3/ol.css");
 // setup require js packaging system and load the "spec" before running mocha
 requirejs.config({
     shim: {
@@ -31,7 +31,7 @@ requirejs.config({
         }
     },
     paths: {
-        "openlayers": localhost ? "../node_modules/ol/build/ol" : "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.1.3/build/ol"
+        "openlayers": localhost ? "../../static/ol/v5.1.3/ol" : "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.1.3/build/ol"
     },
     packages: [
         {
