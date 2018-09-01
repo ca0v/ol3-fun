@@ -6,6 +6,12 @@ define("tests/base", ["require", "exports"], function (require, exports) {
             throw msg || "oops";
     }
     exports.should = should;
+    function shouldEqual(a, b, msg) {
+        if (a !== b)
+            console.warn(a + " <> " + b);
+        should(a === b, msg);
+    }
+    exports.shouldEqual = shouldEqual;
     function stringify(o) {
         return JSON.stringify(o, null, '\t');
     }
@@ -177,7 +183,7 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.shuffle = shuffle;
 });
-define("tests/common.test", ["require", "exports", "tests/base", "ol3-fun/common"], function (require, exports, base_1, common_1) {
+define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common"], function (require, exports, base_1, common_1) {
     "use strict";
     exports.__esModule = true;
     function sum(list) {
@@ -301,51 +307,14 @@ define("tests/common.test", ["require", "exports", "tests/base", "ol3-fun/common
         });
     });
 });
-define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_2) {
+define("tests/spec/openlayers", ["require", "exports", "tests/base", "openlayers"], function (require, exports, base_2, ol) {
     "use strict";
     exports.__esModule = true;
-    function zoomToFeature(map, feature, options) {
-        var promise = $.Deferred();
-        options = common_2.defaults(options || {}, {
-            duration: 1000,
-            padding: 256,
-            minResolution: 2 * map.getView().getMinResolution()
+    describe("ol/Map", function () {
+        it("ol/Map", function () {
+            base_2.should(!!ol.Map, "Map");
         });
-        var view = map.getView();
-        var currentExtent = view.calculateExtent(map.getSize());
-        var targetExtent = feature.getGeometry().getExtent();
-        var doit = function (duration) {
-            view.fit(targetExtent, {
-                size: map.getSize(),
-                padding: [options.padding, options.padding, options.padding, options.padding],
-                minResolution: options.minResolution,
-                duration: duration,
-                callback: function () { return promise.resolve(); }
-            });
-        };
-        if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-            doit(options.duration);
-        }
-        else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-            doit(options.duration);
-        }
-        else {
-            var fullExtent = ol.extent.createEmpty();
-            ol.extent.extend(fullExtent, currentExtent);
-            ol.extent.extend(fullExtent, targetExtent);
-            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
-            var duration = 0.5 * options.duration;
-            view.fit(fullExtent, {
-                size: map.getSize(),
-                padding: [options.padding, options.padding, options.padding, options.padding],
-                minResolution: options.minResolution,
-                duration: duration
-            });
-            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
-        }
-        return promise;
-    }
-    exports.zoomToFeature = zoomToFeature;
+    });
 });
 define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -425,7 +394,7 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
     }
     exports.parse = parse;
 });
-define("tests/navigation.test", ["require", "exports", "tests/base", "openlayers", "ol3-fun/navigation", "ol3-fun/parse-dms"], function (require, exports, base_2, ol, navigation_1, parse_dms_1) {
+define("tests/spec/parse-dms", ["require", "exports", "tests/base", "ol3-fun/parse-dms"], function (require, exports, base_3, parse_dms_1) {
     "use strict";
     exports.__esModule = true;
     describe("parse-dms", function () {
@@ -433,18 +402,266 @@ define("tests/navigation.test", ["require", "exports", "tests/base", "openlayers
             var dms = parse_dms_1.parse("10 5'2\" 10");
             if (typeof dms === "number")
                 throw "lat-lon expected";
-            base_2.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
-            base_2.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
+            base_3.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
+            base_3.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
+        });
+    });
+});
+define("ol3-fun/google-polyline", ["require", "exports"], function (require, exports) {
+    "use strict";
+    var PolylineEncoder = (function () {
+        function PolylineEncoder() {
+        }
+        PolylineEncoder.prototype.encodeCoordinate = function (coordinate, factor) {
+            coordinate = Math.round(coordinate * factor);
+            coordinate <<= 1;
+            if (coordinate < 0) {
+                coordinate = ~coordinate;
+            }
+            var output = '';
+            while (coordinate >= 0x20) {
+                output += String.fromCharCode((0x20 | (coordinate & 0x1f)) + 0x3f);
+                coordinate >>= 5;
+            }
+            output += String.fromCharCode(coordinate + 0x3f);
+            return output;
+        };
+        PolylineEncoder.prototype.decode = function (str, precision) {
+            if (precision === void 0) { precision = 5; }
+            var index = 0, lat = 0, lng = 0, coordinates = [], latitude_change, longitude_change, factor = Math.pow(10, precision);
+            while (index < str.length) {
+                var byte = 0;
+                var shift = 0;
+                var result = 0;
+                do {
+                    byte = str.charCodeAt(index++) - 0x3f;
+                    result |= (byte & 0x1f) << shift;
+                    shift += 5;
+                } while (byte >= 0x20);
+                var latitude_change_1 = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                shift = result = 0;
+                do {
+                    byte = str.charCodeAt(index++) - 0x3f;
+                    result |= (byte & 0x1f) << shift;
+                    shift += 5;
+                } while (byte >= 0x20);
+                longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                lat += latitude_change_1;
+                lng += longitude_change;
+                coordinates.push([lat / factor, lng / factor]);
+            }
+            return coordinates;
+        };
+        PolylineEncoder.prototype.encode = function (coordinates, precision) {
+            if (precision === void 0) { precision = 5; }
+            if (!coordinates.length)
+                return '';
+            var factor = Math.pow(10, precision), output = this.encodeCoordinate(coordinates[0][0], factor) + this.encodeCoordinate(coordinates[0][1], factor);
+            for (var i = 1; i < coordinates.length; i++) {
+                var a = coordinates[i], b = coordinates[i - 1];
+                output += this.encodeCoordinate(a[0] - b[0], factor);
+                output += this.encodeCoordinate(a[1] - b[1], factor);
+            }
+            return output;
+        };
+        return PolylineEncoder;
+    }());
+    return PolylineEncoder;
+});
+define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (require, exports, ol) {
+    "use strict";
+    var Polyline = ol.format.Polyline;
+    var PolylineEncoder = (function () {
+        function PolylineEncoder(precision, stride) {
+            if (precision === void 0) { precision = 5; }
+            if (stride === void 0) { stride = 2; }
+            this.precision = precision;
+            this.stride = stride;
+        }
+        PolylineEncoder.prototype.flatten = function (points) {
+            var nums = new Array(points.length * this.stride);
+            var i = 0;
+            points.forEach(function (p) { return p.map(function (p) { return nums[i++] = p; }); });
+            return nums;
+        };
+        PolylineEncoder.prototype.unflatten = function (nums) {
+            var points = new Array(nums.length / this.stride);
+            for (var i = 0; i < nums.length / this.stride; i++) {
+                points[i] = nums.slice(i * this.stride, (i + 1) * this.stride);
+            }
+            return points;
+        };
+        PolylineEncoder.prototype.round = function (nums) {
+            var factor = Math.pow(10, this.precision);
+            return nums.map(function (n) { return Math.round(n * factor) / factor; });
+        };
+        PolylineEncoder.prototype.decode = function (str) {
+            var nums = Polyline.decodeDeltas(str, this.stride, Math.pow(10, this.precision));
+            return this.unflatten(this.round(nums));
+        };
+        PolylineEncoder.prototype.encode = function (points) {
+            return Polyline.encodeDeltas(this.flatten(points), this.stride, Math.pow(10, this.precision));
+        };
+        return PolylineEncoder;
+    }());
+    return PolylineEncoder;
+});
+define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/common"], function (require, exports, base_4, GooglePolylineEncoder, PolylineEncoder, common_2) {
+    "use strict";
+    exports.__esModule = true;
+    describe("GooglePolylineEncoder", function () {
+        it("GooglePolylineEncoder", function () {
+            base_4.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
+        });
+        var points = common_2.pair(common_2.range(10), common_2.range(10));
+        var poly = new GooglePolylineEncoder();
+        var encoded = poly.encode(points);
+        var decoded = poly.decode(encoded);
+        base_4.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_4.shouldEqual(base_4.stringify(decoded), base_4.stringify(points), "encode->decode");
+    });
+    describe("PolylineEncoder", function () {
+        it("PolylineEncoder", function () {
+            base_4.should(!!PolylineEncoder, "PolylineEncoder");
+        });
+        var points = common_2.pair(common_2.range(10), common_2.range(10));
+        var poly = new PolylineEncoder();
+        var encoded = poly.encode(points);
+        var decoded = poly.decode(encoded);
+        base_4.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_4.shouldEqual(base_4.stringify(decoded), base_4.stringify(points), "encode->decode");
+        poly = new PolylineEncoder(6);
+        encoded = poly.encode(points);
+        decoded = poly.decode(encoded);
+        base_4.shouldEqual(encoded.length, 632, "encoding is 632 characters");
+        base_4.shouldEqual(base_4.stringify(decoded), base_4.stringify(points), "encode->decode");
+    });
+});
+define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (require, exports, ol) {
+    "use strict";
+    function getStyle(feature) {
+        var style = feature.getStyle();
+        if (!style) {
+            var styleFn = feature.getStyleFunction();
+            if (styleFn) {
+                style = styleFn(0);
+            }
+        }
+        if (!style) {
+            style = new ol.style.Style({
+                text: new ol.style.Text({
+                    text: "?"
+                })
+            });
+        }
+        if (!Array.isArray(style))
+            style = [style];
+        return style;
+    }
+    var Snapshot = (function () {
+        function Snapshot() {
+        }
+        Snapshot.render = function (canvas, feature) {
+            feature = feature.clone();
+            var geom = feature.getGeometry();
+            var extent = geom.getExtent();
+            var isPoint = extent[0] === extent[2];
+            var _a = ol.extent.getCenter(extent), dx = _a[0], dy = _a[1];
+            var scale = isPoint ? 1 : Math.min(canvas.width / ol.extent.getWidth(extent), canvas.height / ol.extent.getHeight(extent));
+            geom.translate(-dx, -dy);
+            geom.scale(scale, -scale);
+            geom.translate(canvas.width / 2, canvas.height / 2);
+            var vtx = ol.render.toContext(canvas.getContext("2d"));
+            var styles = getStyle(feature);
+            if (!Array.isArray(styles))
+                styles = [styles];
+            styles.forEach(function (style) { return vtx.drawFeature(feature, style); });
+        };
+        Snapshot.snapshot = function (feature) {
+            var canvas = document.createElement("canvas");
+            var geom = feature.getGeometry();
+            this.render(canvas, feature);
+            return canvas.toDataURL();
+        };
+        return Snapshot;
+    }());
+    return Snapshot;
+});
+define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot"], function (require, exports, base_5, Snapshot) {
+    "use strict";
+    exports.__esModule = true;
+    describe("Snapshot", function () {
+        it("Snapshot", function () {
+            base_5.should(!!Snapshot, "Snapshot");
+        });
+    });
+});
+define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_3) {
+    "use strict";
+    exports.__esModule = true;
+    function zoomToFeature(map, feature, options) {
+        var promise = $.Deferred();
+        options = common_3.defaults(options || {}, {
+            duration: 1000,
+            padding: 256,
+            minResolution: 2 * map.getView().getMinResolution()
+        });
+        var view = map.getView();
+        var currentExtent = view.calculateExtent(map.getSize());
+        var targetExtent = feature.getGeometry().getExtent();
+        var doit = function (duration) {
+            view.fit(targetExtent, {
+                size: map.getSize(),
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration,
+                callback: function () { return promise.resolve(); }
+            });
+        };
+        if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else {
+            var fullExtent = ol.extent.createEmpty();
+            ol.extent.extend(fullExtent, currentExtent);
+            ol.extent.extend(fullExtent, targetExtent);
+            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
+            var duration = 0.5 * options.duration;
+            view.fit(fullExtent, {
+                size: map.getSize(),
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration
+            });
+            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
+        }
+        return promise;
+    }
+    exports.zoomToFeature = zoomToFeature;
+});
+define("tests/spec/zoom-to-feature", ["require", "exports", "tests/base", "openlayers", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/snapshot", "ol3-fun/common"], function (require, exports, base_6, ol, navigation_1, parse_dms_2, GooglePolylineEncoder, PolylineEncoder, Snapshot, common_4) {
+    "use strict";
+    exports.__esModule = true;
+    describe("parse-dms", function () {
+        it("parse", function () {
+            var dms = parse_dms_2.parse("10 5'2\" 10");
+            if (typeof dms === "number")
+                throw "lat-lon expected";
+            base_6.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
+            base_6.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
         });
     });
     describe("ol/Map", function () {
         it("ol/Map", function () {
-            base_2.should(!!ol.Map, "Map");
+            base_6.should(!!ol.Map, "Map");
         });
     });
     describe("zoomToFeature", function () {
         it("zoomToFeature", function (done) {
-            base_2.should(!!navigation_1.zoomToFeature, "zoomToFeature");
+            base_6.should(!!navigation_1.zoomToFeature, "zoomToFeature");
             var map = new ol.Map({
                 view: new ol.View({
                     zoom: 0,
@@ -462,16 +679,48 @@ define("tests/navigation.test", ["require", "exports", "tests/base", "openlayers
                     minResolution: res / 4
                 }).then(function () {
                     var _a = map.getView().getCenter(), cx = _a[0], cy = _a[1];
-                    base_2.should(map.getView().getZoom() === zoom + 2, "zoom in two because minRes is 1/4 of initial res");
-                    base_2.should(cx === 100, "center-x");
-                    base_2.should(cy === 100, "center-y");
+                    base_6.should(map.getView().getZoom() === zoom + 2, "zoom in two because minRes is 1/4 of initial res");
+                    base_6.should(cx === 100, "center-x");
+                    base_6.should(cy === 100, "center-y");
                     done();
                 });
             });
         });
     });
+    describe("GooglePolylineEncoder", function () {
+        it("GooglePolylineEncoder", function () {
+            base_6.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
+        });
+        var points = common_4.pair(common_4.range(10), common_4.range(10));
+        var poly = new GooglePolylineEncoder();
+        var encoded = poly.encode(points);
+        var decoded = poly.decode(encoded);
+        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
+    });
+    describe("PolylineEncoder", function () {
+        it("PolylineEncoder", function () {
+            base_6.should(!!PolylineEncoder, "PolylineEncoder");
+        });
+        var points = common_4.pair(common_4.range(10), common_4.range(10));
+        var poly = new PolylineEncoder();
+        var encoded = poly.encode(points);
+        var decoded = poly.decode(encoded);
+        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
+        poly = new PolylineEncoder(6);
+        encoded = poly.encode(points);
+        decoded = poly.decode(encoded);
+        base_6.shouldEqual(encoded.length, 632, "encoding is 632 characters");
+        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
+    });
+    describe("Snapshot", function () {
+        it("Snapshot", function () {
+            base_6.should(!!Snapshot, "Snapshot");
+        });
+    });
 });
-define("tests/index", ["require", "exports", "tests/common.test", "tests/navigation.test"], function (require, exports) {
+define("tests/index", ["require", "exports", "tests/spec/common", "tests/spec/openlayers", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
 });

@@ -152,8 +152,8 @@ export function pair<A, B>(a1: A[], a2: B[]) {
 }
 
 export function range(n: number) {
-    var result = new Array(n);
-    for (var i = 0; i < n; i++) result[i] = i;
+    var result = new Array(n) as number[];
+    for (let i = 0; i < n; i++) result[i] = i;
     return result;
 }
 

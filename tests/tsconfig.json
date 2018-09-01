@@ -9,7 +9,12 @@
         "sourceMap": true,
         "outFile": "./spec/index.js",
         "moduleResolution": "node",
-        "baseUrl": "../node_modules"
+        "baseUrl": "../",
+        "paths": {
+            "ol3-fun": [
+                "./ol3-fun"
+            ]
+        }
     },
     "include": [
         "index.ts"

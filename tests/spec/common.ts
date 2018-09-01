@@ -2,7 +2,7 @@
 // // Type definitions for Expect 1.20, expect.version = '0.3.1' so I might be loading the wrong defs!
 //import expect from "expect";
 //import * as expect from "expect"; // only works when using karma+webpack
-import {should} from "./base";
+import {should} from "../base";
 
 import {
     asArray,
@@ -13,7 +13,7 @@ import {
     html,
     toggle,
     uuid
-} from "../ol3-fun/common";
+} from "../../ol3-fun/common";
 
 function sum(list: number[]) {
     return list.reduce((a, b) => a + b, 0);
