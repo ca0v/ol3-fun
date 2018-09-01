@@ -565,21 +565,24 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
             feature = feature.clone();
             var geom = feature.getGeometry();
             var extent = geom.getExtent();
-            var isPoint = extent[0] === extent[2];
-            var _a = ol.extent.getCenter(extent), dx = _a[0], dy = _a[1];
-            var scale = isPoint ? 1 : Math.min(canvas.width / ol.extent.getWidth(extent), canvas.height / ol.extent.getHeight(extent));
-            geom.translate(-dx, -dy);
+            var _a = ol.extent.getCenter(extent), cx = _a[0], cy = _a[1];
+            var _b = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)], w = _b[0], h = _b[1];
+            var isPoint = w === 0 || h === 0;
+            var scale = isPoint ? 1 : Math.min(canvas.width / w, canvas.height / h);
+            geom.translate(-cx, -cy);
             geom.scale(scale, -scale);
             geom.translate(canvas.width / 2, canvas.height / 2);
+            console.log(scale, cx, cy, w, h);
             var vtx = ol.render.toContext(canvas.getContext("2d"));
             var styles = getStyle(feature);
             if (!Array.isArray(styles))
                 styles = [styles];
             styles.forEach(function (style) { return vtx.drawFeature(feature, style); });
         };
-        Snapshot.snapshot = function (feature) {
+        Snapshot.snapshot = function (feature, size) {
+            if (size === void 0) { size = 128; }
             var canvas = document.createElement("canvas");
-            var geom = feature.getGeometry();
+            canvas.width = canvas.height = size;
             this.render(canvas, feature);
             return canvas.toDataURL();
         };
@@ -587,21 +590,56 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
     }());
     return Snapshot;
 });
-define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot"], function (require, exports, base_5, Snapshot) {
+define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_5, Snapshot, ol, common_3) {
     "use strict";
     exports.__esModule = true;
+    function circle(radius, points) {
+        if (radius === void 0) { radius = 1; }
+        if (points === void 0) { points = 36; }
+        if (points < 3)
+            throw "a circle must contain at least three points";
+        if (radius <= 0)
+            throw "a circle must have a positive radius";
+        var a = 0;
+        var dr = (2 * Math.PI) / (points - 1);
+        var result = new Array(points);
+        for (var i = 0; i < points; i++) {
+            result[i] = [radius * Math.sin(a), radius * Math.cos(a)];
+            a += dr;
+        }
+        return result;
+    }
     describe("Snapshot", function () {
         it("Snapshot", function () {
             base_5.should(!!Snapshot, "Snapshot");
+            base_5.should(!!Snapshot.render, "Snapshot.render");
+            base_5.should(!!Snapshot.snapshot, "Snapshot.snapshot");
+        });
+        it("Converts a feature to image data", function () {
+            var geom = new ol.geom.Polygon([circle(1)]);
+            var feature = new ol.Feature(geom);
+            feature.setStyle(new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: "black"
+                }),
+                stroke: new ol.style.Stroke({
+                    color: "blue",
+                    width: 3
+                })
+            }));
+            var data = Snapshot.snapshot(feature, 64);
+            base_5.should(!!data, "snapshot returns data");
+            document.body.appendChild(common_3.html("<img src=\"" + data + "\" />"));
+            throw "here i am";
         });
     });
 });
-define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_3) {
+define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_4) {
     "use strict";
     exports.__esModule = true;
     function zoomToFeature(map, feature, options) {
         var promise = $.Deferred();
-        options = common_3.defaults(options || {}, {
+        options = common_4.defaults(options || {}, {
             duration: 1000,
             padding: 256,
             minResolution: 2 * map.getView().getMinResolution()
@@ -642,23 +680,9 @@ define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3
     }
     exports.zoomToFeature = zoomToFeature;
 });
-define("tests/spec/zoom-to-feature", ["require", "exports", "tests/base", "openlayers", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/snapshot", "ol3-fun/common"], function (require, exports, base_6, ol, navigation_1, parse_dms_2, GooglePolylineEncoder, PolylineEncoder, Snapshot, common_4) {
+define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests/base", "ol3-fun/navigation"], function (require, exports, ol, base_6, navigation_1) {
     "use strict";
     exports.__esModule = true;
-    describe("parse-dms", function () {
-        it("parse", function () {
-            var dms = parse_dms_2.parse("10 5'2\" 10");
-            if (typeof dms === "number")
-                throw "lat-lon expected";
-            base_6.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
-            base_6.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
-        });
-    });
-    describe("ol/Map", function () {
-        it("ol/Map", function () {
-            base_6.should(!!ol.Map, "Map");
-        });
-    });
     describe("zoomToFeature", function () {
         it("zoomToFeature", function (done) {
             base_6.should(!!navigation_1.zoomToFeature, "zoomToFeature");
@@ -685,38 +709,6 @@ define("tests/spec/zoom-to-feature", ["require", "exports", "tests/base", "openl
                     done();
                 });
             });
-        });
-    });
-    describe("GooglePolylineEncoder", function () {
-        it("GooglePolylineEncoder", function () {
-            base_6.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
-        });
-        var points = common_4.pair(common_4.range(10), common_4.range(10));
-        var poly = new GooglePolylineEncoder();
-        var encoded = poly.encode(points);
-        var decoded = poly.decode(encoded);
-        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
-        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
-    });
-    describe("PolylineEncoder", function () {
-        it("PolylineEncoder", function () {
-            base_6.should(!!PolylineEncoder, "PolylineEncoder");
-        });
-        var points = common_4.pair(common_4.range(10), common_4.range(10));
-        var poly = new PolylineEncoder();
-        var encoded = poly.encode(points);
-        var decoded = poly.decode(encoded);
-        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
-        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
-        poly = new PolylineEncoder(6);
-        encoded = poly.encode(points);
-        decoded = poly.decode(encoded);
-        base_6.shouldEqual(encoded.length, 632, "encoding is 632 characters");
-        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
-    });
-    describe("Snapshot", function () {
-        it("Snapshot", function () {
-            base_6.should(!!Snapshot, "Snapshot");
         });
     });
 });

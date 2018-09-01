@@ -5,7 +5,7 @@
   "main": "built/index.js",
   "scripts": {
     "ol": "pushd ./node_modules/ol && npm install && npm run build-legacy && popd",
-    "clean": "rmdir .\\built /s/q",
+    "clean": "rm -r ./built",
     "before-push": "npm run clean && npm run build && npm run test",
     "uglify-for-amd": "pushd built && uglifyjs index.max.js --source-map \"content='index.max.js.map',url='index.js.map'\" --output=index.js --compress --mangle && popd",
     "build-for-amd": "tsc -p tsconfig.json",

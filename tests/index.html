@@ -5,15 +5,29 @@
     <title>Mocha Tests</title>
     <meta charset="utf-8">
     <style>
+        #mocha.terse {
+            font-size: 10px;
+            line-height: 1;
+        }
+
+        #mocha.terse h1 {
+            margin-top: 4px;
+        }
+
         /* hide tests if they pass */
-        #mocha-report .suite .test.pass {
+        #mocha.terse #mocha-report .suite .test.pass {
+            font-size: 6px;
+        }
+
+        /* hide tests if they pass */
+        #mocha.terse #mocha-report .suite .test.pass.fast {
             display: none;
         }
     </style>
 </head>
 
 <body>
-    <div id="mocha"></div>
+    <div id="mocha" class="terse"></div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js" data-main="../built/loader"></script>
 </body>
 

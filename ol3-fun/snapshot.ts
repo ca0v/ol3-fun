@@ -21,18 +21,25 @@ function getStyle(feature: ol.Feature) {
 
 class Snapshot {
 
+    /**
+     * @param canvas Canvas which will contain the feature
+     * @param feature Feature to render on the canvas, the style must be assigned to the style
+     */
     static render(canvas: HTMLCanvasElement, feature: ol.Feature) {
         feature = feature.clone();
         let geom = feature.getGeometry() as ol.geom.SimpleGeometry;
         let extent = geom.getExtent();
 
-        let isPoint = extent[0] === extent[2];
-        let [dx, dy] = ol.extent.getCenter(extent);
-        let scale = isPoint ? 1 : Math.min(canvas.width / ol.extent.getWidth(extent), canvas.height / ol.extent.getHeight(extent));
+        let [cx, cy] = ol.extent.getCenter(extent);
+        let [w, h] = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)];
+        let isPoint = w === 0 || h === 0;
+        let scale = isPoint ? 1 : Math.min(canvas.width / w, canvas.height / h);
 
-        geom.translate(-dx, -dy);
+        geom.translate(-cx, -cy);
         geom.scale(scale, -scale);
         geom.translate(canvas.width / 2, canvas.height / 2);
+
+        console.log(scale, cx, cy, w, h);
 
         let vtx = ol.render.toContext(canvas.getContext("2d"));
         let styles = <ol.style.Style[]><any>getStyle(feature);
@@ -41,11 +48,12 @@ class Snapshot {
     }
 
     /**
-     * convert features into data:image/png;base64;  
+     * @param feature Feature to render as image data
+     * @return convert features into data:image/png;base64;  
      */
-    static snapshot(feature: ol.Feature) {
+    static snapshot(feature: ol.Feature, size = 128) {
         let canvas = document.createElement("canvas");
-        let geom = feature.getGeometry();
+        canvas.width = canvas.height = size;
         this.render(canvas, feature);
         return canvas.toDataURL();
     }
