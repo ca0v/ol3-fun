@@ -1,0 +1,1 @@
+{"version":3,"file":"Property.js","sources":["../../../src/ol/interaction/Property.js"],"sourcesContent":["/**\r\n * @module ol/interaction/Property\r\n */\r\n\r\n/**\r\n * @enum {string}\r\n */\r\nexport default {\r\n  ACTIVE: 'active'\r\n};\r\n"],"names":[],"mappings":"AAAA;;;;;;;AAOA,eAAe;EACb,MAAM,EAAE,QAAQ;CACjB,CAAC;"}

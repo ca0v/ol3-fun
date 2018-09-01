@@ -1,0 +1,1 @@
+{"version":3,"file":"ViewHint.js","sources":["../../src/ol/ViewHint.js"],"sourcesContent":["/**\r\n * @module ol/ViewHint\r\n */\r\n\r\n/**\r\n * @enum {number}\r\n */\r\nexport default {\r\n  ANIMATING: 0,\r\n  INTERACTING: 1\r\n};\r\n"],"names":[],"mappings":"AAAA;;;;;;;AAOA,eAAe;EACb,SAAS,EAAE,CAAC;EACZ,WAAW,EAAE,CAAC;CACf,CAAC;"}

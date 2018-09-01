@@ -6,4 +6,4 @@ typings
 *.d.ts
 !built/**/*.js
 !built/**/*.map
-static/**
+!static/**

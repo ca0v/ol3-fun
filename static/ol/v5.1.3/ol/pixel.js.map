@@ -1,0 +1,1 @@
+{"version":3,"file":"pixel.js","sources":["../../src/ol/pixel.js"],"sourcesContent":["/**\r\n * An array with two elements, representing a pixel. The first element is the\r\n * x-coordinate, the second the y-coordinate of the pixel.\r\n * @typedef {Array.<number>} Pixel\r\n * @api\r\n */\r\n"],"names":[],"mappings":"AAAA;;;;;;"}
