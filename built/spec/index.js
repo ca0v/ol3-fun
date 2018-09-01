@@ -568,12 +568,11 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
             var _a = ol.extent.getCenter(extent), cx = _a[0], cy = _a[1];
             var _b = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)], w = _b[0], h = _b[1];
             var isPoint = w === 0 || h === 0;
-            var scale = isPoint ? 1 : Math.min(canvas.width / w, canvas.height / h);
-            var ff = 2 / 3;
-            scale *= ff;
+            var ff = 1 / (window.devicePixelRatio || 1);
+            var scale = isPoint ? 1 : Math.min(ff * canvas.width / w, ff * canvas.height / h);
             geom.translate(-cx, -cy);
             geom.scale(scale, -scale);
-            geom.translate(Math.ceil(canvas.width * ff / 2), Math.ceil(canvas.height * ff / 2));
+            geom.translate(Math.ceil(ff * canvas.width / 2), Math.ceil(ff * canvas.height / 2));
             console.log(scale, cx, cy, w, h, geom.getCoordinates());
             var vtx = ol.render.toContext(canvas.getContext("2d"));
             var styles = getStyle(feature);
@@ -595,8 +594,8 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
 define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_5, Snapshot, ol, common_3) {
     "use strict";
     exports.__esModule = true;
-    var pointData = "data:image/png;base64,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";
-    var circleData = "data:image/png;base64,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";
+    var pointData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFdUlEQVR4Xu1aXUybVRh+3hiWxiX+ZNSMECvjJxiqyaROyq5M2MWUZGyDLEZg0WzhJ2QELharjmbWGgqOOTRxTMDIGHpBpIwE40Un3ujA0EmUYkhcRpoJRObfJkJG9Ji3+1gWoP2+rudrSvq9l/2e857nPOc5/yUkeVCStx+GAIYDklwBYwgkuQGMSdAYAsYQSHIFjCGQ5AYwVgFjCBhDIMkViPsQEEKkANgFIB2AGcCjAP4AsADgOoBxIlqJV7/ETQAhRCWAlwA8D+DBCA38G8DXAD4jok/1FkJ3AYQQVgDdAAruozHfAqgloh/uo6ymIroKIIQ4DOBjAA9oYrMx6F8AVUTEeaSHLgIIITjvOwBel8jYTURNEvOFUuklQDMAh2yyAJqJ6A2ZeaULIIR4GUCfTJJrch0ion5Z+aUKIIRIA/CzyiwfK/d/AGQQES+bMYdsAc4D4OVO7/iEiF6VUYk0AYQQvMyNyiClMUc+EX2vERsWJlOAqHp/enoaY2NjmJubQ1paGgoKCpCbmxtNe3qI6JVoCmyElSKAsuz9CiBVC6GzZ8+ioaEBt2/fvgvfsmUL2tvbUVNToyUFYxaI6DGt4HA4WQLw3v47LWQ6OjpQW1sbFnru3DlUVVVpScWYZ4hoQitYTwfwjq9HjQjbPTMzE8vLy2GhJpMJS0tLaqlWvzuIqEUrWE8BGgC8p0ZkYGAApaWlajAIIVQxCuArIirSCtZTgDcBuNWInDp1CsePH1eDRSPA70S0TTVhBICsOYAH9YdqRLxeLw4ePKgGi0aAL4noBdWEcRCAW/W5GpHZ2VlkZWXJnAP4qNyhVm+k77IckKVsgVW58Cwfaanr7OzE0aNHVfMogGwiuqoVrNscwImFEDMAntBCpr+/H/X19Zifn78LT09Px5kzZ1BWVqYlBWOuE9HjWsHhcFIcoAjQCUBz162srGB0dBRXrlxBfn4+7HY7UlL4ulBzfERE1ZrRYYAyBXgOwFishKIov4uIxqPAbwiVJoDigosA9sVKSkP5QSI6oAGnCpEtwJMAflKtNTbAfwDyiGg6tjR3SksVQHEBX4XxlZhe8RoRtcpKLl0AJjY+Pt5jMpn4fICtW7ciIyMjIt+ZmZkQzmzmd5KI0U5EvO2WFnoIwHvddT3Ep8Dq6vWT9tDQEEpKSkINunbt2jqxFhYW4Ha7MTg4OB8MBrMBLEprvR5DAMD7gUDgWF5e3l2efO5vaWnB7t27UVRUhMnJSRARrFYr+vr6sH37drALcnJyYLFYQuUWFxdDYjQ3Nwuz2Uw3b96E0+l8GsBkwgvg9/uPDQ8PM+He1NTUhzweT0lhYSFaW1tx48YN8DcOm82GiooKNDY2btgmi8XyZzAYfMTv94fKOJ1OP4BnN5MAfE2Grq6uwyyA3W7/y+v1Pswu4JiamkJxcTF/DzmAY//+/di27c4B79KlS6Hfjxw5glu3bqGurg69vb1Sh63UZErPrBsCq+TZ4nwbdPr06W+6u7t/GxkZ2Xf58uWQ1VcF2Lt3L5qamrw7duw4UF5ezlvmoMvlsigO4MliaDM5YJXrFwBGXC7Xu9zjNputgj/4fL4Lq4BVAViMPXv2VFRWVl5wOBxwOBxXT548maUIsOnmgHsJP+VyuX5kB3g8nom2trZfAoFA8VoHqAjwNgDnZnLA2h477/P5Ku+dA6xW64TP59sZzgEnTpyYcLvdO7Ozs0MridPp5JtgKa9CLKQecwCfBfhMwLY/tGbd5p0Ov/AeU3rxA+Uxhd8SAwB4m8ui2QHUKa9Mbyn/KHkxTM6YDKGHADERindhQ4B4K55o9RkOSLQeiTcfwwHxVjzR6jMckGg9Em8+hgPirXii1Zf0DvgfGiXvUAsr6xQAAAAASUVORK5CYII=";
+    var circleData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAHzUlEQVR4XuWbaWxVRRTHf+OGS1BRUQuCuICRRoMWFTRugEgCVo2IQqEgUAmpiCIgJuoHiAmgKEowBlsXwCLuEv2g0kaNti7RaBTFjaBScYtRq1FRueZ/79z75r32tfe9PmrpPclL+96dOzPnP+fMnG0MBSVvP2AUcIn9HFig7n8GNgBPAS+C+aNA/WIK05F3EFAJ3AAckr3Pb4Hv7ec74C9gJyDcDgeOsH+PbG1aPwLLgXvANLV3/u0EwDsMuA6YBbSw2l8EC8ZLwEYg7nyF5zBgJHABcFxLfP4CrACWgZGE5EV5AuB1A24HptvlcwbXyq4NFoiv8ppU85f6AtcCE62UpLX4HXgAmAdGIpUT5QGA1x94EjgpfaQvgaVAtRXtnOYRs7FwnwbcBByV+c4HwGVgPovZmd8sRwC8CcAq4ID0QaYCa4B/chm7HW33ttKghW8mDVPAPBG385gAeHsCd9uNzvYtZm8GlsQdaxe00/TnA7cBmmJEK4HZYP5ta9AYAHh7AOuBsanOGoFxQH1b/XfQ8zPtCalTJKJHgHIwOmayUhsA+MyvBspSPWg3vwL4qYOYiztMT6AGGJETCK0A0BLzDwHSdy/urDq4ndjRvjAlNghZAMjG/FUdzFC+wz0YG4RsAGhncXY3nXrS+VbVKd/Z7oL3pLmPBadiiuaDke2SRi0A4Mns+gjYJ2hZB1zYgUdcofDYy1qh54cd7gCKwXzujpABgC/6bwCnBY22AqcAeVuaheImz34OBt4FjgnffwsYAibaxDIBuBFYHLSWuA8B3s5z8M7y2ul2TSNW54JZFs7OAcA7EXgvJfoya4VHV6A7rKPq85KmCi4A8rcvCtiVFzfQtu0KAGg72wQcHzKzAczF+mIB8I4FtDnY7+cBr3QFzh0e5F7Xht+1B/QFsy0E4C7r19tGadZUFwJCJ1p0KiiOMNeAtz+wPRXQkGRIG7oiKVL3dMjYr0CRALjGRlaAbYFkdFpTt72LolNecYsoljBTAHwYGAiiOYC0oSvTPBu48Xl8XwA4no1icZKMrkwKXSqc6JPnAPAacHZX5tzh7XVAMQT/2AslQAagYm1JIBl5UoU0AGQDPZcE7gGddM9kAiDdiBu3391xOhRQfiWSAAU4FWlNEgV7v90DXrApvSQBIJ5HhgAo4uMEfROBg/Ksl4YAPJwZQ0sABErkTAwBUB5BFnGS6D5gRgiA4p8LksR9kFRmTgiAxKE8YQAocTQhBGCd/yVZ9Kif4bLH4Js2AJokCBTsHRwC8IMtTUkSAMpt9nCdIdXp/JkQBFIuseMNyhWWS5wEUlxQ8cE0b/B6W3yVBAAU+QpyI44EvAqcmwTuraSfFQGgMpI9gkCoqt46W+FDoddENYjfhCmQnZIAJ1g+w9ZAFXrQztTfTODecEJ1AkBcyzAGkuAWq8RneAhAhQDoAcgQsGVWJwCftmvJNm3axMCByi1CU1MTlZWVNDY2smLFChYvXsyaNTK9s1NVVRX9+vVjxIhCZ6gGAJ+EA0v1e4apscAw9kl+clplRU5giPnt27dHkxczo0aNory8nLq64Ohpi3YdAIoD+jlR0Vowk9zkqJbdSkGJLSxoa6rpzydNmsSCBQuYNWtWM2aHDRsWScDkyZMZNGgQ3bt3Z/369ehZ79692bFjB0uWLKFXr16RBGzcuJHhwwORra2tbYdUKAyucLhPWv0BYLa46fEqW4cKNERx81wgWLhwIaNHj6akRACmUyYAeioRF4NFRUUUFxejlR86dCgNDQ0+APX19ZSVlVFRUeEDKunSs+nTVaKcK70DnBq+tAqM9j63VNZTwmxLKjqqUjNFiuJTNgkQYzU1NWkSsHXrVp8RARD+H44UqoB+nzZNtcEpyk8K1IfW16e/gT5gVNWdWSvsqfzcCQ31tmdmfBBa2gPGjRvHypUrKS0t9TdBqYALQCgNkiCt+ObNm+nWrVszCYg/C7elkr1KiEa0HIzMXp8ya4RkJWgv6B48VoGRdCe3KvS2TgEXAKnG6tWrY+0BmlF1dXUOKqDqcrm9UWG7Ep/9wejWRksA6DdvdHqKaHcOlqh0dry7+mPAPO/+kK1QcpEtBbdtpRUKnO5ONDvTuVsE5tZMDrIBoN9118WxRK4G7t9NEKjINOll/o106wNbUYHwkX8RSmeHc2HnTmBuJ64gUQWIqmHl7kakkrcSMFFRQAwViEDQ0ajbF2ekXlIG+fJOGD3aF3gcGOPyp2DnWFWDZRPdOBcmVGSn3JnTs0qJh3aiahIJqy5vBP6HJdn048GoMDIrxQDAPxnUTlUFkn9LXwPSNXmQ/yepkFt7Ux93EkvBxCpzjQlApBLiWK6zlM3Ss/baoADpSDraXs0rdQeVjT8VjG65xKIcAfClQVdjdXPMgVzRZJ25qsn9ONbA+TdSSbNKebQPSe8zRdLkJJJ5AOCDoOLKW6xKqDDfIVmP8iF0ebJQ4TXdB5JBM9l1aMIxpeOKcC4Ek3NcP08AIpVQ9ETScE7zFZXPITBkQOlOozbOVvcjpwuZsFppmbC6mXsykIFz0FqRXIm8jrq8qJ0AREAo0K57rVcCko4WSGU4cjMEhi5/pzkoQD8r0mJauKbdA3T701VZXeNbA+blvLh2XioQABEQcqIkq9osB7d3chnvy6vRdr8OzG+F6vs/cM4xojBcMyUAAAAASUVORK5CYII=";
     function show(data) {
         document.body.appendChild(common_3.html("<img src=\"" + data + "\" />"));
     }
@@ -610,10 +609,11 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
         var a = 0;
         var dr = (2 * Math.PI) / (points - 1);
         var result = new Array(points);
-        for (var i = 0; i < points; i++) {
+        for (var i = 0; i < points - 1; i++) {
             result[i] = [radius * Math.sin(a), radius * Math.cos(a)];
             a += dr;
         }
+        result[result.length - 1] = result[0];
         return result;
     }
     describe("Snapshot", function () {
@@ -647,21 +647,31 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
             }));
             var data = Snapshot.snapshot(feature, 64);
             show(data);
-            base_5.shouldEqual(data, pointData, "point");
+            if (1 === window.devicePixelRatio) {
+                if (data !== pointData)
+                    show(pointData);
+                base_5.shouldEqual(data, pointData, "point data as expected");
+            }
+        });
+        it("Converts a triangle to image data", function () {
+            var points = circle(50, 4);
+            var feature = new ol.Feature(new ol.geom.Polygon([points]));
+            feature.setStyle(createStyle("Triangle"));
+            var data = Snapshot.snapshot(feature, 64);
+            show(data);
+        });
+        it("Converts a diamond to image data", function () {
+            var points = circle(50, 5);
+            var feature = new ol.Feature(new ol.geom.Polygon([points]));
+            feature.setStyle(createStyle("Diamond"));
+            var data = Snapshot.snapshot(feature, 64);
+            show(data);
         });
         it("Converts a polygon to image data", function () {
             var geom = new ol.geom.Polygon([circle(3 + 100 * Math.random())]);
             var feature = new ol.Feature(geom);
             base_5.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
-            feature.setStyle(new ol.style.Style({
-                fill: new ol.style.Fill({
-                    color: "black"
-                }),
-                stroke: new ol.style.Stroke({
-                    color: "blue",
-                    width: 3
-                })
-            }));
+            feature.setStyle(createStyle("Circle"));
             var originalCoordinates = base_5.stringify(geom.getCoordinates());
             var data = Snapshot.snapshot(feature, 64);
             console.log(data);
@@ -670,9 +680,36 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
             var finalCoordinates = base_5.stringify(geom.getCoordinates());
             base_5.shouldEqual(originalCoordinates, finalCoordinates, "coordinates unchanged");
             base_5.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
-            base_5.shouldEqual(data, circleData, "circle data as expected");
+            if (1 === window.devicePixelRatio) {
+                if (data !== pointData)
+                    show(circleData);
+                base_5.shouldEqual(data, circleData, "circle data as expected");
+            }
         });
     });
+    function createStyle(text) {
+        if (text === void 0) { text = ""; }
+        return new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: "black"
+            }),
+            stroke: new ol.style.Stroke({
+                color: "blue",
+                width: 3
+            }),
+            text: new ol.style.Text({
+                text: text,
+                fill: new ol.style.Fill({
+                    color: "white"
+                }),
+                stroke: new ol.style.Stroke({
+                    color: "black",
+                    width: 2
+                }),
+                offsetY: 16
+            })
+        });
+    }
 });
 define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_4) {
     "use strict";

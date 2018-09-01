@@ -34,11 +34,8 @@ class Snapshot {
         let [cx, cy] = ol.extent.getCenter(extent);
         let [w, h] = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)];
         let isPoint = w === 0 || h === 0;
-        let scale = isPoint ? 1 : Math.min(canvas.width / w, canvas.height / h);
-
-        // this will modify the geometry on the cloned feature
         let ff = 1 / (window.devicePixelRatio || 1);
-        scale *= ff;
+        let scale = isPoint ? 1 : Math.min(ff * canvas.width / w, ff * canvas.height / h);
         geom.translate(-cx, -cy); // center at 0,0
         geom.scale(scale, -scale); // fill the canvas, flipping the y axis
         geom.translate(Math.ceil(ff * canvas.width / 2), Math.ceil(ff * canvas.height  / 2));  // move center to center of canvas
