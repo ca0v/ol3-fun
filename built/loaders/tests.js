@@ -36,16 +36,16 @@ requirejs.config({
     packages: [
         {
             name: 'jquery',
-            location: localhost ? '../node_modules/jquery' : "https://code.jquery.com",
+            location: localhost ? '../../node_modules/jquery' : "https://code.jquery.com",
             main: localhost ? 'dist/jquery.min' : "jquery-3.3.1.min"
         },
         {
             name: 'mocha',
-            location: localhost ? '../node_modules/mocha' : "https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0",
+            location: localhost ? '../../node_modules/mocha' : "https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0",
             main: localhost ? 'mocha' : "mocha.min"
         }
     ],
-    deps: ["../built/spec/index"],
+    deps: ["../spec/index"],
     callback: function () {
         requirejs(["mocha"], function () {
             var Mocha = window["mocha"];
