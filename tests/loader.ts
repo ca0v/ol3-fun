@@ -1,5 +1,13 @@
 declare var requirejs: any;
 
+function loadCss(url: string) {
+    let link = document.createElement("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = url;
+    document.getElementsByTagName("head")[0].appendChild(link);
+}
+
 function getParameterByName(name: string, url?: string) {
     url = url || window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -13,6 +21,9 @@ function getParameterByName(name: string, url?: string) {
 let debug = getParameterByName("debug") === "1";
 let localhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
+loadCss(localhost ? "../node_modules/mocha/mocha.css" : "https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0/mocha.css");
+loadCss(localhost ? "../node_modules/ol/build/ol.css" : "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.1.3/build/ol.js");
+
 // setup require js packaging system and load the "spec" before running mocha
 requirejs.config({
     shim: {
@@ -24,7 +35,7 @@ requirejs.config({
         }
     },
     paths: {
-        "openlayers": localhost ? "../node_modules/ol/build/ol" : "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.2.0/build/ol"
+        "openlayers": localhost ? "../node_modules/ol/build/ol" : "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.1.3/build/ol"
     },
     packages: [
         {
