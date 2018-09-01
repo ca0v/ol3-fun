@@ -26,8 +26,9 @@ class Snapshot {
      * @param feature Feature to render on the canvas, the style must be assigned to the style
      */
     static render(canvas: HTMLCanvasElement, feature: ol.Feature) {
+        // clone the feature to the geometry can be modified
         feature = feature.clone();
-        let geom = feature.getGeometry() as ol.geom.SimpleGeometry;
+        let geom = feature.getGeometry() as ol.geom.Polygon;
         let extent = geom.getExtent();
 
         let [cx, cy] = ol.extent.getCenter(extent);
@@ -35,11 +36,13 @@ class Snapshot {
         let isPoint = w === 0 || h === 0;
         let scale = isPoint ? 1 : Math.min(canvas.width / w, canvas.height / h);
 
-        geom.translate(-cx, -cy);
-        geom.scale(scale, -scale);
-        geom.translate(canvas.width / 2, canvas.height / 2);
+        // this will modify the geometry on the cloned feature
+        let ff = 2/3; // fudge-factor, something is happening I don't understand
+        geom.translate(-cx, -cy); // center at 0,0
+        geom.scale(scale * ff, -scale * ff); // fill the canvas, flipping the y axis
+        geom.translate(canvas.width * ff / 2, canvas.height * ff / 2);  // move center to center of canvas
 
-        console.log(scale, cx, cy, w, h);
+        console.log(scale, cx, cy, w, h, geom.getCoordinates());
 
         let vtx = ol.render.toContext(canvas.getContext("2d"));
         let styles = <ol.style.Style[]><any>getStyle(feature);

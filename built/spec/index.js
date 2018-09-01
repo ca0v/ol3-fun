@@ -569,10 +569,11 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
             var _b = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)], w = _b[0], h = _b[1];
             var isPoint = w === 0 || h === 0;
             var scale = isPoint ? 1 : Math.min(canvas.width / w, canvas.height / h);
+            var ff = 2 / 3;
             geom.translate(-cx, -cy);
-            geom.scale(scale, -scale);
-            geom.translate(canvas.width / 2, canvas.height / 2);
-            console.log(scale, cx, cy, w, h);
+            geom.scale(scale * ff, -scale * ff);
+            geom.translate(canvas.width * ff / 2, canvas.height * ff / 2);
+            console.log(scale, cx, cy, w, h, geom.getCoordinates());
             var vtx = ol.render.toContext(canvas.getContext("2d"));
             var styles = getStyle(feature);
             if (!Array.isArray(styles))
@@ -593,6 +594,7 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
 define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_5, Snapshot, ol, common_3) {
     "use strict";
     exports.__esModule = true;
+    var circleData = "data:image/png;base64,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";
     function circle(radius, points) {
         if (radius === void 0) { radius = 1; }
         if (points === void 0) { points = 36; }
@@ -616,8 +618,9 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
             base_5.should(!!Snapshot.snapshot, "Snapshot.snapshot");
         });
         it("Converts a feature to image data", function () {
-            var geom = new ol.geom.Polygon([circle(1)]);
+            var geom = new ol.geom.Polygon([circle(3 + 100 * Math.random())]);
             var feature = new ol.Feature(geom);
+            base_5.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
             feature.setStyle(new ol.style.Style({
                 fill: new ol.style.Fill({
                     color: "black"
@@ -627,10 +630,15 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
                     width: 3
                 })
             }));
+            var originalCoordinates = base_5.stringify(geom.getCoordinates());
             var data = Snapshot.snapshot(feature, 64);
+            console.log(data);
             base_5.should(!!data, "snapshot returns data");
             document.body.appendChild(common_3.html("<img src=\"" + data + "\" />"));
-            throw "here i am";
+            var finalCoordinates = base_5.stringify(geom.getCoordinates());
+            base_5.shouldEqual(originalCoordinates, finalCoordinates, "coordinates unchanged");
+            base_5.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
+            base_5.shouldEqual(data, circleData, "circle data as expected");
         });
     });
 });
