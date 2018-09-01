@@ -1,4 +1,5 @@
-import ol = require("openlayers");
+import * as ol from "openlayers";
+import * as $ from "jquery";
 import { defaults } from "./common";
 
 /**
@@ -12,6 +13,7 @@ export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
     minResolution?: number;
 }) {
 
+    let promise = $.Deferred();
     options = defaults(options || {}, {
         duration: 1000,
         padding: 256,
@@ -27,7 +29,8 @@ export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
             size: map.getSize(),
             padding: [options.padding, options.padding, options.padding, options.padding],
             minResolution: options.minResolution,
-            duration: duration
+            duration: duration,
+            callback: () => promise.resolve(),
         });
     }
 
@@ -53,5 +56,5 @@ export function zoomToFeature(map: ol.Map, feature: ol.Feature, options?: {
         });
         setTimeout(() => doit(0.5 * options.duration), duration);
     }
-
+    return promise;
 }

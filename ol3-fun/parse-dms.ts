@@ -40,7 +40,7 @@ function inRange(value: number, a: number, b: number) {
     return value >= a && value <= b;
 }
 
-export function parse(dmsString: string) {
+export function parse(dmsString: string): { lon: number; lat: number } | number {
 
     dmsString = dmsString.trim();
 

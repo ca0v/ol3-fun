@@ -1,17 +1,17 @@
 {
     "compilerOptions": {
+        "allowJs": false,
         "removeComments": true,
         "declaration": false,
-        "module": "commonjs",
-        "target": "es6",
+        "module": "amd",
+        "target": "es3",
         "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "sourceMap": false,
-        "outDir": "../built",
-        "moduleResolution": "node"
+        "sourceMap": true,
+        "outFile": "./spec/index.js",
+        "moduleResolution": "node",
+        "baseUrl": "../node_modules"
     },
     "include": [
-        "**/*.ts"
+        "index.ts"
     ]
 }

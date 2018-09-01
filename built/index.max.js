@@ -164,10 +164,11 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.shuffle = shuffle;
 });
-define("ol3-fun/navigation", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_1) {
+define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function zoomToFeature(map, feature, options) {
+        var promise = $.Deferred();
         options = common_1.defaults(options || {}, {
             duration: 1000,
             padding: 256,
@@ -181,7 +182,8 @@ define("ol3-fun/navigation", ["require", "exports", "openlayers", "ol3-fun/commo
                 size: map.getSize(),
                 padding: [options.padding, options.padding, options.padding, options.padding],
                 minResolution: options.minResolution,
-                duration: duration
+                duration: duration,
+                callback: function () { return promise.resolve(); },
             });
         };
         if (ol.extent.containsExtent(currentExtent, targetExtent)) {
@@ -204,6 +206,7 @@ define("ol3-fun/navigation", ["require", "exports", "openlayers", "ol3-fun/commo
             });
             setTimeout(function () { return doit(0.5 * options.duration); }, duration);
         }
+        return promise;
     }
     exports.zoomToFeature = zoomToFeature;
 });
