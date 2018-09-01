@@ -10,6 +10,9 @@ Collection of utility function oriented around OpenLayers
 * integrate with ol 5.1.3
 * run tests on github (report status on github)
 
+## Tests
+* [v5.1.5](https://rawgit.com/ca0v/ol3-fun/v5.1.3/tests/index.html)
+
 ## Examples
 
 * [v5.1.3](https://rawgit.com/ca0v/ol3-fun/v5.1.3/rawgit.html)
