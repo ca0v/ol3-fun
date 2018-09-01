@@ -1,58 +1,11 @@
 <html>
 
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script>
-    <style>
-        @import url('https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css');
-    </style>
+    <script src="./static/require.js" data-main="./built/loaders/examples"></script>
 </head>
 
 <body>
     <div id="map" class="map"></div>
-    <script>
-        (function () {
-            window.module = window.module || {};
-
-            function getParameterByName(name, url) {
-                url = url || window.location.href;
-                name = name.replace(/[\[\]]/g, "\\$&");
-                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                    results = regex.exec(url);
-                if (!results) return null;
-                if (!results[2]) return '';
-                return decodeURIComponent(results[2].replace(/\+/g, " "));
-            }
-
-            let debug = getParameterByName("debug") === "1";
-            let localhost = window.location.hostname === "localhost";
-
-            let deps = ["built/examples.max"];
-
-            require.config({
-
-                packages: [
-                    {
-                        name: 'openlayers',
-                        location: localhost ? "./bower_components/openlayers" : 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5',
-                        main: debug ? 'ol-debug' : 'ol'
-                    },
-                    {
-                        name: 'jquery',
-                        location: localhost ? "./bower_components/jquery/dist" : 'https://cdn.rawgit.com/jquery/jquery-dist/3.1.1/dist',
-                        main: debug ? 'jquery' : 'jquery.min'
-                    }
-                ],
-
-                deps: deps,
-
-                callback: function () {
-                    window.module = window.module || {};
-                    require([getParameterByName("run") || "examples/index"], function (test) { test.run(); });
-                }
-            });
-
-        })();
-    </script>
 </body>
 
 </html>

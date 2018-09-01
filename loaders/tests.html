@@ -5,7 +5,7 @@
     <title>Mocha Tests</title>
     <meta charset="utf-8">
     <style>
-        body {
+        body.dark {
             background: rgb(30, 30, 30);
             color: rgb(200, 200, 200);
         }
@@ -37,9 +37,9 @@
     </style>
 </head>
 
-<body>
-    <div id="mocha" class="terse"></div>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js" data-main="../built/loader"></script>
+<body class="not-dark">
+    <div id="mocha" class="not-terse"></div>
+    <script type="text/javascript" src="../static/require.js" data-main="./tests"></script>
 </body>
 
 </html>

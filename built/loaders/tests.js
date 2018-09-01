@@ -1,37 +1,33 @@
-declare var requirejs: any;
-
-function loadCss(url: string) {
-    let link = document.createElement("link");
+"use strict";
+function loadCss(url) {
+    var link = document.createElement("link");
     link.type = "text/css";
     link.rel = "stylesheet";
     link.href = url;
     document.getElementsByTagName("head")[0].appendChild(link);
 }
-
-function getParameterByName(name: string, url?: string) {
+function getParameterByName(name, url) {
     url = url || window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
+    if (!results)
+        return null;
+    if (!results[2])
+        return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
-
-let debug = getParameterByName("debug") === "1";
-let localhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-
+var debug = getParameterByName("debug") === "1";
+var localhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 loadCss(localhost ? "../node_modules/mocha/mocha.css" : "https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0/mocha.css");
 loadCss(localhost ? "../node_modules/ol/build/ol.css" : "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.1.3/css/ol.css");
-
 // setup require js packaging system and load the "spec" before running mocha
 requirejs.config({
     shim: {
         // no need to wrap ol in a define method when using a shim
         // build this using the "npm run build-legacy" (see ol package.json)
         "openlayers": {
-            deps: [], // no dependencies, needs path to indicate where to find "openlayers"
-            exports: "ol", // tell requirejs which global this library defines
+            deps: [],
+            exports: "ol"
         }
     },
     paths: {
@@ -49,18 +45,17 @@ requirejs.config({
             main: localhost ? 'mocha' : "mocha.min"
         }
     ],
-    deps: ["spec/index"],
+    deps: ["../built/spec/index"],
     callback: function () {
         requirejs(["mocha"], function () {
-            let Mocha = window["mocha"];
-
-            let mocha = Mocha.setup({
+            var Mocha = window["mocha"];
+            var mocha = Mocha.setup({
                 timeout: 6000,
                 ui: 'bdd',
                 bail: false
             });
             // execute "describe" and "it" methods before running mocha
-            requirejs(["tests/index"], () => mocha.run());
+            requirejs(["tests/index"], function () { return mocha.run(); });
         });
     }
 });
