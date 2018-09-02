@@ -13,7 +13,7 @@ Collection of utility function oriented around OpenLayers
 
 ## Tests
 
-* [v5.1.3](https://rawgit.com/ca0v/ol3-fun/v5.1.3/loaders/tests/index.html)
+* [v5.1.3](https://rawgit.com/ca0v/ol3-fun/v5.1.3/loaders/tests.html)
 
 ## Examples
 
