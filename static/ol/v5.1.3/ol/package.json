@@ -1,0 +1,54 @@
+{
+  "_args": [
+    [
+      "git+https://github.com/openlayers/openlayers.git#v5.1.3",
+      "C:\\code\\ca0v\\ol3-fun"
+    ]
+  ],
+  "_from": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
+  "_id": "ol@git+https://github.com/openlayers/openlayers.git#9ec623380af86b8a5519ff16f8ed6136b6b747bf",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/ol",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
+    "rawSpec": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
+    "saveSpec": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
+    "fetchSpec": "https://github.com/openlayers/openlayers.git",
+    "gitCommittish": "v5.1.3"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git+https://github.com/openlayers/openlayers.git#9ec623380af86b8a5519ff16f8ed6136b6b747bf",
+  "_spec": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
+  "_where": "C:\\code\\ca0v\\ol3-fun",
+  "bugs": {
+    "url": "https://github.com/openlayers/openlayers/issues"
+  },
+  "dependencies": {
+    "pbf": "3.1.0",
+    "pixelworks": "1.1.0",
+    "rbush": "2.0.2"
+  },
+  "description": "OpenLayers mapping library",
+  "homepage": "https://openlayers.org/",
+  "keywords": [
+    "map",
+    "mapping",
+    "ol"
+  ],
+  "license": "BSD-2-Clause",
+  "main": "index.js",
+  "name": "ol",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/openlayers/openlayers.git"
+  },
+  "sideEffects": [
+    "ol.css"
+  ],
+  "version": "5.1.3"
+}

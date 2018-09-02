@@ -1,0 +1,56 @@
+{
+  "name": "ol3-fun",
+  "version": "5.1.3",
+  "description": "OpenLayers Functions",
+  "main": "built/index.js",
+  "scripts": {
+    "ol": "pushd ./node_modules/ol && npm install && npm run build-legacy && popd",
+    "clean": "rm -r ./built",
+    "before-push": "npm run clean && npm run build && npm run test && start npm run live-for-tests && npm run live-for-examples",
+    "uglify-for-amd": "pushd built && uglifyjs index.max.js --source-map \"content='index.max.js.map',url='index.js.map'\" --output=index.js --compress --mangle && popd",
+    "build-for-amd": "tsc -p tsconfig.json",
+    "build-for-examples": "tsc -p examples/tsconfig.json --outFile ./built/examples.max.js",
+    "live-for-examples": "live-server --port=5001 --wait=200 --watch=./built/examples.max.js --open=loaders/examples.html",
+    "dev-for-examples": "npm run build-for-examples && start npm run live-for-examples && npm run build-for-examples -- -w",
+    "build-for-tests": "tsc -p tests/tsconfig.json --outFile ./built/spec/index.js",
+    "live-for-tests": "npm run build-for-loaders && live-server --port=5000 --wait=200 --watch=./built/spec/index.js --open=./loaders/tests.html --browser=CHROME",
+    "dev-for-tests": "npm run build-for-tests & start npm run live-for-tests & npm run build-for-tests -- -w",
+    "build-for-loaders": "tsc -p ./loaders/tsconfig.json",
+    "build": "npm run build-for-loaders && npm run build-for-amd && npm run build-for-examples && npm run build-for-tests",
+    "install": "npm run build-for-amd & npm run uglify-for-amd",
+    "test": "npm run live-for-tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ca0v/ol3-fun.git"
+  },
+  "keywords": [
+    "OpenLayers"
+  ],
+  "author": "coreyalix@hotmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ca0v/ol3-fun/issues"
+  },
+  "homepage": "https://github.com/ca0v/ol3-fun/blob/v5.1.3/README.md",
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "ol": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
+    "requirejs": "^2.3.5"
+  },
+  "devDependencies": {
+    "@types/expect": "^1.20.3",
+    "@types/jquery": "^3.3.6",
+    "@types/mocha": "^5.2.5",
+    "@types/ol": "^4.6.2",
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.1",
+    "expect": "^23.5.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "live-server": "^1.2.0",
+    "mocha": "^5.2.0",
+    "npm-watch": "^0.3.0",
+    "typescript": "^3.0.1",
+    "uglify-js": "^3.4.8"
+  }
+}
