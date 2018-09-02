@@ -189,49 +189,43 @@ define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common
     function sum(list) {
         return list.reduce(function (a, b) { return a + b; }, 0);
     }
-    describe("expect", function () {
-        it("expect", function () {
+    describe("asArray tests", function () {
+        it("asArray", function (done) {
+            if (!document)
+                return;
+            document.body.appendChild(document.createElement("div"));
+            var list = document.getElementsByTagName("div");
+            var result = common_1.asArray(list);
+            base_1.should(result.length === list.length, "array size matches list size");
+            done();
         });
     });
-    describe("common", function () {
-        describe("asArray tests", function () {
-            it("asArray", function (done) {
-                if (!document)
-                    return;
-                document.body.appendChild(document.createElement("div"));
-                var list = document.getElementsByTagName("div");
-                var result = common_1.asArray(list);
-                base_1.should(result.length === list.length, "array size matches list size");
-                done();
-            });
+    describe("uuid tests", function () {
+        it("uuid", function () {
+            base_1.should(common_1.uuid().length === 36, "uuid has 36 characters");
         });
-        describe("uuid tests", function () {
-            it("uuid", function () {
-                base_1.should(common_1.uuid().length === 36, "uuid has 36 characters");
-            });
+    });
+    describe("pair tests", function () {
+        it("empty test", function () {
+            base_1.should(0 === common_1.pair([], []).length, "empty result");
+            base_1.should(0 === common_1.pair([1], []).length, "empty result");
+            base_1.should(0 === common_1.pair([], [1]).length, "empty result");
         });
-        describe("pair tests", function () {
-            it("empty test", function () {
-                base_1.should(0 === common_1.pair([], []).length, "empty result");
-                base_1.should(0 === common_1.pair([1], []).length, "empty result");
-                base_1.should(0 === common_1.pair([], [1]).length, "empty result");
-            });
-            it("ensures all combinations", function () {
-                var A = [1, 3, 5], B = [7, 11, 13], result = common_1.pair(A, B);
-                base_1.should((A.length * sum(B) + B.length * sum(A)) === sum(result.map(function (v) { return v[0] + v[1]; })), "create product from two vectors");
-            });
+        it("ensures all combinations", function () {
+            var A = [1, 3, 5], B = [7, 11, 13], result = common_1.pair(A, B);
+            base_1.should((A.length * sum(B) + B.length * sum(A)) === sum(result.map(function (v) { return v[0] + v[1]; })), "create product from two vectors");
         });
-        describe("range tests", function () {
-            it("empty test", function () {
-                base_1.should(0 === common_1.range(0).length, "empty result");
-            });
-            it("size tests", function () {
-                base_1.should(1 === common_1.range(1).length, "single item");
-                base_1.should(10 === common_1.range(10).length, "ten items");
-            });
-            it("content tests", function () {
-                base_1.should(45 === sum(common_1.range(10)), "range '10' contains 0..9");
-            });
+    });
+    describe("range tests", function () {
+        it("empty test", function () {
+            base_1.should(0 === common_1.range(0).length, "empty result");
+        });
+        it("size tests", function () {
+            base_1.should(1 === common_1.range(1).length, "single item");
+            base_1.should(10 === common_1.range(10).length, "ten items");
+        });
+        it("content tests", function () {
+            base_1.should(45 === sum(common_1.range(10)), "range '10' contains 0..9");
         });
     });
     describe("shuffle tests", function () {
@@ -281,26 +275,99 @@ define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common
         });
     });
     describe("getQueryParameters tests", function () {
+        it("getQueryParameters", function () {
+            var options = { a: "" };
+            common_1.getQueryParameters(options, "foo?a=1&b=2");
+            base_1.shouldEqual(options.a, "1", "a=1 extracted");
+            base_1.shouldEqual(options.b, undefined, "b not assigned");
+            options = { b: "" };
+            common_1.getQueryParameters(options, "foo?a=1&b=2");
+            base_1.shouldEqual(options.b, "2", "b=2 extracted");
+            base_1.shouldEqual(options.a, undefined, "a not assigned");
+            options.a = options.b = options.c = "<null>";
+            common_1.getQueryParameters(options, "foo?a=1&b=2");
+            base_1.shouldEqual(options.a, "1", "a=1 extracted");
+            base_1.shouldEqual(options.b, "2", "b=2 extracted");
+            base_1.shouldEqual(options.c, "<null>", "c not assigned, original value untouched");
+        });
     });
     describe("getParameterByName tests", function () {
+        it("getParameterByName", function () {
+            base_1.shouldEqual(common_1.getParameterByName("a", "foo?a=1"), "1", "a=1");
+            base_1.shouldEqual(common_1.getParameterByName("b", "foo?a=1"), null, "b does not exist");
+        });
     });
     describe("doif tests", function () {
+        var die = function (n) { throw "doif callback not expected to execute: " + n; };
+        var spawn = function () {
+            var v = true;
+            return function () { return v = !v; };
+        };
+        it("doif false tests", function () {
+            common_1.doif(undefined, die);
+            common_1.doif(null, die);
+        });
+        it("doif empty tests", function () {
+            var c = spawn();
+            common_1.doif(0, c);
+            base_1.shouldEqual(c(), true, "0 invokes doif");
+            common_1.doif(false, c);
+            base_1.shouldEqual(c(), true, "false invokes doif");
+            common_1.doif({}, c);
+            base_1.shouldEqual(c(), true, "{} invokes doif");
+        });
+        it("doif value tests", function () {
+            common_1.doif(0, function (v) { return base_1.shouldEqual(v, 0, "0"); });
+            common_1.doif({ a: 100 }, function (v) { return base_1.shouldEqual(v.a, 100, "a = 100"); });
+        });
     });
     describe("mixin tests", function () {
+        it("simple mixins", function () {
+            base_1.shouldEqual(common_1.mixin({ a: 1 }, { b: 2 }).a, 1, "a=1");
+            base_1.shouldEqual(common_1.mixin({ a: 1 }, { b: 2 }).b, 2, "b=2");
+            base_1.shouldEqual(common_1.mixin({ a: 1 }, { b: 2 }).c, undefined, "c undefined");
+            base_1.shouldEqual(common_1.mixin({ a: 1 }, {}).a, 1, "a=1");
+            base_1.shouldEqual(common_1.mixin({}, { b: 2 }).b, 2, "b=2");
+        });
+        it("nested mixins", function () {
+            var _a;
+            base_1.shouldEqual(common_1.mixin({ vermont: { burlington: true } }, (_a = {}, _a["south carolina"] = { greenville: true }, _a))["south carolina"].greenville, true, "greenville is in south carolina");
+            base_1.shouldEqual(common_1.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.greenville, false, "greenville is not in vermont");
+            base_1.shouldEqual(common_1.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.burlington, undefined, "second vermont completely wipes out 1st");
+        });
     });
     describe("defaults tests", function () {
+        it("defaults", function () {
+            base_1.shouldEqual(common_1.defaults({ a: 1 }, { a: 2, b: 3 }).a, 1, "a = 1");
+            base_1.shouldEqual(common_1.defaults({ a: 1 }, { a: 2, b: 3 }).b, 3, "b = 3");
+            base_1.shouldEqual(common_1.defaults({}, { a: 2, b: 3 }).a, 2, "a = 2");
+        });
     });
     describe("cssin tests", function () {
+        it("hides the body", function () {
+            var handles = [];
+            handles.push(common_1.cssin("css1", "body {display: none}"));
+            handles.push(common_1.cssin("css1", "body {display: block}"));
+            base_1.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
+            handles.shift()();
+            base_1.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");
+            handles.shift()();
+            base_1.shouldEqual(getComputedStyle(document.body).display, "block", "body is no longer hidden, css1 destroyed");
+        });
     });
     describe("html tests", function () {
-        it("", function () {
+        it("tableless tr test", function () {
             var markup = "<tr>A<td>B</td></tr>";
             var tr = common_1.html(markup);
             base_1.should(tr.nodeValue === "AB", "setting innerHTML on a 'div' will not assign tr elements");
-            markup = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
+        });
+        it("table tr test", function () {
+            var markup = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
             var table = common_1.html(markup);
             base_1.should(table.outerHTML === markup, "preserves tr when within a table");
-            markup = "<canvas width=\"100\" height=\"100\"></canvas>";
+        });
+        it("canvas test", function () {
+            var markup = "<canvas width=\"100\" height=\"100\"></canvas>";
             var canvas = common_1.html(markup);
             base_1.should(canvas.outerHTML === markup, "canvas markup preserved");
             base_1.should(!!canvas.getContext("2d"), "cnvas has 2d context");

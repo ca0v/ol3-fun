@@ -48,6 +48,10 @@ export function parse<T>(v: string, type: T): T {
     throw `unknown type: ${type}`;
 }
 
+/**
+ * @param options Attributes on this object with be assigned the value of the matching parameter in the query string
+ * @param url The url to scan
+ */
 export function getQueryParameters(options: any, url = window.location.href) {
     let opts = <any>options;
     Object.keys(opts).forEach(k => {
@@ -58,6 +62,10 @@ export function getQueryParameters(options: any, url = window.location.href) {
     });
 }
 
+/**
+ * @param name Extract parameter of this name from the query string
+ * @param url Search this url
+ */
 export function getParameterByName(name: string, url = window.location.href) {
     name = name.replace(/[\[\]]/g, "\\$&");
     var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -67,15 +75,27 @@ export function getParameterByName(name: string, url = window.location.href) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+/**
+ * @param v passing a non-trivial value will invoke the callback with this as the sole argument
+ * @param cb callback to execute when the value is non-trivial (not null, not undefined)
+ */
 export function doif<T>(v: T, cb: (v: T) => void) {
     if (v !== undefined && v !== null) cb(v);
 }
 
+/**
+ * @param a target
+ * @param b values to shallow copy into target
+ */
 export function mixin<A extends any, B extends any>(a: A, b: B) {
     Object.keys(b).forEach(k => a[k] = b[k]);
     return <A & B>a;
 }
 
+/**
+ * @param a target
+ * @param b values to copy into target if they are not already present
+ */
 export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B {
     b.forEach(b => {
         Object.keys(b).filter(k => a[k] === undefined).forEach(k => a[k] = b[k]);
