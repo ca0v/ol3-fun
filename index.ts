@@ -1,10 +1,50 @@
-import common = require("./ol3-fun/common");
-import navigation = require("./ol3-fun/navigation");
-import dms = require("./ol3-fun/parse-dms");
+/**
+ * decouples API from implementation
+ */
+import {
+    asArray,
+    cssin,
+    debounce,
+    defaults,
+    doif,
+    getParameterByName,
+    getQueryParameters,
+    html,
+    mixin,
+    pair,
+    parse,
+    range,
+    shuffle,
+    toggle,
+    uuid,
+} from "./ol3-fun/common";
+import { zoomToFeature } from "./ol3-fun/navigation";
+import { parse as dmsParse } from "./ol3-fun/parse-dms";
+import { slowloop } from "./ol3-fun/slowloop";
 
-let index = common.defaults(common, {
-    dms: dms,
-    navigation: navigation
-});
+let index = {
+    asArray,
+    cssin,
+    debounce,
+    defaults,
+    doif,
+    getParameterByName,
+    getQueryParameters,
+    html,
+    mixin,
+    pair,
+    parse,
+    range,
+    shuffle,
+    toggle,
+    uuid,
+    slowloop,
+    dms: {
+        parse: dmsParse,
+    },
+    navigation: {
+        zoomToFeature,
+    },
+};
 
 export = index;

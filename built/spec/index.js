@@ -1,19 +1,59 @@
-define("tests/base", ["require", "exports"], function (require, exports) {
+define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
-    function should(result, msg) {
+    function slowloop(functions, interval, cycles) {
+        if (interval === void 0) { interval = 1000; }
+        if (cycles === void 0) { cycles = 1; }
+        var d = $.Deferred();
+        var index = 0;
+        if (!functions || 0 >= cycles) {
+            d.resolve();
+            return d;
+        }
+        var h = setInterval(function () {
+            if (index === functions.length) {
+                index = 0;
+                cycles--;
+                if (cycles <= 0) {
+                    d.resolve();
+                    return;
+                }
+            }
+            functions[index++]();
+        }, interval);
+        d.done(function () { return clearInterval(h); });
+        return d;
+    }
+    exports.slowloop = slowloop;
+});
+define("tests/base", ["require", "exports", "ol3-fun/slowloop"], function (require, exports, slowloop_1) {
+    "use strict";
+    exports.__esModule = true;
+    exports.slowloop = slowloop_1.slowloop;
+    function describe(title, fn) {
+        console.log(title || "undocumented test group");
+        return window.describe(title, fn);
+    }
+    exports.describe = describe;
+    function it(title, fn) {
+        console.log(title || "undocumented test");
+        return window.it(title, fn);
+    }
+    exports.it = it;
+    function should(result, message) {
+        console.log(message || "undocumented assertion");
         if (!result)
-            throw msg || "oops";
+            throw message;
     }
     exports.should = should;
-    function shouldEqual(a, b, msg) {
-        if (a !== b)
-            console.warn(a + " <> " + b);
-        should(a === b, msg);
+    function shouldEqual(a, b, message) {
+        if (a != b)
+            console.warn("\"" + a + "\" <> \"" + b + "\"");
+        should(a == b, message);
     }
     exports.shouldEqual = shouldEqual;
     function stringify(o) {
-        return JSON.stringify(o, null, '\t');
+        return JSON.stringify(o, null, "\t");
     }
     exports.stringify = stringify;
 });
@@ -183,205 +223,51 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.shuffle = shuffle;
 });
-define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common"], function (require, exports, base_1, common_1) {
+define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_1) {
     "use strict";
     exports.__esModule = true;
-    function sum(list) {
-        return list.reduce(function (a, b) { return a + b; }, 0);
-    }
-    describe("asArray tests", function () {
-        it("asArray", function (done) {
-            if (!document)
-                return;
-            document.body.appendChild(document.createElement("div"));
-            var list = document.getElementsByTagName("div");
-            var result = common_1.asArray(list);
-            base_1.should(result.length === list.length, "array size matches list size");
-            done();
+    function zoomToFeature(map, feature, options) {
+        var promise = $.Deferred();
+        options = common_1.defaults(options || {}, {
+            duration: 1000,
+            padding: 256,
+            minResolution: 2 * map.getView().getMinResolution()
         });
-    });
-    describe("uuid tests", function () {
-        it("uuid", function () {
-            base_1.should(common_1.uuid().length === 36, "uuid has 36 characters");
-        });
-    });
-    describe("pair tests", function () {
-        it("empty test", function () {
-            base_1.should(0 === common_1.pair([], []).length, "empty result");
-            base_1.should(0 === common_1.pair([1], []).length, "empty result");
-            base_1.should(0 === common_1.pair([], [1]).length, "empty result");
-        });
-        it("ensures all combinations", function () {
-            var A = [1, 3, 5], B = [7, 11, 13], result = common_1.pair(A, B);
-            base_1.should((A.length * sum(B) + B.length * sum(A)) === sum(result.map(function (v) { return v[0] + v[1]; })), "create product from two vectors");
-        });
-    });
-    describe("range tests", function () {
-        it("empty test", function () {
-            base_1.should(0 === common_1.range(0).length, "empty result");
-        });
-        it("size tests", function () {
-            base_1.should(1 === common_1.range(1).length, "single item");
-            base_1.should(10 === common_1.range(10).length, "ten items");
-        });
-        it("content tests", function () {
-            base_1.should(45 === sum(common_1.range(10)), "range '10' contains 0..9");
-        });
-    });
-    describe("shuffle tests", function () {
-        it("empty test", function () {
-            base_1.should(0 === common_1.shuffle([]).length, "empty result");
-        });
-        it("size tests", function () {
-            base_1.should(1 === common_1.shuffle(common_1.range(1)).length, "single item");
-            base_1.should(10 === common_1.shuffle(common_1.range(10)).length, "ten items");
-        });
-        it("content tests", function () {
-            base_1.should(45 === sum(common_1.shuffle(common_1.range(10))), "range '10' contains 0..9");
-        });
-    });
-    describe("toggle tests", function () {
-        it("toggle", function () {
-            var div = document.createElement("div");
-            base_1.should(div.className === "", "div contains no className");
-            common_1.toggle(div, "foo");
-            base_1.should(div.className === "foo", "toggle adds");
-            common_1.toggle(div, "foo");
-            base_1.should(div.className === "", "second toggles removes");
-            common_1.toggle(div, "foo", true);
-            base_1.should(div.className === "foo", "forces foo to exist when it does not exist");
-            common_1.toggle(div, "foo", true);
-            base_1.should(div.className === "foo", "forces foo to exist when it already exists");
-            common_1.toggle(div, "foo", false);
-            base_1.should(div.className === "", "forces foo to not exist");
-            common_1.toggle(div, "foo", false);
-            base_1.should(div.className === "", "forces foo to not exist");
-        });
-    });
-    describe("parse tests", function () {
-        it("parse", function () {
-            var num = 0;
-            var bool = false;
-            base_1.should(common_1.parse("", "").toString() === "", "empty string");
-            base_1.should(common_1.parse("1", "").toString() === "1", "numeric string");
-            base_1.should(common_1.parse("1", num) === 1, "numeric string as number returns number");
-            base_1.should(common_1.parse("0", bool) === false, "0 as boolean is false");
-            base_1.should(common_1.parse("1", bool) === true, "1 as boolean is true");
-            base_1.should(common_1.parse("false", bool) === false, "'false' as boolean is false");
-            base_1.should(common_1.parse("true", bool) === true, "'true' as boolean is true");
-            base_1.should(common_1.parse("1", num) === 1, "numeric string as number returns number");
-            base_1.should(common_1.parse("1", num) === 1, "numeric string as number returns number");
-            base_1.should(common_1.parse("1,2,3", [num])[1] === 2, "parse into numeric array");
-        });
-    });
-    describe("getQueryParameters tests", function () {
-        it("getQueryParameters", function () {
-            var options = { a: "" };
-            common_1.getQueryParameters(options, "foo?a=1&b=2");
-            base_1.shouldEqual(options.a, "1", "a=1 extracted");
-            base_1.shouldEqual(options.b, undefined, "b not assigned");
-            options = { b: "" };
-            common_1.getQueryParameters(options, "foo?a=1&b=2");
-            base_1.shouldEqual(options.b, "2", "b=2 extracted");
-            base_1.shouldEqual(options.a, undefined, "a not assigned");
-            options.a = options.b = options.c = "<null>";
-            common_1.getQueryParameters(options, "foo?a=1&b=2");
-            base_1.shouldEqual(options.a, "1", "a=1 extracted");
-            base_1.shouldEqual(options.b, "2", "b=2 extracted");
-            base_1.shouldEqual(options.c, "<null>", "c not assigned, original value untouched");
-        });
-    });
-    describe("getParameterByName tests", function () {
-        it("getParameterByName", function () {
-            base_1.shouldEqual(common_1.getParameterByName("a", "foo?a=1"), "1", "a=1");
-            base_1.shouldEqual(common_1.getParameterByName("b", "foo?a=1"), null, "b does not exist");
-        });
-    });
-    describe("doif tests", function () {
-        var die = function (n) { throw "doif callback not expected to execute: " + n; };
-        var spawn = function () {
-            var v = true;
-            return function () { return v = !v; };
+        var view = map.getView();
+        var currentExtent = view.calculateExtent(map.getSize());
+        var targetExtent = feature.getGeometry().getExtent();
+        var doit = function (duration) {
+            view.fit(targetExtent, {
+                size: map.getSize(),
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration,
+                callback: function () { return promise.resolve(); }
+            });
         };
-        it("doif false tests", function () {
-            common_1.doif(undefined, die);
-            common_1.doif(null, die);
-        });
-        it("doif empty tests", function () {
-            var c = spawn();
-            common_1.doif(0, c);
-            base_1.shouldEqual(c(), true, "0 invokes doif");
-            common_1.doif(false, c);
-            base_1.shouldEqual(c(), true, "false invokes doif");
-            common_1.doif({}, c);
-            base_1.shouldEqual(c(), true, "{} invokes doif");
-        });
-        it("doif value tests", function () {
-            common_1.doif(0, function (v) { return base_1.shouldEqual(v, 0, "0"); });
-            common_1.doif({ a: 100 }, function (v) { return base_1.shouldEqual(v.a, 100, "a = 100"); });
-        });
-    });
-    describe("mixin tests", function () {
-        it("simple mixins", function () {
-            base_1.shouldEqual(common_1.mixin({ a: 1 }, { b: 2 }).a, 1, "a=1");
-            base_1.shouldEqual(common_1.mixin({ a: 1 }, { b: 2 }).b, 2, "b=2");
-            base_1.shouldEqual(common_1.mixin({ a: 1 }, { b: 2 }).c, undefined, "c undefined");
-            base_1.shouldEqual(common_1.mixin({ a: 1 }, {}).a, 1, "a=1");
-            base_1.shouldEqual(common_1.mixin({}, { b: 2 }).b, 2, "b=2");
-        });
-        it("nested mixins", function () {
-            var _a;
-            base_1.shouldEqual(common_1.mixin({ vermont: { burlington: true } }, (_a = {}, _a["south carolina"] = { greenville: true }, _a))["south carolina"].greenville, true, "greenville is in south carolina");
-            base_1.shouldEqual(common_1.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.greenville, false, "greenville is not in vermont");
-            base_1.shouldEqual(common_1.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.burlington, undefined, "second vermont completely wipes out 1st");
-        });
-    });
-    describe("defaults tests", function () {
-        it("defaults", function () {
-            base_1.shouldEqual(common_1.defaults({ a: 1 }, { a: 2, b: 3 }).a, 1, "a = 1");
-            base_1.shouldEqual(common_1.defaults({ a: 1 }, { a: 2, b: 3 }).b, 3, "b = 3");
-            base_1.shouldEqual(common_1.defaults({}, { a: 2, b: 3 }).a, 2, "a = 2");
-        });
-    });
-    describe("cssin tests", function () {
-        it("hides the body", function () {
-            var handles = [];
-            handles.push(common_1.cssin("css1", "body {display: none}"));
-            handles.push(common_1.cssin("css1", "body {display: block}"));
-            base_1.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
-            handles.shift()();
-            base_1.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");
-            handles.shift()();
-            base_1.shouldEqual(getComputedStyle(document.body).display, "block", "body is no longer hidden, css1 destroyed");
-        });
-    });
-    describe("html tests", function () {
-        it("tableless tr test", function () {
-            var markup = "<tr>A<td>B</td></tr>";
-            var tr = common_1.html(markup);
-            base_1.should(tr.nodeValue === "AB", "setting innerHTML on a 'div' will not assign tr elements");
-        });
-        it("table tr test", function () {
-            var markup = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
-            var table = common_1.html(markup);
-            base_1.should(table.outerHTML === markup, "preserves tr when within a table");
-        });
-        it("canvas test", function () {
-            var markup = "<canvas width=\"100\" height=\"100\"></canvas>";
-            var canvas = common_1.html(markup);
-            base_1.should(canvas.outerHTML === markup, "canvas markup preserved");
-            base_1.should(!!canvas.getContext("2d"), "cnvas has 2d context");
-        });
-    });
-});
-define("tests/spec/openlayers", ["require", "exports", "tests/base", "openlayers"], function (require, exports, base_2, ol) {
-    "use strict";
-    exports.__esModule = true;
-    describe("ol/Map", function () {
-        it("ol/Map", function () {
-            base_2.should(!!ol.Map, "Map");
-        });
-    });
+        if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
+            doit(options.duration);
+        }
+        else {
+            var fullExtent = ol.extent.createEmpty();
+            ol.extent.extend(fullExtent, currentExtent);
+            ol.extent.extend(fullExtent, targetExtent);
+            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
+            var duration = 0.5 * options.duration;
+            view.fit(fullExtent, {
+                size: map.getSize(),
+                padding: [options.padding, options.padding, options.padding, options.padding],
+                minResolution: options.minResolution,
+                duration: duration
+            });
+            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
+        }
+        return promise;
+    }
+    exports.zoomToFeature = zoomToFeature;
 });
 define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -461,16 +347,309 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
     }
     exports.parse = parse;
 });
-define("tests/spec/parse-dms", ["require", "exports", "tests/base", "ol3-fun/parse-dms"], function (require, exports, base_3, parse_dms_1) {
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop"], function (require, exports, common_2, navigation_1, parse_dms_1, slowloop_2) {
+    "use strict";
+    var index = {
+        asArray: common_2.asArray,
+        cssin: common_2.cssin,
+        debounce: common_2.debounce,
+        defaults: common_2.defaults,
+        doif: common_2.doif,
+        getParameterByName: common_2.getParameterByName,
+        getQueryParameters: common_2.getQueryParameters,
+        html: common_2.html,
+        mixin: common_2.mixin,
+        pair: common_2.pair,
+        parse: common_2.parse,
+        range: common_2.range,
+        shuffle: common_2.shuffle,
+        toggle: common_2.toggle,
+        uuid: common_2.uuid,
+        slowloop: slowloop_2.slowloop,
+        dms: {
+            parse: parse_dms_1.parse
+        },
+        navigation: {
+            zoomToFeature: navigation_1.zoomToFeature
+        }
+    };
+    return index;
+});
+define("tests/spec/api", ["require", "exports", "tests/base", "index"], function (require, exports, base_1, API) {
     "use strict";
     exports.__esModule = true;
-    describe("parse-dms", function () {
+    base_1.describe("API", function () {
+        base_1.it("full api exists", function () {
+            base_1.shouldEqual([
+                API.asArray,
+                API.cssin,
+                API.debounce,
+                API.defaults,
+                API.dms.parse,
+                API.doif,
+                API.getParameterByName,
+                API.getQueryParameters,
+                API.html,
+                API.mixin,
+                API.navigation.zoomToFeature,
+                API.pair,
+                API.parse,
+                API.range,
+                API.shuffle,
+                API.slowloop,
+                API.toggle,
+                API.uuid,
+            ].every(function (f) { return typeof f === "function"; }), true, "API functions exist");
+        });
+    });
+});
+define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common"], function (require, exports, base_2, common_3) {
+    "use strict";
+    exports.__esModule = true;
+    function sum(list) {
+        return list.reduce(function (a, b) { return a + b; }, 0);
+    }
+    describe("asArray tests", function () {
+        it("asArray", function (done) {
+            if (!document)
+                return;
+            document.body.appendChild(document.createElement("div"));
+            var list = document.getElementsByTagName("div");
+            var result = common_3.asArray(list);
+            base_2.should(result.length === list.length, "array size matches list size");
+            done();
+        });
+    });
+    describe("uuid tests", function () {
+        it("uuid", function () {
+            base_2.should(common_3.uuid().length === 36, "uuid has 36 characters");
+        });
+    });
+    describe("pair tests", function () {
+        it("empty test", function () {
+            base_2.should(0 === common_3.pair([], []).length, "empty result");
+            base_2.should(0 === common_3.pair([1], []).length, "empty result");
+            base_2.should(0 === common_3.pair([], [1]).length, "empty result");
+        });
+        it("ensures all combinations", function () {
+            var A = [1, 3, 5], B = [7, 11, 13], result = common_3.pair(A, B);
+            base_2.should((A.length * sum(B) + B.length * sum(A)) === sum(result.map(function (v) { return v[0] + v[1]; })), "create product from two vectors");
+        });
+    });
+    describe("range tests", function () {
+        it("empty test", function () {
+            base_2.should(0 === common_3.range(0).length, "empty result");
+        });
+        it("size tests", function () {
+            base_2.should(1 === common_3.range(1).length, "single item");
+            base_2.should(10 === common_3.range(10).length, "ten items");
+        });
+        it("content tests", function () {
+            base_2.should(45 === sum(common_3.range(10)), "range '10' contains 0..9");
+        });
+    });
+    describe("shuffle tests", function () {
+        it("empty test", function () {
+            base_2.should(0 === common_3.shuffle([]).length, "empty result");
+        });
+        it("size tests", function () {
+            base_2.should(1 === common_3.shuffle(common_3.range(1)).length, "single item");
+            base_2.should(10 === common_3.shuffle(common_3.range(10)).length, "ten items");
+        });
+        it("content tests", function () {
+            base_2.should(45 === sum(common_3.shuffle(common_3.range(10))), "range '10' contains 0..9");
+        });
+    });
+    describe("toggle tests", function () {
+        it("toggle", function () {
+            var div = document.createElement("div");
+            base_2.should(div.className === "", "div contains no className");
+            common_3.toggle(div, "foo");
+            base_2.should(div.className === "foo", "toggle adds");
+            common_3.toggle(div, "foo");
+            base_2.should(div.className === "", "second toggles removes");
+            common_3.toggle(div, "foo", true);
+            base_2.should(div.className === "foo", "forces foo to exist when it does not exist");
+            common_3.toggle(div, "foo", true);
+            base_2.should(div.className === "foo", "forces foo to exist when it already exists");
+            common_3.toggle(div, "foo", false);
+            base_2.should(div.className === "", "forces foo to not exist");
+            common_3.toggle(div, "foo", false);
+            base_2.should(div.className === "", "forces foo to not exist");
+        });
+    });
+    describe("parse tests", function () {
         it("parse", function () {
-            var dms = parse_dms_1.parse("10 5'2\" 10");
+            var num = 0;
+            var bool = false;
+            base_2.should(common_3.parse("", "").toString() === "", "empty string");
+            base_2.should(common_3.parse("1", "").toString() === "1", "numeric string");
+            base_2.should(common_3.parse("1", num) === 1, "numeric string as number returns number");
+            base_2.should(common_3.parse("0", bool) === false, "0 as boolean is false");
+            base_2.should(common_3.parse("1", bool) === true, "1 as boolean is true");
+            base_2.should(common_3.parse("false", bool) === false, "'false' as boolean is false");
+            base_2.should(common_3.parse("true", bool) === true, "'true' as boolean is true");
+            base_2.should(common_3.parse("1", num) === 1, "numeric string as number returns number");
+            base_2.should(common_3.parse("1", num) === 1, "numeric string as number returns number");
+            base_2.should(common_3.parse("1,2,3", [num])[1] === 2, "parse into numeric array");
+        });
+    });
+    describe("getQueryParameters tests", function () {
+        it("getQueryParameters", function () {
+            var options = { a: "" };
+            common_3.getQueryParameters(options, "foo?a=1&b=2");
+            base_2.shouldEqual(options.a, "1", "a=1 extracted");
+            base_2.shouldEqual(options.b, undefined, "b not assigned");
+            options = { b: "" };
+            common_3.getQueryParameters(options, "foo?a=1&b=2");
+            base_2.shouldEqual(options.b, "2", "b=2 extracted");
+            base_2.shouldEqual(options.a, undefined, "a not assigned");
+            options.a = options.b = options.c = "<null>";
+            common_3.getQueryParameters(options, "foo?a=1&b=2");
+            base_2.shouldEqual(options.a, "1", "a=1 extracted");
+            base_2.shouldEqual(options.b, "2", "b=2 extracted");
+            base_2.shouldEqual(options.c, "<null>", "c not assigned, original value untouched");
+        });
+    });
+    describe("getParameterByName tests", function () {
+        it("getParameterByName", function () {
+            base_2.shouldEqual(common_3.getParameterByName("a", "foo?a=1"), "1", "a=1");
+            base_2.shouldEqual(common_3.getParameterByName("b", "foo?a=1"), null, "b does not exist");
+        });
+    });
+    describe("doif tests", function () {
+        var die = function (n) { throw "doif callback not expected to execute: " + n; };
+        var spawn = function () {
+            var v = true;
+            return function () { return v = !v; };
+        };
+        it("doif false tests", function () {
+            common_3.doif(undefined, die);
+            common_3.doif(null, die);
+        });
+        it("doif empty tests", function () {
+            var c = spawn();
+            common_3.doif(0, c);
+            base_2.shouldEqual(c(), true, "0 invokes doif");
+            common_3.doif(false, c);
+            base_2.shouldEqual(c(), true, "false invokes doif");
+            common_3.doif({}, c);
+            base_2.shouldEqual(c(), true, "{} invokes doif");
+        });
+        it("doif value tests", function () {
+            common_3.doif(0, function (v) { return base_2.shouldEqual(v, 0, "0"); });
+            common_3.doif({ a: 100 }, function (v) { return base_2.shouldEqual(v.a, 100, "a = 100"); });
+        });
+    });
+    describe("mixin tests", function () {
+        it("simple mixins", function () {
+            base_2.shouldEqual(common_3.mixin({ a: 1 }, { b: 2 }).a, 1, "a=1");
+            base_2.shouldEqual(common_3.mixin({ a: 1 }, { b: 2 }).b, 2, "b=2");
+            base_2.shouldEqual(common_3.mixin({ a: 1 }, { b: 2 }).c, undefined, "c undefined");
+            base_2.shouldEqual(common_3.mixin({ a: 1 }, {}).a, 1, "a=1");
+            base_2.shouldEqual(common_3.mixin({}, { b: 2 }).b, 2, "b=2");
+        });
+        it("nested mixins", function () {
+            var _a;
+            base_2.shouldEqual(common_3.mixin({ vermont: { burlington: true } }, (_a = {}, _a["south carolina"] = { greenville: true }, _a))["south carolina"].greenville, true, "greenville is in south carolina");
+            base_2.shouldEqual(common_3.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.greenville, false, "greenville is not in vermont");
+            base_2.shouldEqual(common_3.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.burlington, undefined, "second vermont completely wipes out 1st");
+        });
+    });
+    describe("defaults tests", function () {
+        it("defaults", function () {
+            base_2.shouldEqual(common_3.defaults({ a: 1 }, { a: 2, b: 3 }).a, 1, "a = 1");
+            base_2.shouldEqual(common_3.defaults({ a: 1 }, { a: 2, b: 3 }).b, 3, "b = 3");
+            base_2.shouldEqual(common_3.defaults({}, { a: 2, b: 3 }).a, 2, "a = 2");
+        });
+    });
+    describe("cssin tests", function () {
+        it("hides the body", function () {
+            var handles = [];
+            handles.push(common_3.cssin("css1", "body {display: none}"));
+            handles.push(common_3.cssin("css1", "body {display: block}"));
+            base_2.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
+            handles.shift()();
+            base_2.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");
+            handles.shift()();
+            base_2.shouldEqual(getComputedStyle(document.body).display, "block", "body is no longer hidden, css1 destroyed");
+        });
+    });
+    describe("html tests", function () {
+        it("tableless tr test", function () {
+            var markup = "<tr>A<td>B</td></tr>";
+            var tr = common_3.html(markup);
+            base_2.should(tr.nodeValue === "AB", "setting innerHTML on a 'div' will not assign tr elements");
+        });
+        it("table tr test", function () {
+            var markup = "<table><tbody><tr><td>Test</td></tr></tbody></table>";
+            var table = common_3.html(markup);
+            base_2.should(table.outerHTML === markup, "preserves tr when within a table");
+        });
+        it("canvas test", function () {
+            var markup = "<canvas width=\"100\" height=\"100\"></canvas>";
+            var canvas = common_3.html(markup);
+            base_2.should(canvas.outerHTML === markup, "canvas markup preserved");
+            base_2.should(!!canvas.getContext("2d"), "cnvas has 2d context");
+        });
+    });
+});
+define("tests/spec/slowloop", ["require", "exports", "tests/base"], function (require, exports, base_3) {
+    "use strict";
+    exports.__esModule = true;
+    base_3.describe("slowloop", function () {
+        base_3.it("slowloop empty", function (done) {
+            try {
+                base_3.slowloop(null);
+                base_3.should(false, "slowloop requires an array");
+            }
+            catch (_a) {
+                done();
+            }
+        });
+        base_3.it("slowloop fast", function (done) {
+            var count = 0;
+            var inc = function () { return count++; };
+            base_3.slowloop([inc, inc, inc], 0, 100).then(function () {
+                base_3.shouldEqual(count, 300, "0 ms * 100 iterations * 3 functions => 300 invocations");
+                done();
+            });
+        }).timeout(2000);
+        base_3.it("slowloop iterations", function (done) {
+            var count = 0;
+            var inc = function () { return count++; };
+            base_3.slowloop([inc]).then(function () {
+                base_3.shouldEqual(count, 1, "defaults to a single iteration");
+                base_3.slowloop([inc], 0, 2).then(function () {
+                    base_3.shouldEqual(count, 3, "performs two iterations");
+                    base_3.slowloop([inc], 0, 0).then(function () {
+                        base_3.shouldEqual(count, 3, "performs 0 iterations");
+                        done();
+                    });
+                });
+            });
+        });
+    });
+});
+define("tests/spec/openlayers", ["require", "exports", "tests/base", "openlayers"], function (require, exports, base_4, ol) {
+    "use strict";
+    exports.__esModule = true;
+    describe("ol/Map", function () {
+        it("ol/Map", function () {
+            base_4.should(!!ol.Map, "Map");
+        });
+    });
+});
+define("tests/spec/parse-dms", ["require", "exports", "tests/base", "ol3-fun/parse-dms"], function (require, exports, base_5, parse_dms_2) {
+    "use strict";
+    exports.__esModule = true;
+    base_5.describe("parse-dms", function () {
+        base_5.it("parse", function () {
+            var dms = parse_dms_2.parse("10 5'2\" 10");
             if (typeof dms === "number")
                 throw "lat-lon expected";
-            base_3.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
-            base_3.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
+            base_5.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
+            base_5.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
         });
     });
 });
@@ -573,35 +752,35 @@ define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (r
     }());
     return PolylineEncoder;
 });
-define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/common"], function (require, exports, base_4, GooglePolylineEncoder, PolylineEncoder, common_2) {
+define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/common"], function (require, exports, base_6, GooglePolylineEncoder, PolylineEncoder, common_4) {
     "use strict";
     exports.__esModule = true;
     describe("GooglePolylineEncoder", function () {
         it("GooglePolylineEncoder", function () {
-            base_4.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
+            base_6.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
         });
-        var points = common_2.pair(common_2.range(10), common_2.range(10));
+        var points = common_4.pair(common_4.range(10), common_4.range(10));
         var poly = new GooglePolylineEncoder();
         var encoded = poly.encode(points);
         var decoded = poly.decode(encoded);
-        base_4.shouldEqual(encoded.length, 533, "encoding is 533 characters");
-        base_4.shouldEqual(base_4.stringify(decoded), base_4.stringify(points), "encode->decode");
+        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
     });
     describe("PolylineEncoder", function () {
         it("PolylineEncoder", function () {
-            base_4.should(!!PolylineEncoder, "PolylineEncoder");
+            base_6.should(!!PolylineEncoder, "PolylineEncoder");
         });
-        var points = common_2.pair(common_2.range(10), common_2.range(10));
+        var points = common_4.pair(common_4.range(10), common_4.range(10));
         var poly = new PolylineEncoder();
         var encoded = poly.encode(points);
         var decoded = poly.decode(encoded);
-        base_4.shouldEqual(encoded.length, 533, "encoding is 533 characters");
-        base_4.shouldEqual(base_4.stringify(decoded), base_4.stringify(points), "encode->decode");
+        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
         poly = new PolylineEncoder(6);
         encoded = poly.encode(points);
         decoded = poly.decode(encoded);
-        base_4.shouldEqual(encoded.length, 632, "encoding is 632 characters");
-        base_4.shouldEqual(base_4.stringify(decoded), base_4.stringify(points), "encode->decode");
+        base_6.shouldEqual(encoded.length, 632, "encoding is 632 characters");
+        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
     });
 });
 define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (require, exports, ol) {
@@ -658,13 +837,13 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
     }());
     return Snapshot;
 });
-define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_5, Snapshot, ol, common_3) {
+define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_7, Snapshot, ol, common_5) {
     "use strict";
     exports.__esModule = true;
     var pointData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFdUlEQVR4Xu1aXUybVRh+3hiWxiX+ZNSMECvjJxiqyaROyq5M2MWUZGyDLEZg0WzhJ2QELharjmbWGgqOOTRxTMDIGHpBpIwE40Un3ujA0EmUYkhcRpoJRObfJkJG9Ji3+1gWoP2+rudrSvq9l/2e857nPOc5/yUkeVCStx+GAIYDklwBYwgkuQGMSdAYAsYQSHIFjCGQ5AYwVgFjCBhDIMkViPsQEEKkANgFIB2AGcCjAP4AsADgOoBxIlqJV7/ETQAhRCWAlwA8D+DBCA38G8DXAD4jok/1FkJ3AYQQVgDdAAruozHfAqgloh/uo6ymIroKIIQ4DOBjAA9oYrMx6F8AVUTEeaSHLgIIITjvOwBel8jYTURNEvOFUuklQDMAh2yyAJqJ6A2ZeaULIIR4GUCfTJJrch0ion5Z+aUKIIRIA/CzyiwfK/d/AGQQES+bMYdsAc4D4OVO7/iEiF6VUYk0AYQQvMyNyiClMUc+EX2vERsWJlOAqHp/enoaY2NjmJubQ1paGgoKCpCbmxtNe3qI6JVoCmyElSKAsuz9CiBVC6GzZ8+ioaEBt2/fvgvfsmUL2tvbUVNToyUFYxaI6DGt4HA4WQLw3v47LWQ6OjpQW1sbFnru3DlUVVVpScWYZ4hoQitYTwfwjq9HjQjbPTMzE8vLy2GhJpMJS0tLaqlWvzuIqEUrWE8BGgC8p0ZkYGAApaWlajAIIVQxCuArIirSCtZTgDcBuNWInDp1CsePH1eDRSPA70S0TTVhBICsOYAH9YdqRLxeLw4ePKgGi0aAL4noBdWEcRCAW/W5GpHZ2VlkZWXJnAP4qNyhVm+k77IckKVsgVW58Cwfaanr7OzE0aNHVfMogGwiuqoVrNscwImFEDMAntBCpr+/H/X19Zifn78LT09Px5kzZ1BWVqYlBWOuE9HjWsHhcFIcoAjQCUBz162srGB0dBRXrlxBfn4+7HY7UlL4ulBzfERE1ZrRYYAyBXgOwFishKIov4uIxqPAbwiVJoDigosA9sVKSkP5QSI6oAGnCpEtwJMAflKtNTbAfwDyiGg6tjR3SksVQHEBX4XxlZhe8RoRtcpKLl0AJjY+Pt5jMpn4fICtW7ciIyMjIt+ZmZkQzmzmd5KI0U5EvO2WFnoIwHvddT3Ep8Dq6vWT9tDQEEpKSkINunbt2jqxFhYW4Ha7MTg4OB8MBrMBLEprvR5DAMD7gUDgWF5e3l2efO5vaWnB7t27UVRUhMnJSRARrFYr+vr6sH37drALcnJyYLFYQuUWFxdDYjQ3Nwuz2Uw3b96E0+l8GsBkwgvg9/uPDQ8PM+He1NTUhzweT0lhYSFaW1tx48YN8DcOm82GiooKNDY2btgmi8XyZzAYfMTv94fKOJ1OP4BnN5MAfE2Grq6uwyyA3W7/y+v1Pswu4JiamkJxcTF/DzmAY//+/di27c4B79KlS6Hfjxw5glu3bqGurg69vb1Sh63UZErPrBsCq+TZ4nwbdPr06W+6u7t/GxkZ2Xf58uWQ1VcF2Lt3L5qamrw7duw4UF5ezlvmoMvlsigO4MliaDM5YJXrFwBGXC7Xu9zjNputgj/4fL4Lq4BVAViMPXv2VFRWVl5wOBxwOBxXT548maUIsOnmgHsJP+VyuX5kB3g8nom2trZfAoFA8VoHqAjwNgDnZnLA2h477/P5Ku+dA6xW64TP59sZzgEnTpyYcLvdO7Ozs0MridPp5JtgKa9CLKQecwCfBfhMwLY/tGbd5p0Ov/AeU3rxA+Uxhd8SAwB4m8ui2QHUKa9Mbyn/KHkxTM6YDKGHADERindhQ4B4K55o9RkOSLQeiTcfwwHxVjzR6jMckGg9Em8+hgPirXii1Zf0DvgfGiXvUAsr6xQAAAAASUVORK5CYII=";
     var circleData = "data:image/png;base64,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";
     function show(data) {
-        document.body.appendChild(common_3.html("<img src=\"" + data + "\" />"));
+        document.body.appendChild(common_5.html("<img src=\"" + data + "\" />"));
     }
     function circle(radius, points) {
         if (radius === void 0) { radius = 1; }
@@ -685,9 +864,9 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
     }
     describe("Snapshot", function () {
         it("Snapshot", function () {
-            base_5.should(!!Snapshot, "Snapshot");
-            base_5.should(!!Snapshot.render, "Snapshot.render");
-            base_5.should(!!Snapshot.snapshot, "Snapshot.snapshot");
+            base_7.should(!!Snapshot, "Snapshot");
+            base_7.should(!!Snapshot.render, "Snapshot.render");
+            base_7.should(!!Snapshot.snapshot, "Snapshot.snapshot");
         });
         it("Converts a point to image data", function () {
             var feature = new ol.Feature(new ol.geom.Point([0, 0]));
@@ -717,7 +896,7 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
             if (1 === window.devicePixelRatio) {
                 if (data !== pointData)
                     show(pointData);
-                base_5.shouldEqual(data, pointData, "point data as expected");
+                base_7.shouldEqual(data, pointData, "point data as expected");
             }
         });
         it("Converts a triangle to image data", function () {
@@ -737,20 +916,20 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
         it("Converts a polygon to image data", function () {
             var geom = new ol.geom.Polygon([circle(3 + 100 * Math.random())]);
             var feature = new ol.Feature(geom);
-            base_5.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
+            base_7.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
             feature.setStyle(createStyle("Circle"));
-            var originalCoordinates = base_5.stringify(geom.getCoordinates());
+            var originalCoordinates = base_7.stringify(geom.getCoordinates());
             var data = Snapshot.snapshot(feature, 64);
             console.log(data);
-            base_5.should(!!data, "snapshot returns data");
+            base_7.should(!!data, "snapshot returns data");
             show(data);
-            var finalCoordinates = base_5.stringify(geom.getCoordinates());
-            base_5.shouldEqual(originalCoordinates, finalCoordinates, "coordinates unchanged");
-            base_5.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
+            var finalCoordinates = base_7.stringify(geom.getCoordinates());
+            base_7.shouldEqual(originalCoordinates, finalCoordinates, "coordinates unchanged");
+            base_7.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
             if (1 === window.devicePixelRatio) {
                 if (data !== pointData)
                     show(circleData);
-                base_5.shouldEqual(data, circleData, "circle data as expected");
+                base_7.shouldEqual(data, circleData, "circle data as expected");
             }
         });
     });
@@ -778,58 +957,12 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
         });
     }
 });
-define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_4) {
-    "use strict";
-    exports.__esModule = true;
-    function zoomToFeature(map, feature, options) {
-        var promise = $.Deferred();
-        options = common_4.defaults(options || {}, {
-            duration: 1000,
-            padding: 256,
-            minResolution: 2 * map.getView().getMinResolution()
-        });
-        var view = map.getView();
-        var currentExtent = view.calculateExtent(map.getSize());
-        var targetExtent = feature.getGeometry().getExtent();
-        var doit = function (duration) {
-            view.fit(targetExtent, {
-                size: map.getSize(),
-                padding: [options.padding, options.padding, options.padding, options.padding],
-                minResolution: options.minResolution,
-                duration: duration,
-                callback: function () { return promise.resolve(); }
-            });
-        };
-        if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-            doit(options.duration);
-        }
-        else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-            doit(options.duration);
-        }
-        else {
-            var fullExtent = ol.extent.createEmpty();
-            ol.extent.extend(fullExtent, currentExtent);
-            ol.extent.extend(fullExtent, targetExtent);
-            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
-            var duration = 0.5 * options.duration;
-            view.fit(fullExtent, {
-                size: map.getSize(),
-                padding: [options.padding, options.padding, options.padding, options.padding],
-                minResolution: options.minResolution,
-                duration: duration
-            });
-            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
-        }
-        return promise;
-    }
-    exports.zoomToFeature = zoomToFeature;
-});
-define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests/base", "ol3-fun/navigation"], function (require, exports, ol, base_6, navigation_1) {
+define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests/base", "ol3-fun/navigation"], function (require, exports, ol, base_8, navigation_2) {
     "use strict";
     exports.__esModule = true;
     describe("zoomToFeature", function () {
         it("zoomToFeature", function (done) {
-            base_6.should(!!navigation_1.zoomToFeature, "zoomToFeature");
+            base_8.should(!!navigation_2.zoomToFeature, "zoomToFeature");
             var map = new ol.Map({
                 view: new ol.View({
                     zoom: 0,
@@ -842,21 +975,21 @@ define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests
             map.once("postrender", function () {
                 var res = map.getView().getResolution();
                 var zoom = map.getView().getZoom();
-                navigation_1.zoomToFeature(map, feature, {
+                navigation_2.zoomToFeature(map, feature, {
                     duration: 200,
                     minResolution: res / 4
                 }).then(function () {
                     var _a = map.getView().getCenter(), cx = _a[0], cy = _a[1];
-                    base_6.should(map.getView().getZoom() === zoom + 2, "zoom in two because minRes is 1/4 of initial res");
-                    base_6.should(cx === 100, "center-x");
-                    base_6.should(cy === 100, "center-y");
+                    base_8.should(map.getView().getZoom() === zoom + 2, "zoom in two because minRes is 1/4 of initial res");
+                    base_8.should(cx === 100, "center-x");
+                    base_8.should(cy === 100, "center-y");
                     done();
                 });
             });
         });
     });
 });
-define("tests/index", ["require", "exports", "tests/spec/common", "tests/spec/openlayers", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature"], function (require, exports) {
+define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/common", "tests/spec/slowloop", "tests/spec/openlayers", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
 });

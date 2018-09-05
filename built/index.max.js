@@ -288,12 +288,60 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
     }
     exports.parse = parse;
 });
-define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms"], function (require, exports, common, navigation, dms) {
+define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
     "use strict";
-    var index = common.defaults(common, {
-        dms: dms,
-        navigation: navigation
-    });
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function slowloop(functions, interval, cycles) {
+        if (interval === void 0) { interval = 1000; }
+        if (cycles === void 0) { cycles = 1; }
+        var d = $.Deferred();
+        var index = 0;
+        if (!functions || 0 >= cycles) {
+            d.resolve();
+            return d;
+        }
+        var h = setInterval(function () {
+            if (index === functions.length) {
+                index = 0;
+                cycles--;
+                if (cycles <= 0) {
+                    d.resolve();
+                    return;
+                }
+            }
+            functions[index++]();
+        }, interval);
+        d.done(function () { return clearInterval(h); });
+        return d;
+    }
+    exports.slowloop = slowloop;
+});
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop"], function (require, exports, common_2, navigation_1, parse_dms_1, slowloop_1) {
+    "use strict";
+    var index = {
+        asArray: common_2.asArray,
+        cssin: common_2.cssin,
+        debounce: common_2.debounce,
+        defaults: common_2.defaults,
+        doif: common_2.doif,
+        getParameterByName: common_2.getParameterByName,
+        getQueryParameters: common_2.getQueryParameters,
+        html: common_2.html,
+        mixin: common_2.mixin,
+        pair: common_2.pair,
+        parse: common_2.parse,
+        range: common_2.range,
+        shuffle: common_2.shuffle,
+        toggle: common_2.toggle,
+        uuid: common_2.uuid,
+        slowloop: slowloop_1.slowloop,
+        dms: {
+            parse: parse_dms_1.parse,
+        },
+        navigation: {
+            zoomToFeature: navigation_1.zoomToFeature,
+        },
+    };
     return index;
 });
 //# sourceMappingURL=index.max.js.map

@@ -1,4 +1,4 @@
-import { should } from "../base";
+import { describe, it, should } from "../base";
 import { parse } from "ol3-fun/parse-dms";
 
 describe("parse-dms", () => {
