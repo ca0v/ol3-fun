@@ -657,7 +657,7 @@ define("tests/spec/slowloop", ["require", "exports", "tests/base", "ol3-fun/comm
         });
     });
 });
-define("tests/spec/openlayers", ["require", "exports", "tests/base", "openlayers"], function (require, exports, base_4, ol) {
+define("tests/spec/openlayers-test", ["require", "exports", "tests/base", "openlayers"], function (require, exports, base_4, ol) {
     "use strict";
     exports.__esModule = true;
     describe("ol/Map", function () {
@@ -1015,7 +1015,7 @@ define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests
         });
     });
 });
-define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/common", "tests/spec/slowloop", "tests/spec/openlayers", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature"], function (require, exports) {
+define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/common", "tests/spec/slowloop", "tests/spec/openlayers-test", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
 });
