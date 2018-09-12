@@ -296,6 +296,7 @@ define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
         if (cycles === void 0) { cycles = 1; }
         var d = $.Deferred();
         var index = 0;
+        var cycle = 0;
         if (!functions || 0 >= cycles) {
             d.resolve();
             return d;
@@ -303,15 +304,21 @@ define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
         var h = setInterval(function () {
             if (index === functions.length) {
                 index = 0;
-                cycles--;
-                if (cycles <= 0) {
+                if (++cycle === cycles) {
                     d.resolve();
+                    clearInterval(h);
                     return;
                 }
             }
-            functions[index++]();
+            try {
+                d.notify({ index: index, cycle: cycle });
+                functions[index++]();
+            }
+            catch (ex) {
+                clearInterval(h);
+                d.reject(ex);
+            }
         }, interval);
-        d.done(function () { return clearInterval(h); });
         return d;
     }
     exports.slowloop = slowloop;
