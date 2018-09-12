@@ -1,22 +1,18 @@
 {
-    "compilerOptions": {
-        "allowJs": false,
-        "removeComments": true,
-        "declaration": false,
-        "module": "amd",
-        "target": "es3",
-        "noImplicitAny": true,
-        "sourceMap": true,
-        "outFile": "./spec/index.js",
-        "moduleResolution": "node",
-        "baseUrl": "../",
-        "paths": {
-            "ol3-fun": [
-                "./ol3-fun"
-            ]
-        }
-    },
-    "include": [
-        "index.ts"
-    ]
+	"compilerOptions": {
+		"allowJs": false,
+		"removeComments": true,
+		"declaration": false,
+		"module": "amd",
+		"target": "es3",
+		"noImplicitAny": true,
+		"sourceMap": true,
+		"outFile": "../built/tests.max.js",
+		"moduleResolution": "node",
+		"baseUrl": "../",
+		"paths": {
+			"ol3-fun": ["./ol3-fun"]
+		}
+	},
+	"include": ["index.ts"]
 }

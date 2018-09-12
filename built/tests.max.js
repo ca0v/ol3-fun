@@ -1019,4 +1019,4 @@ define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/commo
     "use strict";
     exports.__esModule = true;
 });
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=tests.max.js.map
