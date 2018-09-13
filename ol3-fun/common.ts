@@ -13,7 +13,9 @@ export function uuid() {
 }
 
 /**
+ * Converts a GetElementsBy* to a classic array
  * @param list HTML collection to be converted to standard array
+ * @returns The @param list represented as a native array of elements
  */
 export function asArray<T extends HTMLInputElement>(list: NodeList | HTMLCollectionOf<Element>) {
 	let result = <Array<T>>new Array(list.length);
@@ -43,6 +45,7 @@ export function toggle(e: HTMLElement, className: string, force?: boolean) {
 }
 
 /**
+ * Converts a string representation of a value to it's desired type (e.g. parse("1", 0) returns 1)
  * @param v string representation of desired return value
  * @param type desired type
  * @returns @param v converted to a @param type
@@ -58,10 +61,11 @@ export function parse<T>(v: string, type: T): T {
 }
 
 /**
+ * Replaces the options elements with the actual query string parameter values (e.g. {a: 0, "?a=10"} becomes {a: 10})
  * @param options Attributes on this object with be assigned the value of the matching parameter in the query string
  * @param url The url to scan
  */
-export function getQueryParameters(options: any, url = window.location.href) {
+export function getQueryParameters(options: any, url = window.location.href): void {
 	let opts = <any>options;
 	Object.keys(opts).forEach(k => {
 		doif(getParameterByName(k, url), v => {
@@ -72,8 +76,10 @@ export function getQueryParameters(options: any, url = window.location.href) {
 }
 
 /**
+ * Returns individual query string value from a url
  * @param name Extract parameter of this name from the query string
  * @param url Search this url
+ * @returns parameter value
  */
 export function getParameterByName(name: string, url = window.location.href) {
 	name = name.replace(/[\[\]]/g, "\\$&");
@@ -85,6 +91,7 @@ export function getParameterByName(name: string, url = window.location.href) {
 }
 
 /**
+ * Only execute callback when @param v is truthy
  * @param v passing a non-trivial value will invoke the callback with this as the sole argument
  * @param cb callback to execute when the value is non-trivial (not null, not undefined)
  */
@@ -93,15 +100,19 @@ export function doif<T>(v: T, cb: (v: T) => void) {
 }
 
 /**
+ * shallow copies b into a, replacing any existing values in a
  * @param a target
  * @param b values to shallow copy into target
  */
-export function mixin<A extends any, B extends any>(a: A, b: B) {
-	Object.keys(b).forEach(k => (a[k] = b[k]));
+export function mixin<A extends any, B extends any>(a: A, ...b: B[]) {
+	b.forEach(b => {
+		Object.keys(b).forEach(k => (a[k] = b[k]));
+	});
 	return <A & B>a;
 }
 
 /**
+ * shallow copies b into a, preserving any existing values in a
  * @param a target
  * @param b values to copy into target if they are not already present
  */
