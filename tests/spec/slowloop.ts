@@ -33,6 +33,19 @@ describe("slowloop", () => {
 			.catch(ex => should(!!ex, ex));
 	});
 
+	it("slowloop with abort", () => {
+		return slowloop(
+			[
+				() => {
+					should(false, "aborted from inside");
+				}
+			],
+			10
+		)
+			.reject("aborted from outside")
+			.catch(ex => shouldEqual(ex, "aborted from outside", "aborted from outside"));
+	});
+
 	it("slowloop fast", done => {
 		let count = 0;
 		let inc = () => count++;

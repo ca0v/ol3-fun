@@ -633,6 +633,14 @@ define("tests/spec/slowloop", ["require", "exports", "tests/base", "ol3-fun/comm
             ])
                 .then(function () { return base_3.should(false, "failure expected"); })["catch"](function (ex) { return base_3.should(!!ex, ex); });
         });
+        base_3.it("slowloop with abort", function () {
+            return base_3.slowloop([
+                function () {
+                    base_3.should(false, "aborted from inside");
+                }
+            ], 10)
+                .reject("aborted from outside")["catch"](function (ex) { return base_3.shouldEqual(ex, "aborted from outside", "aborted from outside"); });
+        });
         base_3.it("slowloop fast", function (done) {
             var count = 0;
             var inc = function () { return count++; };
