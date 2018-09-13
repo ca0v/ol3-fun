@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;ol3-fun/slowloop&quot; | ol3-fun</title>
+	<title>PolylineEncoder | ol3-fun</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,72 +56,127 @@
 					<a href="../index.html">Globals</a>
 				</li>
 				<li>
-					<a href="_ol3_fun_slowloop_.html">&quot;ol3-fun/slowloop&quot;</a>
+					<a href="../modules/_ol3_fun_google_polyline_.html">&quot;ol3-fun/google-polyline&quot;</a>
+				</li>
+				<li>
+					<a href="_ol3_fun_google_polyline_.polylineencoder.html">PolylineEncoder</a>
 				</li>
 			</ul>
-			<h1>External module &quot;ol3-fun/slowloop&quot;</h1>
+			<h1>Class PolylineEncoder</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p><a href="https://developers.google.com/maps/documentation/utilities/polylinealgorithm?csw=1">https://developers.google.com/maps/documentation/utilities/polylinealgorithm?csw=1</a>
+						<a href="https://github.com/DeMoehn/Cloudant-nyctaxi/blob/2e48cb6c53bd4ac4f58d50d9302f00fc72f6681e/app/js/polyline.js">https://github.com/DeMoehn/Cloudant-nyctaxi/blob/2e48cb6c53bd4ac4f58d50d9302f00fc72f6681e/app/js/polyline.js</a></p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">PolylineEncoder</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Functions</h3>
+							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_ol3_fun_slowloop_.html#slowloop" class="tsd-kind-icon">slowloop</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_ol3_fun_google_polyline_.polylineencoder.html#decode" class="tsd-kind-icon">decode</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_ol3_fun_google_polyline_.polylineencoder.html#encode" class="tsd-kind-icon">encode</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_ol3_fun_google_polyline_.polylineencoder.html#encodecoordinate" class="tsd-kind-icon">encode<wbr>Coordinate</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="slowloop" class="tsd-anchor"></a>
-					<h3>slowloop</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">slowloop<span class="tsd-signature-symbol">(</span>functions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol">&gt;</span>, interval<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, cycles<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Deferred</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="decode" class="tsd-anchor"></a>
+					<h3>decode</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">decode<span class="tsd-signature-symbol">(</span>str<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, precision<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/86979a2/ol3-fun/slowloop.ts#L8">ol3-fun/slowloop.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/86979a2/ol3-fun/google-polyline.ts#L22">ol3-fun/google-polyline.ts:22</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Executes a series of functions in a delayed manner</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>functions: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>one function executes per interval</p>
-									</div>
+									<h5>str: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> interval: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;1000</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>length of the interval in milliseconds</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> cycles: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;1</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>number of types to run each function</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> precision: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;5</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Deferred</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>promise indicating the process is complete</p>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="encode" class="tsd-anchor"></a>
+					<h3>encode</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">encode<span class="tsd-signature-symbol">(</span>coordinates<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span>, precision<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/86979a2/ol3-fun/google-polyline.ts#L64">ol3-fun/google-polyline.ts:64</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>coordinates: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> precision: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;5</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="encodecoordinate" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> encode<wbr>Coordinate</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">encode<wbr>Coordinate<span class="tsd-signature-symbol">(</span>coordinate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, factor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/86979a2/ol3-fun/google-polyline.ts#L7">ol3-fun/google-polyline.ts:7</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>coordinate: <span class="tsd-signature-type">number</span></h5>
+								</li>
+								<li>
+									<h5>factor: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -134,36 +189,51 @@
 						<a href="../index.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_index_.html">"index"</a>
+						<a href="../modules/_index_.html">"index"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_ol3_fun_common_.html">"ol3-<wbr>fun/common"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_ol3_fun_google_polyline_.html">"ol3-<wbr>fun/google-<wbr>polyline"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_ol3_fun_navigation_.html">"ol3-<wbr>fun/navigation"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_ol3_fun_ol3_polyline_.html">"ol3-<wbr>fun/ol3-<wbr>polyline"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_ol3_fun_parse_dms_.html">"ol3-<wbr>fun/parse-<wbr>dms"</a>
+						<a href="../modules/_ol3_fun_common_.html">"ol3-<wbr>fun/common"</a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_ol3_fun_slowloop_.html">"ol3-<wbr>fun/slowloop"</a>
+						<a href="../modules/_ol3_fun_google_polyline_.html">"ol3-<wbr>fun/google-<wbr>polyline"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_ol3_fun_snapshot_.html">"ol3-<wbr>fun/snapshot"</a>
+						<a href="../modules/_ol3_fun_navigation_.html">"ol3-<wbr>fun/navigation"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_ol3_fun_ol3_polyline_.html">"ol3-<wbr>fun/ol3-<wbr>polyline"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_ol3_fun_parse_dms_.html">"ol3-<wbr>fun/parse-<wbr>dms"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_ol3_fun_slowloop_.html">"ol3-<wbr>fun/slowloop"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_ol3_fun_snapshot_.html">"ol3-<wbr>fun/snapshot"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_ol3_fun_slowloop_.html#slowloop" class="tsd-kind-icon">slowloop</a>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-external-module">
+						<a href="_ol3_fun_google_polyline_.polylineencoder.html" class="tsd-kind-icon">Polyline<wbr>Encoder</a>
+						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_ol3_fun_google_polyline_.polylineencoder.html#decode" class="tsd-kind-icon">decode</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_ol3_fun_google_polyline_.polylineencoder.html#encode" class="tsd-kind-icon">encode</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_ol3_fun_google_polyline_.polylineencoder.html#encodecoordinate" class="tsd-kind-icon">encode<wbr>Coordinate</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 				</ul>
 			</nav>
 		</div>

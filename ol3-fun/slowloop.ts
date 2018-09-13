@@ -1,4 +1,5 @@
 /**
+ * Executes a series of functions in a delayed manner
  * @param functions one function executes per interval
  * @param interval length of the interval in milliseconds
  * @param cycles number of types to run each function

@@ -68,8 +68,8 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
     function uuid() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+            var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
             return v.toString(16);
         });
     }
@@ -88,7 +88,6 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
             e.classList.remove(className);
             return false;
         }
-        ;
         if (!exists && force !== false) {
             e.classList.add(className);
             return true;
@@ -104,7 +103,7 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         if (typeof type === "boolean")
             return (v === "1" || v === "true");
         if (Array.isArray(type)) {
-            return (v.split(",").map(function (v) { return parse(v, type[0]); }));
+            return v.split(",").map(function (v) { return parse(v, type[0]); });
         }
         throw "unknown type: " + type;
     }
@@ -128,7 +127,7 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         if (!results)
             return null;
         if (!results[2])
-            return '';
+            return "";
         return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
     exports.getParameterByName = getParameterByName;
@@ -137,8 +136,14 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
             cb(v);
     }
     exports.doif = doif;
-    function mixin(a, b) {
-        Object.keys(b).forEach(function (k) { return a[k] = b[k]; });
+    function mixin(a) {
+        var b = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            b[_i - 1] = arguments[_i];
+        }
+        b.forEach(function (b) {
+            Object.keys(b).forEach(function (k) { return (a[k] = b[k]); });
+        });
         return a;
     }
     exports.mixin = mixin;
@@ -148,7 +153,9 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
             b[_i - 1] = arguments[_i];
         }
         b.forEach(function (b) {
-            Object.keys(b).filter(function (k) { return a[k] === undefined; }).forEach(function (k) { return a[k] = b[k]; });
+            Object.keys(b)
+                .filter(function (k) { return a[k] === undefined; })
+                .forEach(function (k) { return (a[k] = b[k]); });
         });
         return a;
     }
@@ -204,7 +211,7 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     function pair(a1, a2) {
         var result = new Array(a1.length * a2.length);
         var i = 0;
-        a1.forEach(function (v1) { return a2.forEach(function (v2) { return result[i++] = [v1, v2]; }); });
+        a1.forEach(function (v1) { return a2.forEach(function (v2) { return (result[i++] = [v1, v2]); }); });
         return result;
     }
     exports.pair = pair;
@@ -282,17 +289,17 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
     function decDegFromMatch(m) {
         var signIndex = {
             "-": -1,
-            "N": 1,
-            "S": -1,
-            "E": 1,
-            "W": -1
+            N: 1,
+            S: -1,
+            E: 1,
+            W: -1
         };
         var latLonIndex = {
             "-": "",
-            "N": "lat",
-            "S": "lat",
-            "E": "lon",
-            "W": "lon"
+            N: "lat",
+            S: "lat",
+            E: "lon",
+            W: "lon"
         };
         var degrees, minutes, seconds, sign, latLon;
         sign = signIndex[m[2]] || signIndex[m[1]] || signIndex[m[6]] || 1;
@@ -301,11 +308,11 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
         seconds = m[5] ? Number(m[5]) : 0;
         latLon = latLonIndex[m[1]] || latLonIndex[m[6]];
         if (!inRange(degrees, 0, 180))
-            throw 'Degrees out of range';
+            throw "Degrees out of range";
         if (!inRange(minutes, 0, 60))
-            throw 'Minutes out of range';
+            throw "Minutes out of range";
         if (!inRange(seconds, 0, 60))
-            throw 'Seconds out of range';
+            throw "Seconds out of range";
         return {
             decDeg: sign * (degrees + minutes / 60 + seconds / 3600),
             latLon: latLon
@@ -314,14 +321,29 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
     function inRange(value, a, b) {
         return value >= a && value <= b;
     }
-    function parse(dmsString) {
+    function toDegreesMinutesAndSeconds(coordinate) {
+        var absolute = Math.abs(coordinate);
+        var degrees = Math.floor(absolute);
+        var minutesNotTruncated = (absolute - degrees) * 60;
+        var minutes = Math.floor(minutesNotTruncated);
+        var seconds = Math.floor((minutesNotTruncated - minutes) * 60);
+        return degrees + " " + minutes + " " + seconds;
+    }
+    function fromLonLatToDms(lon, lat) {
+        var latitude = toDegreesMinutesAndSeconds(lat);
+        var latitudeCardinal = lat >= 0 ? "N" : "S";
+        var longitude = toDegreesMinutesAndSeconds(lon);
+        var longitudeCardinal = lon >= 0 ? "E" : "W";
+        return latitude + " " + latitudeCardinal + " " + longitude + " " + longitudeCardinal;
+    }
+    function fromDmsToLonLat(dmsString) {
         var _a;
         dmsString = dmsString.trim();
         var dmsRe = /([NSEW])?(-)?(\d+(?:\.\d+)?)[°º:d\s]?\s?(?:(\d+(?:\.\d+)?)['’‘′:]\s?(?:(\d{1,2}(?:\.\d+)?)(?:"|″|’’|'')?)?)?\s?([NSEW])?/i;
         var dmsString2;
         var m1 = dmsString.match(dmsRe);
         if (!m1)
-            throw 'Could not parse string';
+            throw "Could not parse string";
         if (m1[1]) {
             m1[6] = undefined;
             dmsString2 = dmsString.substr(m1[0].length - 1).trim();
@@ -332,25 +354,30 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
         var decDeg1 = decDegFromMatch(m1);
         var m2 = dmsString2.match(dmsRe);
         var decDeg2 = m2 && decDegFromMatch(m2);
-        if (typeof decDeg1.latLon === 'undefined') {
+        if (typeof decDeg1.latLon === "undefined") {
             if (!isNaN(decDeg1.decDeg) && decDeg2 && isNaN(decDeg2.decDeg)) {
                 return decDeg1.decDeg;
             }
             else if (!isNaN(decDeg1.decDeg) && decDeg2 && !isNaN(decDeg2.decDeg)) {
-                decDeg1.latLon = 'lat';
-                decDeg2.latLon = 'lon';
+                decDeg1.latLon = "lat";
+                decDeg2.latLon = "lon";
             }
             else {
-                throw 'Could not parse string';
+                throw "Could not parse string";
             }
         }
-        if (typeof decDeg2.latLon === 'undefined') {
-            decDeg2.latLon = decDeg1.latLon === 'lat' ? 'lon' : 'lat';
+        if (typeof decDeg2.latLon === "undefined") {
+            decDeg2.latLon = decDeg1.latLon === "lat" ? "lon" : "lat";
         }
         return _a = {},
             _a[decDeg1.latLon] = decDeg1.decDeg,
             _a[decDeg2.latLon] = decDeg2.decDeg,
             _a;
+    }
+    function parse(value) {
+        if (typeof value === "string")
+            return fromDmsToLonLat(value);
+        return fromLonLatToDms(value.lon, value.lat);
     }
     exports.parse = parse;
 });
@@ -849,10 +876,10 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
             var _b = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)], w = _b[0], h = _b[1];
             var isPoint = w === 0 || h === 0;
             var ff = 1 / (window.devicePixelRatio || 1);
-            var scale = isPoint ? 1 : Math.min(ff * canvas.width / w, ff * canvas.height / h);
+            var scale = isPoint ? 1 : Math.min((ff * canvas.width) / w, (ff * canvas.height) / h);
             geom.translate(-cx, -cy);
             geom.scale(scale, -scale);
-            geom.translate(Math.ceil(ff * canvas.width / 2), Math.ceil(ff * canvas.height / 2));
+            geom.translate(Math.ceil((ff * canvas.width) / 2), Math.ceil((ff * canvas.height) / 2));
             console.log(scale, cx, cy, w, h, geom.getCoordinates());
             var vtx = ol.render.toContext(canvas.getContext("2d"));
             var styles = getStyle(feature);
