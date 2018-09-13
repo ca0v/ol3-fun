@@ -11,10 +11,15 @@ Collection of utility function oriented around OpenLayers
 -   ✓ automated testing
 -   ✓ eliminate typescript warnings
 -   ✓ npm support
--   document usage and methods
+-   ✓ document usage and methods
 -   ✓ integrates with ol 5.1.3 (via build-legacy)
 -   ✓ run tests on github
 -   report test status on github
+
+## Docs
+
+-   [main](https://rawgit.com/ca0v/ol3-fun/v5.1.3/built/docs/index.html)
+-   [index](https://rawgit.com/ca0v/ol3-fun/v5.1.3/built/docs/modules/_index_.html)
 
 ## Tests
 
