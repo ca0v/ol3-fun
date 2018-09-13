@@ -6,6 +6,7 @@
 	"scripts": {
 		"ol": "pushd ./node_modules/ol && npm install && npm run build-legacy && popd",
 		"clean": "rm -r ./built",
+		"doc": "typedoc --out ./built/docs --tsconfig ./tsconfig.json --readme none",
 		"before-push": "npm run clean && npm run build && npm run test && npm run live-for-tests",
 		"uglify-for-amd": "pushd built && uglifyjs index.max.js --source-map \"content='index.max.js.map',url='index.js.map'\" --output=index.js --compress --mangle && popd",
 		"build-for-amd": "tsc -p tsconfig.json",
