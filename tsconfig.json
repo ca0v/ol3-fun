@@ -3,13 +3,14 @@
 		"removeComments": true,
 		"declaration": true,
 		"module": "amd",
-		"target": "es5",
+		"target": "es2015",
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"sourceMap": true,
 		"outFile": "./built/index.max.js",
-		"moduleResolution": "node"
+		"moduleResolution": "node",
+		"baseUrl": "./"
 	},
 	"include": ["index.ts", "ol3-fun/**/*.ts"],
 	"exclude": ["ol3-fun/examples", "ol3-fun/tests"]

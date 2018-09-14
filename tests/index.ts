@@ -6,3 +6,5 @@ import "./spec/parse-dms";
 import "./spec/polyline";
 import "./spec/snapshot";
 import "./spec/zoom-to-feature";
+import "./spec/deep-extend";
+import "./spec/extensions";

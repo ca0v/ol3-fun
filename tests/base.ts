@@ -30,10 +30,11 @@ export function shouldEqual<T>(a: T, b: T, message?: string) {
 export function shouldThrow(fn: Function, message?: string) {
 	try {
 		fn();
-		should(false, `expected an exception${message ? ": " + message : ""}`);
 	} catch (ex) {
 		should(!!ex, ex);
+		return;
 	}
+	should(false, `expected an exception${message ? ": " + message : ""}`);
 }
 
 export function stringify(o: Object) {

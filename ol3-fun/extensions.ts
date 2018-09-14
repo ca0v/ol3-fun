@@ -1,8 +1,13 @@
-﻿import { Dictionary } from "lodash";
+﻿export interface Dictionary<T> {
+	[index: string]: T;
+}
 
+/**
+ * Stores associated data in an in-memory repository using a WeakMap
+ */
 export class Extensions {
 	private extensions: Array<object> = [];
-	private hash: Dictionary<Dictionary<any>> = {};
+	private hash = new WeakMap(null);
 
 	private isExtended(o: any) {
 		return 0 <= this.extensions.indexOf(o);
@@ -26,13 +31,14 @@ export class Extensions {
     @returns the extension object
     */
 
-	extend<T, U extends any>(o: T, ext?: U) {
+	extend<T extends object, U extends any>(o: T, ext?: U) {
 		if (!this.isExtended(o)) {
 			this.extensions.push(<any>o);
 		}
 		let key = this.getExtensionKey(o, true);
 		// ensure the extension object exists
-		let hashData = (this.hash[key] = this.hash[key] || {});
+		if (!this.hash.has(o)) this.hash.set(o, {});
+		let hashData = this.hash.get(o);
 
 		// update the extension values
 		if (ext) {
@@ -53,10 +59,10 @@ export class Extensions {
 					throw "both objects already bound";
 				}
 			} else {
-				this.hash[this.getExtensionKey(o2, true)] = this.extend(o1);
+				this.hash.set(o2, this.extend(o1));
 			}
 		} else {
-			this.hash[this.getExtensionKey(o1, true)] = this.extend(o2);
+			this.hash.set(o1, this.extend(o2));
 		}
 	}
 }
