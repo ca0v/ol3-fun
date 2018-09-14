@@ -331,53 +331,6 @@ define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
     }
     exports.slowloop = slowloop;
 });
-define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    class Extensions {
-        constructor() {
-            this.extensions = [];
-            this.hash = new WeakMap(null);
-        }
-        isExtended(o) {
-            return 0 <= this.extensions.indexOf(o);
-        }
-        getExtensionKey(o, force = true) {
-            force && !this.isExtended(o) && this.extend(o);
-            return this.extensions.indexOf(o);
-        }
-        extend(o, ext) {
-            if (!this.isExtended(o)) {
-                this.extensions.push(o);
-            }
-            let key = this.getExtensionKey(o, true);
-            if (!this.hash.has(o))
-                this.hash.set(o, {});
-            let hashData = this.hash.get(o);
-            if (ext) {
-                Object.keys(ext).forEach(k => (hashData[k] = ext[k]));
-                console.log("hashData", hashData);
-            }
-            return hashData;
-        }
-        bind(o1, o2) {
-            if (this.isExtended(o1)) {
-                if (this.isExtended(o2)) {
-                    if (this.getExtensionKey(o1) !== this.getExtensionKey(o2)) {
-                        throw "both objects already bound";
-                    }
-                }
-                else {
-                    this.hash.set(o2, this.extend(o1));
-                }
-            }
-            else {
-                this.hash.set(o1, this.extend(o2));
-            }
-        }
-    }
-    exports.Extensions = Extensions;
-});
 define("ol3-fun/is-primitive", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -627,6 +580,43 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "
         }
     };
     return index;
+});
+define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    class Extensions {
+        constructor() {
+            this.hash = new WeakMap(null);
+        }
+        isExtended(o) {
+            return this.hash.has(o);
+        }
+        extend(o, ext) {
+            let hashData = this.hash.get(o);
+            if (!hashData) {
+                hashData = {};
+                this.hash.set(o, hashData);
+            }
+            ext && Object.keys(ext).forEach(k => (hashData[k] = ext[k]));
+            return hashData;
+        }
+        bind(o1, o2) {
+            if (this.isExtended(o1)) {
+                if (this.isExtended(o2)) {
+                    if (this.hash.get(o1) === this.hash.get(o2))
+                        return;
+                    throw "both objects already bound";
+                }
+                else {
+                    this.hash.set(o2, this.extend(o1));
+                }
+            }
+            else {
+                this.hash.set(o1, this.extend(o2));
+            }
+        }
+    }
+    exports.Extensions = Extensions;
 });
 define("ol3-fun/google-polyline", ["require", "exports"], function (require, exports) {
     "use strict";

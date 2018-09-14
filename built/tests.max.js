@@ -376,53 +376,6 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
     }
     exports.parse = parse;
 });
-define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    class Extensions {
-        constructor() {
-            this.extensions = [];
-            this.hash = new WeakMap(null);
-        }
-        isExtended(o) {
-            return 0 <= this.extensions.indexOf(o);
-        }
-        getExtensionKey(o, force = true) {
-            force && !this.isExtended(o) && this.extend(o);
-            return this.extensions.indexOf(o);
-        }
-        extend(o, ext) {
-            if (!this.isExtended(o)) {
-                this.extensions.push(o);
-            }
-            let key = this.getExtensionKey(o, true);
-            if (!this.hash.has(o))
-                this.hash.set(o, {});
-            let hashData = this.hash.get(o);
-            if (ext) {
-                Object.keys(ext).forEach(k => (hashData[k] = ext[k]));
-                console.log("hashData", hashData);
-            }
-            return hashData;
-        }
-        bind(o1, o2) {
-            if (this.isExtended(o1)) {
-                if (this.isExtended(o2)) {
-                    if (this.getExtensionKey(o1) !== this.getExtensionKey(o2)) {
-                        throw "both objects already bound";
-                    }
-                }
-                else {
-                    this.hash.set(o2, this.extend(o1));
-                }
-            }
-            else {
-                this.hash.set(o1, this.extend(o2));
-            }
-        }
-    }
-    exports.Extensions = Extensions;
-});
 define("ol3-fun/is-primitive", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -1186,10 +1139,52 @@ define("tests/spec/deep-extend", ["require", "exports", "tests/base", "ol3-fun/d
         });
     });
 });
-define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/extensions"], function (require, exports, base_5, extensions_1) {
+define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    class Extensions {
+        constructor() {
+            this.hash = new WeakMap(null);
+        }
+        isExtended(o) {
+            return this.hash.has(o);
+        }
+        extend(o, ext) {
+            let hashData = this.hash.get(o);
+            if (!hashData) {
+                hashData = {};
+                this.hash.set(o, hashData);
+            }
+            ext && Object.keys(ext).forEach(k => (hashData[k] = ext[k]));
+            return hashData;
+        }
+        bind(o1, o2) {
+            if (this.isExtended(o1)) {
+                if (this.isExtended(o2)) {
+                    if (this.hash.get(o1) === this.hash.get(o2))
+                        return;
+                    throw "both objects already bound";
+                }
+                else {
+                    this.hash.set(o2, this.extend(o1));
+                }
+            }
+            else {
+                this.hash.set(o1, this.extend(o2));
+            }
+        }
+    }
+    exports.Extensions = Extensions;
+});
+define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/extensions", "ol3-fun/common"], function (require, exports, base_5, extensions_1, common_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     base_5.describe("data/extensions", () => {
+        base_5.it("ensures the api", () => {
+            let x = new extensions_1.Extensions();
+            base_5.shouldEqual(typeof x.extend, "function", "extend method");
+            base_5.shouldEqual(typeof x.bind, "function", "bind method");
+        });
         base_5.it("ensures no side-effects on the object", () => {
             let x = new extensions_1.Extensions();
             let o = {};
@@ -1205,81 +1200,65 @@ define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/ex
             x.bind(Number, Math);
             base_5.shouldEqual(Math.round(math.sqrt2 * x.extend(Number).sqrt2), 2, "sqrt2*sqrt2 = 2");
         });
-        base_5.it("ensures two objects can be bound to same extension data", () => {
-            let x = new extensions_1.Extensions();
-        });
-    });
-    base_5.describe("100% code coverage for data/extensions", () => {
-        let ext1;
-        let ext2;
-        base_5.it("creates two extension instances", done => {
-            ext1 = new extensions_1.Extensions();
-            base_5.shouldEqual(typeof ext1.extend, "function", "extensions has an extend method");
-            base_5.shouldEqual(typeof ext1.getExtensionKey, "function", "extensions has an getExtensionKey method");
-            ext2 = new extensions_1.Extensions();
-            let o1 = {};
-            let o2 = {};
-            let xo1 = ext1.extend(o1, { v1: 1 });
-            base_5.shouldEqual(xo1, ext1.extend(o1), "extend returns extension object");
-            base_5.shouldEqual(xo1.v1, 1, "ext1 v1");
-            let xo2 = ext2.extend(o2, { v2: 2 });
-            base_5.shouldEqual(xo2.v2, 2, "ext2 v2");
-            ext2.extend(o1, { v2: 2 });
-            base_5.shouldEqual(xo2.v2, 2, "ext2 v2");
-            base_5.shouldEqual(xo1.v1, 1, "ext1 v1");
-            done();
-        });
-        base_5.it("extends an object using the first extension instance", done => {
-            let o = { v1: 1 };
-            ext1.extend(o, { v1: 2 });
-            base_5.shouldEqual(o.v1, 1, "v1 is unchanged");
-            base_5.shouldEqual(ext1.extend(o).v1, 2, "the extended object has a value for v1 in the context of the first extender");
-            false &&
-                base_5.shouldEqual(ext1.getExtensionKey(o), ext2.getExtensionKey(o), "the internal extension key for an object should be the same for both extension instances");
-            base_5.shouldEqual(typeof ext2.extend(o), "object", "the extended object exists in the context of the second extender");
-            base_5.shouldEqual(typeof ext2.extend(o).v1, "undefined", "the extended object has no extension values in the context of the second extender");
-            done();
-        });
-        base_5.it("extends an object using the both extension instances", done => {
-            let o = { v1: 1 };
-            ext1.extend(o, { v1: 2 });
-            ext2.extend(o, { v1: 3 });
-            base_5.shouldEqual(o.v1, 1, "v1 is unchanged");
-            base_5.shouldEqual(ext1.extend(o).v1, 2, "the extended object has a value for v1 in the context of the first extender");
-            base_5.shouldEqual(ext2.extend(o).v1, 3, "the extended object has a value for v1 in the context of the second extender");
-            done();
-        });
-        base_5.it("forces a key to exist on an object without setting any values", done => {
+        base_5.it("ensures two extensions can bind data to the same object", () => {
+            let ext1 = new extensions_1.Extensions();
+            let ext2 = new extensions_1.Extensions();
             let o = {};
-            ext1.getExtensionKey(o, true);
-            base_5.shouldEqual(Object.keys(ext1.extend(o)).length, 0, "the extended object has no extension values in the context of the first extender");
-            base_5.shouldEqual(Object.keys(ext2.extend(o)).length, 0, "the extended object has no extension values in the context of the second extender");
-            base_5.should(ext1 !== ext2, "extensions should be unique");
-            done();
+            ext1.extend(o, { ext: 1 });
+            ext2.extend(o, { ext: 2 });
+            base_5.shouldEqual(ext1.extend(o).ext, 1, "ext1");
+            base_5.shouldEqual(ext2.extend(o).ext, 2, "ext2");
         });
-        base_5.it("binds two objects to the same extension", done => {
+        base_5.it("ensures two extended objects cannot be bound", () => {
+            let x = new extensions_1.Extensions();
+            let o = {};
+            let p = {};
+            x.extend(o);
+            x.extend(p);
+            base_5.shouldThrow(() => x.bind(o, p), "cannot bind extended objects");
+        });
+        base_5.it("extension references are preserved", () => {
+            let x = new extensions_1.Extensions();
+            let o = {};
+            let p = x.extend(o);
+            x.extend(o, { name: "P" });
+            base_5.shouldEqual(p.name, "P", "extension references are preserved");
+        });
+        base_5.it("binds two objects to the same extension", () => {
+            let x = new extensions_1.Extensions();
             let o1 = { id: 1 };
             let o2 = Object.create({ id: 2 });
-            ext1.bind(o1, o2);
-            ext1.extend(o1, { foo: "foo1" });
-            base_5.shouldEqual(ext1.extend(o1).foo, "foo1");
-            ext1.extend(o2, { foo: "foo2" });
-            base_5.shouldEqual(ext1.extend(o1).foo, "foo2");
-            done();
+            x.bind(o1, o2);
+            x.extend(o1, { foo: "foo1" });
+            base_5.shouldEqual(x.extend(o1).foo, "foo1");
+            x.extend(o2, { foo: "foo2" });
+            base_5.shouldEqual(x.extend(o1).foo, "foo2");
         });
-        base_5.it("binds a new object to an extended object", done => {
-            let o1 = { id: 1 };
-            ext1.extend(o1, { foo: "foo1" });
-            base_5.shouldEqual(ext1.extend(o1).foo, "foo1");
-            let o3 = { id: 3 };
-            ext1.bind(o1, o3);
-            base_5.shouldEqual(ext1.extend(o3).foo, "foo1");
-            let o4 = { id: 4 };
-            ext1.extend(o4, { foo: "foo4" });
-            base_5.shouldEqual(ext1.extend(o4).foo, "foo4");
-            base_5.shouldThrow(() => ext1.bind(o1, o4), "should fail to bind since o4 already extended");
-            done();
+        base_5.it("extension integrity testing (100 objects X 10 extensions)", () => {
+            let x = common_5.range(10).map(n => new extensions_1.Extensions());
+            let data = common_5.range(1000).map(n => Object.create({ id: n }));
+            data.map((d, i) => x[i % 10].extend(d, { data: common_5.shuffle(common_5.range(1000)) }));
+            data.forEach((d, i) => {
+                let data = x[i % 10].extend(d).data;
+                data = data.filter(v => v <= d.id);
+                x[i % 10].extend(d, { data });
+            });
+            let sums = data.map((d, i) => {
+                let ext = x[i % 10].extend(d);
+                base_5.shouldEqual(ext.data.length, i + 1, `extension data has ${i + 1} items`);
+                return ext.data.reduce((a, b) => a + b, 0);
+            });
+            console.log(sums);
+            base_5.shouldEqual(sums.reduce((a, b) => a + b, 0), 166666500);
         });
+        base_5.it("extensions performance testing (1 million accesses)", () => {
+            let x = new extensions_1.Extensions();
+            let data = common_5.range(500000).map(n => ({ id: n }));
+            let counter = { count: 0 };
+            data.forEach(d => x.extend(d, { counter }));
+            data.forEach(d => x.extend(d).counter.count++);
+            base_5.shouldEqual(counter.count, data.length, `accessed ${data.length} items`);
+        }).timeout(600);
     });
 });
 define("tests/spec/is-primitive", ["require", "exports", "tests/base", "ol3-fun/is-primitive"], function (require, exports, base_6, is_primitive_3) {
@@ -1429,14 +1408,14 @@ define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (r
     }
     return PolylineEncoder;
 });
-define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/common"], function (require, exports, base_10, GooglePolylineEncoder, PolylineEncoder, common_5) {
+define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/common"], function (require, exports, base_10, GooglePolylineEncoder, PolylineEncoder, common_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     describe("GooglePolylineEncoder", () => {
         it("GooglePolylineEncoder", () => {
             base_10.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
         });
-        let points = common_5.pair(common_5.range(10), common_5.range(10));
+        let points = common_6.pair(common_6.range(10), common_6.range(10));
         let poly = new GooglePolylineEncoder();
         let encoded = poly.encode(points);
         let decoded = poly.decode(encoded);
@@ -1447,7 +1426,7 @@ define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/goog
         it("PolylineEncoder", () => {
             base_10.should(!!PolylineEncoder, "PolylineEncoder");
         });
-        let points = common_5.pair(common_5.range(10), common_5.range(10));
+        let points = common_6.pair(common_6.range(10), common_6.range(10));
         let poly = new PolylineEncoder();
         let encoded = poly.encode(points);
         let decoded = poly.decode(encoded);
@@ -1510,13 +1489,13 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
     }
     return Snapshot;
 });
-define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_11, Snapshot, ol, common_6) {
+define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_11, Snapshot, ol, common_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const pointData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFdUlEQVR4Xu1aXUybVRh+3hiWxiX+ZNSMECvjJxiqyaROyq5M2MWUZGyDLEZg0WzhJ2QELharjmbWGgqOOTRxTMDIGHpBpIwE40Un3ujA0EmUYkhcRpoJRObfJkJG9Ji3+1gWoP2+rudrSvq9l/2e857nPOc5/yUkeVCStx+GAIYDklwBYwgkuQGMSdAYAsYQSHIFjCGQ5AYwVgFjCBhDIMkViPsQEEKkANgFIB2AGcCjAP4AsADgOoBxIlqJV7/ETQAhRCWAlwA8D+DBCA38G8DXAD4jok/1FkJ3AYQQVgDdAAruozHfAqgloh/uo6ymIroKIIQ4DOBjAA9oYrMx6F8AVUTEeaSHLgIIITjvOwBel8jYTURNEvOFUuklQDMAh2yyAJqJ6A2ZeaULIIR4GUCfTJJrch0ion5Z+aUKIIRIA/CzyiwfK/d/AGQQES+bMYdsAc4D4OVO7/iEiF6VUYk0AYQQvMyNyiClMUc+EX2vERsWJlOAqHp/enoaY2NjmJubQ1paGgoKCpCbmxtNe3qI6JVoCmyElSKAsuz9CiBVC6GzZ8+ioaEBt2/fvgvfsmUL2tvbUVNToyUFYxaI6DGt4HA4WQLw3v47LWQ6OjpQW1sbFnru3DlUVVVpScWYZ4hoQitYTwfwjq9HjQjbPTMzE8vLy2GhJpMJS0tLaqlWvzuIqEUrWE8BGgC8p0ZkYGAApaWlajAIIVQxCuArIirSCtZTgDcBuNWInDp1CsePH1eDRSPA70S0TTVhBICsOYAH9YdqRLxeLw4ePKgGi0aAL4noBdWEcRCAW/W5GpHZ2VlkZWXJnAP4qNyhVm+k77IckKVsgVW58Cwfaanr7OzE0aNHVfMogGwiuqoVrNscwImFEDMAntBCpr+/H/X19Zifn78LT09Px5kzZ1BWVqYlBWOuE9HjWsHhcFIcoAjQCUBz162srGB0dBRXrlxBfn4+7HY7UlL4ulBzfERE1ZrRYYAyBXgOwFishKIov4uIxqPAbwiVJoDigosA9sVKSkP5QSI6oAGnCpEtwJMAflKtNTbAfwDyiGg6tjR3SksVQHEBX4XxlZhe8RoRtcpKLl0AJjY+Pt5jMpn4fICtW7ciIyMjIt+ZmZkQzmzmd5KI0U5EvO2WFnoIwHvddT3Ep8Dq6vWT9tDQEEpKSkINunbt2jqxFhYW4Ha7MTg4OB8MBrMBLEprvR5DAMD7gUDgWF5e3l2efO5vaWnB7t27UVRUhMnJSRARrFYr+vr6sH37drALcnJyYLFYQuUWFxdDYjQ3Nwuz2Uw3b96E0+l8GsBkwgvg9/uPDQ8PM+He1NTUhzweT0lhYSFaW1tx48YN8DcOm82GiooKNDY2btgmi8XyZzAYfMTv94fKOJ1OP4BnN5MAfE2Grq6uwyyA3W7/y+v1Pswu4JiamkJxcTF/DzmAY//+/di27c4B79KlS6Hfjxw5glu3bqGurg69vb1Sh63UZErPrBsCq+TZ4nwbdPr06W+6u7t/GxkZ2Xf58uWQ1VcF2Lt3L5qamrw7duw4UF5ezlvmoMvlsigO4MliaDM5YJXrFwBGXC7Xu9zjNputgj/4fL4Lq4BVAViMPXv2VFRWVl5wOBxwOBxXT548maUIsOnmgHsJP+VyuX5kB3g8nom2trZfAoFA8VoHqAjwNgDnZnLA2h477/P5Ku+dA6xW64TP59sZzgEnTpyYcLvdO7Ozs0MridPp5JtgKa9CLKQecwCfBfhMwLY/tGbd5p0Ov/AeU3rxA+Uxhd8SAwB4m8ui2QHUKa9Mbyn/KHkxTM6YDKGHADERindhQ4B4K55o9RkOSLQeiTcfwwHxVjzR6jMckGg9Em8+hgPirXii1Zf0DvgfGiXvUAsr6xQAAAAASUVORK5CYII=";
     const circleData = "data:image/png;base64,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";
     function show(data) {
-        document.body.appendChild(common_6.html(`<img src="${data}" />`));
+        document.body.appendChild(common_7.html(`<img src="${data}" />`));
     }
     function circle(radius = 1, points = 36) {
         if (points < 3)
