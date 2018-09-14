@@ -9,15 +9,15 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.uuid = uuid;
     function asArray(list) {
-        let result = new Array(list.length);
-        for (let i = 0; i < list.length; i++) {
+        var result = new Array(list.length);
+        for (var i = 0; i < list.length; i++) {
             result[i] = list[i];
         }
         return result;
     }
     exports.asArray = asArray;
     function toggle(e, className, force) {
-        let exists = e.classList.contains(className);
+        var exists = e.classList.contains(className);
         if (exists && force !== true) {
             e.classList.remove(className);
             return false;
@@ -37,23 +37,25 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         if (typeof type === "boolean")
             return (v === "1" || v === "true");
         if (Array.isArray(type)) {
-            return v.split(",").map(v => parse(v, type[0]));
+            return v.split(",").map(function (v) { return parse(v, type[0]); });
         }
-        throw `unknown type: ${type}`;
+        throw "unknown type: " + type;
     }
     exports.parse = parse;
-    function getQueryParameters(options, url = window.location.href) {
-        let opts = options;
-        Object.keys(opts).forEach(k => {
-            doif(getParameterByName(k, url), v => {
-                let value = parse(v, opts[k]);
+    function getQueryParameters(options, url) {
+        if (url === void 0) { url = window.location.href; }
+        var opts = options;
+        Object.keys(opts).forEach(function (k) {
+            doif(getParameterByName(k, url), function (v) {
+                var value = parse(v, opts[k]);
                 if (value !== undefined)
                     opts[k] = value;
             });
         });
     }
     exports.getQueryParameters = getQueryParameters;
-    function getParameterByName(name, url = window.location.href) {
+    function getParameterByName(name, url) {
+        if (url === void 0) { url = window.location.href; }
         name = name.replace(/[\[\]]/g, "\\$&");
         var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
         if (!results)
@@ -68,25 +70,33 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
             cb(v);
     }
     exports.doif = doif;
-    function mixin(a, ...b) {
-        b.forEach(b => {
-            Object.keys(b).forEach(k => (a[k] = b[k]));
+    function mixin(a) {
+        var b = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            b[_i - 1] = arguments[_i];
+        }
+        b.forEach(function (b) {
+            Object.keys(b).forEach(function (k) { return (a[k] = b[k]); });
         });
         return a;
     }
     exports.mixin = mixin;
-    function defaults(a, ...b) {
-        b.forEach(b => {
+    function defaults(a) {
+        var b = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            b[_i - 1] = arguments[_i];
+        }
+        b.forEach(function (b) {
             Object.keys(b)
-                .filter(k => a[k] === undefined)
-                .forEach(k => (a[k] = b[k]));
+                .filter(function (k) { return a[k] === undefined; })
+                .forEach(function (k) { return (a[k] = b[k]); });
         });
         return a;
     }
     exports.defaults = defaults;
     function cssin(name, css) {
-        let id = `style-${name}`;
-        let styleTag = document.getElementById(id);
+        var id = "style-" + name;
+        var styleTag = document.getElementById(id);
         if (!styleTag) {
             styleTag = document.createElement("style");
             styleTag.id = id;
@@ -94,9 +104,9 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
             document.head.appendChild(styleTag);
             styleTag.appendChild(document.createTextNode(css));
         }
-        let dataset = styleTag.dataset;
+        var dataset = styleTag.dataset;
         dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
-        return () => {
+        return function () {
             dataset["count"] = parseInt(dataset["count"] || "0") - 1 + "";
             if (dataset["count"] === "0") {
                 styleTag.remove();
@@ -104,15 +114,21 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         };
     }
     exports.cssin = cssin;
-    function debounce(func, wait = 50, immediate = false) {
-        let timeout;
-        return ((...args) => {
-            let later = () => {
+    function debounce(func, wait, immediate) {
+        if (wait === void 0) { wait = 50; }
+        if (immediate === void 0) { immediate = false; }
+        var timeout;
+        return (function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var later = function () {
                 timeout = null;
                 if (!immediate)
                     func.apply({}, args);
             };
-            let callNow = immediate && !timeout;
+            var callNow = immediate && !timeout;
             clearTimeout(timeout);
             timeout = window.setTimeout(later, wait);
             if (callNow)
@@ -121,29 +137,29 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     }
     exports.debounce = debounce;
     function html(html) {
-        let a = document.createElement("div");
+        var a = document.createElement("div");
         a.innerHTML = html;
         return (a.firstElementChild || a.firstChild);
     }
     exports.html = html;
     function pair(a1, a2) {
-        let result = new Array(a1.length * a2.length);
-        let i = 0;
-        a1.forEach(v1 => a2.forEach(v2 => (result[i++] = [v1, v2])));
+        var result = new Array(a1.length * a2.length);
+        var i = 0;
+        a1.forEach(function (v1) { return a2.forEach(function (v2) { return (result[i++] = [v1, v2]); }); });
         return result;
     }
     exports.pair = pair;
     function range(n) {
         var result = new Array(n);
-        for (let i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
             result[i] = i;
         return result;
     }
     exports.range = range;
     function shuffle(array) {
-        let currentIndex = array.length;
-        let temporaryValue;
-        let randomIndex;
+        var currentIndex = array.length;
+        var temporaryValue;
+        var randomIndex;
         while (0 !== currentIndex) {
             randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex -= 1;
@@ -159,22 +175,22 @@ define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function zoomToFeature(map, feature, options) {
-        let promise = $.Deferred();
+        var promise = $.Deferred();
         options = common_1.defaults(options || {}, {
             duration: 1000,
             padding: 256,
             minResolution: 2 * map.getView().getMinResolution()
         });
-        let view = map.getView();
-        let currentExtent = view.calculateExtent(map.getSize());
-        let targetExtent = feature.getGeometry().getExtent();
-        let doit = (duration) => {
+        var view = map.getView();
+        var currentExtent = view.calculateExtent(map.getSize());
+        var targetExtent = feature.getGeometry().getExtent();
+        var doit = function (duration) {
             view.fit(targetExtent, {
                 size: map.getSize(),
                 padding: [options.padding, options.padding, options.padding, options.padding],
                 minResolution: options.minResolution,
                 duration: duration,
-                callback: () => promise.resolve()
+                callback: function () { return promise.resolve(); }
             });
         };
         if (ol.extent.containsExtent(currentExtent, targetExtent)) {
@@ -184,18 +200,18 @@ define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3
             doit(options.duration);
         }
         else {
-            let fullExtent = ol.extent.createEmpty();
+            var fullExtent = ol.extent.createEmpty();
             ol.extent.extend(fullExtent, currentExtent);
             ol.extent.extend(fullExtent, targetExtent);
-            let dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
-            let duration = 0.5 * options.duration;
+            var dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
+            var duration = 0.5 * options.duration;
             view.fit(fullExtent, {
                 size: map.getSize(),
                 padding: [options.padding, options.padding, options.padding, options.padding],
                 minResolution: options.minResolution,
                 duration: duration
             });
-            setTimeout(() => doit(0.5 * options.duration), duration);
+            setTimeout(function () { return doit(0.5 * options.duration); }, duration);
         }
         return promise;
     }
@@ -240,25 +256,26 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
         return value >= a && value <= b;
     }
     function toDegreesMinutesAndSeconds(coordinate) {
-        let absolute = Math.abs(coordinate);
-        let degrees = Math.floor(absolute);
-        let minutesNotTruncated = (absolute - degrees) * 60;
-        let minutes = Math.floor(minutesNotTruncated);
-        let seconds = Math.floor((minutesNotTruncated - minutes) * 60);
-        return `${degrees} ${minutes} ${seconds}`;
+        var absolute = Math.abs(coordinate);
+        var degrees = Math.floor(absolute);
+        var minutesNotTruncated = (absolute - degrees) * 60;
+        var minutes = Math.floor(minutesNotTruncated);
+        var seconds = Math.floor((minutesNotTruncated - minutes) * 60);
+        return degrees + " " + minutes + " " + seconds;
     }
     function fromLonLatToDms(lon, lat) {
-        let latitude = toDegreesMinutesAndSeconds(lat);
-        let latitudeCardinal = lat >= 0 ? "N" : "S";
-        let longitude = toDegreesMinutesAndSeconds(lon);
-        let longitudeCardinal = lon >= 0 ? "E" : "W";
-        return `${latitude} ${latitudeCardinal} ${longitude} ${longitudeCardinal}`;
+        var latitude = toDegreesMinutesAndSeconds(lat);
+        var latitudeCardinal = lat >= 0 ? "N" : "S";
+        var longitude = toDegreesMinutesAndSeconds(lon);
+        var longitudeCardinal = lon >= 0 ? "E" : "W";
+        return latitude + " " + latitudeCardinal + " " + longitude + " " + longitudeCardinal;
     }
     function fromDmsToLonLat(dmsString) {
+        var _a;
         dmsString = dmsString.trim();
         var dmsRe = /([NSEW])?(-)?(\d+(?:\.\d+)?)[°º:d\s]?\s?(?:(\d+(?:\.\d+)?)['’‘′:]\s?(?:(\d{1,2}(?:\.\d+)?)(?:"|″|’’|'')?)?)?\s?([NSEW])?/i;
         var dmsString2;
-        let m1 = dmsString.match(dmsRe);
+        var m1 = dmsString.match(dmsRe);
         if (!m1)
             throw "Could not parse string";
         if (m1[1]) {
@@ -268,9 +285,9 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
         else {
             dmsString2 = dmsString.substr(m1[0].length).trim();
         }
-        let decDeg1 = decDegFromMatch(m1);
-        let m2 = dmsString2.match(dmsRe);
-        let decDeg2 = m2 && decDegFromMatch(m2);
+        var decDeg1 = decDegFromMatch(m1);
+        var m2 = dmsString2.match(dmsRe);
+        var decDeg2 = m2 && decDegFromMatch(m2);
         if (typeof decDeg1.latLon === "undefined") {
             if (!isNaN(decDeg1.decDeg) && decDeg2 && isNaN(decDeg2.decDeg)) {
                 return decDeg1.decDeg;
@@ -286,10 +303,10 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
         if (typeof decDeg2.latLon === "undefined") {
             decDeg2.latLon = decDeg1.latLon === "lat" ? "lon" : "lat";
         }
-        return {
-            [decDeg1.latLon]: decDeg1.decDeg,
-            [decDeg2.latLon]: decDeg2.decDeg
-        };
+        return _a = {},
+            _a[decDeg1.latLon] = decDeg1.decDeg,
+            _a[decDeg2.latLon] = decDeg2.decDeg,
+            _a;
     }
     function parse(value) {
         if (typeof value === "string")
@@ -301,15 +318,17 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
 define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    function slowloop(functions, interval = 1000, cycles = 1) {
-        let d = $.Deferred();
-        let index = 0;
-        let cycle = 0;
+    function slowloop(functions, interval, cycles) {
+        if (interval === void 0) { interval = 1000; }
+        if (cycles === void 0) { cycles = 1; }
+        var d = $.Deferred();
+        var index = 0;
+        var cycle = 0;
         if (!functions || 0 >= cycles) {
             d.resolve();
             return d;
         }
-        let h = setInterval(() => {
+        var h = setInterval(function () {
             if (index === functions.length) {
                 index = 0;
                 if (++cycle === cycles) {
@@ -319,7 +338,7 @@ define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
                 }
             }
             try {
-                d.notify({ index, cycle });
+                d.notify({ index: index, cycle: cycle });
                 functions[index++]();
             }
             catch (ex) {
@@ -349,7 +368,7 @@ define("ol3-fun/is-primitive", ["require", "exports"], function (require, export
             case "undefined":
                 return true;
             default:
-                throw `unknown type: ${typeof a}`;
+                throw "unknown type: " + typeof a;
         }
     }
     exports.isPrimitive = isPrimitive;
@@ -360,27 +379,29 @@ define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], func
     function isCyclic(a) {
         if (is_primitive_1.isPrimitive(a))
             return false;
-        let test = (o, history) => {
+        var test = function (o, history) {
             if (is_primitive_1.isPrimitive(o))
                 return false;
             if (0 <= history.indexOf(o)) {
                 return true;
             }
-            return Object.keys(o).some(k => test(o[k], [o].concat(history)));
+            return Object.keys(o).some(function (k) { return test(o[k], [o].concat(history)); });
         };
-        return Object.keys(a).some(k => test(a[k], [a]));
+        return Object.keys(a).some(function (k) { return test(a[k], [a]); });
     }
     exports.isCyclic = isCyclic;
 });
 define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    function extend(a, b, trace = [], history = []) {
+    function extend(a, b, trace, history) {
+        if (trace === void 0) { trace = []; }
+        if (history === void 0) { history = []; }
         if (!b) {
             b = a;
             a = {};
         }
-        let merger = new Merger(trace, history);
+        var merger = new Merger(trace, history);
         return merger.deepExtend(a, b);
     }
     exports.extend = extend;
@@ -405,14 +426,15 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             return new Date(val.getTime());
         if (val instanceof RegExp)
             return new RegExp(val.source);
-        throw `unclonable type encounted: ${typeof val}`;
+        throw "unclonable type encounted: " + typeof val;
     }
-    class Merger {
-        constructor(trace, history) {
+    var Merger = (function () {
+        function Merger(trace, history) {
             this.trace = trace;
             this.history = history;
         }
-        deepExtend(target, source) {
+        Merger.prototype.deepExtend = function (target, source) {
+            var _this = this;
             if (target === source)
                 return target;
             if (!target || (!isHash(target) && !isArray(target))) {
@@ -435,26 +457,27 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             else if (isArray(target)) {
                 throw "attempting to merge a non-array into an array";
             }
-            Object.keys(source).forEach(k => this.mergeChild(k, target, source[k]));
+            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k]); });
             return target;
-        }
-        cloneArray(val) {
+        };
+        Merger.prototype.cloneArray = function (val) {
+            var _this = this;
             this.push(val);
-            return val.map(v => (isArray(v) ? this.cloneArray(v) : canClone(v) ? clone(v) : v));
-        }
-        push(a) {
+            return val.map(function (v) { return (isArray(v) ? _this.cloneArray(v) : canClone(v) ? clone(v) : v); });
+        };
+        Merger.prototype.push = function (a) {
             if (is_primitive_2.isPrimitive(a))
                 return;
             if (-1 < this.history.indexOf(a)) {
                 if (is_cyclic_1.isCyclic(a)) {
-                    throw `circular reference detected`;
+                    throw "circular reference detected";
                 }
             }
             else
                 this.history.push(a);
-        }
-        mergeChild(key, target, sourceValue) {
-            let targetValue = target[key];
+        };
+        Merger.prototype.mergeChild = function (key, target, sourceValue) {
+            var targetValue = target[key];
             if (sourceValue === targetValue)
                 return;
             if (is_primitive_2.isPrimitive(sourceValue)) {
@@ -494,10 +517,10 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 return;
             }
             if (!isHash(sourceValue)) {
-                throw `unexpected source type: ${typeof sourceValue}`;
+                throw "unexpected source type: " + typeof sourceValue;
             }
             if (!isHash(targetValue)) {
-                let traceIndex = this.trace.length;
+                var traceIndex = this.trace.length;
                 try {
                     sourceValue = this.deepExtend({}, sourceValue);
                 }
@@ -515,44 +538,46 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             }
             this.deepExtend(targetValue, sourceValue);
             return;
-        }
-        merge(key, target, source) {
+        };
+        Merger.prototype.merge = function (key, target, source) {
+            var _this = this;
             if (!isArray(target))
                 throw "target must be an array";
             if (!isArray(source))
                 throw "input must be an array";
             if (!source.length)
                 return target;
-            let hash = {};
-            target.forEach((item, i) => {
+            var hash = {};
+            target.forEach(function (item, i) {
                 if (!item[key])
                     return;
                 hash[item[key]] = i;
             });
-            source.forEach((sourceItem, i) => {
-                let sourceKey = sourceItem[key];
-                let targetIndex = hash[sourceKey];
+            source.forEach(function (sourceItem, i) {
+                var sourceKey = sourceItem[key];
+                var targetIndex = hash[sourceKey];
                 if (isUndefined(sourceKey)) {
                     if (isHash(target[i]) && !!target[i][key]) {
                         throw "cannot replace an identified array item with a non-identified array item";
                     }
-                    this.mergeChild(i, target, sourceItem);
+                    _this.mergeChild(i, target, sourceItem);
                     return;
                 }
                 if (isUndefined(targetIndex)) {
-                    this.mergeChild(target.length, target, sourceItem);
+                    _this.mergeChild(target.length, target, sourceItem);
                     return;
                 }
-                this.mergeChild(targetIndex, target, sourceItem);
+                _this.mergeChild(targetIndex, target, sourceItem);
                 return;
             });
             return target;
-        }
-    }
+        };
+        return Merger;
+    }());
 });
 define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, navigation_1, parse_dms_1, slowloop_1, deep_extend_1) {
     "use strict";
-    let index = {
+    var index = {
         asArray: common_2.asArray,
         cssin: common_2.cssin,
         debounce: common_2.debounce,
@@ -572,8 +597,8 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "
         slowloop: slowloop_1.slowloop,
         dms: {
             parse: parse_dms_1.parse,
-            fromDms: (dms) => parse_dms_1.parse(dms),
-            fromLonLat: (o) => parse_dms_1.parse(o)
+            fromDms: function (dms) { return parse_dms_1.parse(dms); },
+            fromLonLat: function (o) { return parse_dms_1.parse(o); }
         },
         navigation: {
             zoomToFeature: navigation_1.zoomToFeature
@@ -584,23 +609,23 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "
 define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class Extensions {
-        constructor() {
+    var Extensions = (function () {
+        function Extensions() {
             this.hash = new WeakMap(null);
         }
-        isExtended(o) {
+        Extensions.prototype.isExtended = function (o) {
             return this.hash.has(o);
-        }
-        extend(o, ext) {
-            let hashData = this.hash.get(o);
+        };
+        Extensions.prototype.extend = function (o, ext) {
+            var hashData = this.hash.get(o);
             if (!hashData) {
                 hashData = {};
                 this.hash.set(o, hashData);
             }
-            ext && Object.keys(ext).forEach(k => (hashData[k] = ext[k]));
+            ext && Object.keys(ext).forEach(function (k) { return (hashData[k] = ext[k]); });
             return hashData;
-        }
-        bind(o1, o2) {
+        };
+        Extensions.prototype.bind = function (o1, o2) {
             if (this.isExtended(o1)) {
                 if (this.isExtended(o2)) {
                     if (this.hash.get(o1) === this.hash.get(o2))
@@ -614,39 +639,43 @@ define("ol3-fun/extensions", ["require", "exports"], function (require, exports)
             else {
                 this.hash.set(o1, this.extend(o2));
             }
-        }
-    }
+        };
+        return Extensions;
+    }());
     exports.Extensions = Extensions;
 });
 define("ol3-fun/google-polyline", ["require", "exports"], function (require, exports) {
     "use strict";
-    class PolylineEncoder {
-        encodeCoordinate(coordinate, factor) {
+    var PolylineEncoder = (function () {
+        function PolylineEncoder() {
+        }
+        PolylineEncoder.prototype.encodeCoordinate = function (coordinate, factor) {
             coordinate = Math.round(coordinate * factor);
             coordinate <<= 1;
             if (coordinate < 0) {
                 coordinate = ~coordinate;
             }
-            let output = '';
+            var output = '';
             while (coordinate >= 0x20) {
                 output += String.fromCharCode((0x20 | (coordinate & 0x1f)) + 0x3f);
                 coordinate >>= 5;
             }
             output += String.fromCharCode(coordinate + 0x3f);
             return output;
-        }
-        decode(str, precision = 5) {
-            let index = 0, lat = 0, lng = 0, coordinates = [], latitude_change, longitude_change, factor = Math.pow(10, precision);
+        };
+        PolylineEncoder.prototype.decode = function (str, precision) {
+            if (precision === void 0) { precision = 5; }
+            var index = 0, lat = 0, lng = 0, coordinates = [], latitude_change, longitude_change, factor = Math.pow(10, precision);
             while (index < str.length) {
-                let byte = 0;
-                let shift = 0;
-                let result = 0;
+                var byte = 0;
+                var shift = 0;
+                var result = 0;
                 do {
                     byte = str.charCodeAt(index++) - 0x3f;
                     result |= (byte & 0x1f) << shift;
                     shift += 5;
                 } while (byte >= 0x20);
-                let latitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                var latitude_change_1 = ((result & 1) ? ~(result >> 1) : (result >> 1));
                 shift = result = 0;
                 do {
                     byte = str.charCodeAt(index++) - 0x3f;
@@ -654,67 +683,72 @@ define("ol3-fun/google-polyline", ["require", "exports"], function (require, exp
                     shift += 5;
                 } while (byte >= 0x20);
                 longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
-                lat += latitude_change;
+                lat += latitude_change_1;
                 lng += longitude_change;
                 coordinates.push([lat / factor, lng / factor]);
             }
             return coordinates;
-        }
-        encode(coordinates, precision = 5) {
+        };
+        PolylineEncoder.prototype.encode = function (coordinates, precision) {
+            if (precision === void 0) { precision = 5; }
             if (!coordinates.length)
                 return '';
-            let factor = Math.pow(10, precision), output = this.encodeCoordinate(coordinates[0][0], factor) + this.encodeCoordinate(coordinates[0][1], factor);
-            for (let i = 1; i < coordinates.length; i++) {
-                let a = coordinates[i], b = coordinates[i - 1];
+            var factor = Math.pow(10, precision), output = this.encodeCoordinate(coordinates[0][0], factor) + this.encodeCoordinate(coordinates[0][1], factor);
+            for (var i = 1; i < coordinates.length; i++) {
+                var a = coordinates[i], b = coordinates[i - 1];
                 output += this.encodeCoordinate(a[0] - b[0], factor);
                 output += this.encodeCoordinate(a[1] - b[1], factor);
             }
             return output;
-        }
-    }
+        };
+        return PolylineEncoder;
+    }());
     return PolylineEncoder;
 });
 define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
-    const Polyline = ol.format.Polyline;
-    class PolylineEncoder {
-        constructor(precision = 5, stride = 2) {
+    var Polyline = ol.format.Polyline;
+    var PolylineEncoder = (function () {
+        function PolylineEncoder(precision, stride) {
+            if (precision === void 0) { precision = 5; }
+            if (stride === void 0) { stride = 2; }
             this.precision = precision;
             this.stride = stride;
         }
-        flatten(points) {
-            let nums = new Array(points.length * this.stride);
-            let i = 0;
-            points.forEach(p => p.map(p => nums[i++] = p));
+        PolylineEncoder.prototype.flatten = function (points) {
+            var nums = new Array(points.length * this.stride);
+            var i = 0;
+            points.forEach(function (p) { return p.map(function (p) { return nums[i++] = p; }); });
             return nums;
-        }
-        unflatten(nums) {
-            let points = new Array(nums.length / this.stride);
-            for (let i = 0; i < nums.length / this.stride; i++) {
+        };
+        PolylineEncoder.prototype.unflatten = function (nums) {
+            var points = new Array(nums.length / this.stride);
+            for (var i = 0; i < nums.length / this.stride; i++) {
                 points[i] = nums.slice(i * this.stride, (i + 1) * this.stride);
             }
             return points;
-        }
-        round(nums) {
-            let factor = Math.pow(10, this.precision);
-            return nums.map(n => Math.round(n * factor) / factor);
-        }
-        decode(str) {
-            let nums = Polyline.decodeDeltas(str, this.stride, Math.pow(10, this.precision));
+        };
+        PolylineEncoder.prototype.round = function (nums) {
+            var factor = Math.pow(10, this.precision);
+            return nums.map(function (n) { return Math.round(n * factor) / factor; });
+        };
+        PolylineEncoder.prototype.decode = function (str) {
+            var nums = Polyline.decodeDeltas(str, this.stride, Math.pow(10, this.precision));
             return this.unflatten(this.round(nums));
-        }
-        encode(points) {
+        };
+        PolylineEncoder.prototype.encode = function (points) {
             return Polyline.encodeDeltas(this.flatten(points), this.stride, Math.pow(10, this.precision));
-        }
-    }
+        };
+        return PolylineEncoder;
+    }());
     return PolylineEncoder;
 });
 define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (require, exports, ol) {
     "use strict";
     function getStyle(feature) {
-        let style = feature.getStyle();
+        var style = feature.getStyle();
         if (!style) {
-            let styleFn = feature.getStyleFunction();
+            var styleFn = feature.getStyleFunction();
             if (styleFn) {
                 style = styleFn(0);
             }
@@ -730,33 +764,37 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
             style = [style];
         return style;
     }
-    class Snapshot {
-        static render(canvas, feature) {
+    var Snapshot = (function () {
+        function Snapshot() {
+        }
+        Snapshot.render = function (canvas, feature) {
             feature = feature.clone();
-            let geom = feature.getGeometry();
-            let extent = geom.getExtent();
-            let [cx, cy] = ol.extent.getCenter(extent);
-            let [w, h] = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)];
-            let isPoint = w === 0 || h === 0;
-            let ff = 1 / (window.devicePixelRatio || 1);
-            let scale = isPoint ? 1 : Math.min((ff * canvas.width) / w, (ff * canvas.height) / h);
+            var geom = feature.getGeometry();
+            var extent = geom.getExtent();
+            var _a = ol.extent.getCenter(extent), cx = _a[0], cy = _a[1];
+            var _b = [ol.extent.getWidth(extent), ol.extent.getHeight(extent)], w = _b[0], h = _b[1];
+            var isPoint = w === 0 || h === 0;
+            var ff = 1 / (window.devicePixelRatio || 1);
+            var scale = isPoint ? 1 : Math.min((ff * canvas.width) / w, (ff * canvas.height) / h);
             geom.translate(-cx, -cy);
             geom.scale(scale, -scale);
             geom.translate(Math.ceil((ff * canvas.width) / 2), Math.ceil((ff * canvas.height) / 2));
             console.log(scale, cx, cy, w, h, geom.getCoordinates());
-            let vtx = ol.render.toContext(canvas.getContext("2d"));
-            let styles = getStyle(feature);
+            var vtx = ol.render.toContext(canvas.getContext("2d"));
+            var styles = getStyle(feature);
             if (!Array.isArray(styles))
                 styles = [styles];
-            styles.forEach(style => vtx.drawFeature(feature, style));
-        }
-        static snapshot(feature, size = 128) {
-            let canvas = document.createElement("canvas");
+            styles.forEach(function (style) { return vtx.drawFeature(feature, style); });
+        };
+        Snapshot.snapshot = function (feature, size) {
+            if (size === void 0) { size = 128; }
+            var canvas = document.createElement("canvas");
             canvas.width = canvas.height = size;
             this.render(canvas, feature);
             return canvas.toDataURL();
-        }
-    }
+        };
+        return Snapshot;
+    }());
     return Snapshot;
 });
 //# sourceMappingURL=index.max.js.map

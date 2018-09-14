@@ -727,13 +727,587 @@ define("examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/n
     }
     exports.run = run;
 });
-define("examples/index", ["require", "exports", "examples/debounce", "examples/goto", "examples/polyline", "examples/zoomToFeature"], function (require, exports) {
+define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    function slowloop(functions, interval, cycles) {
+        if (interval === void 0) { interval = 1000; }
+        if (cycles === void 0) { cycles = 1; }
+        var d = $.Deferred();
+        var index = 0;
+        var cycle = 0;
+        if (!functions || 0 >= cycles) {
+            d.resolve();
+            return d;
+        }
+        var h = setInterval(function () {
+            if (index === functions.length) {
+                index = 0;
+                if (++cycle === cycles) {
+                    d.resolve();
+                    clearInterval(h);
+                    return;
+                }
+            }
+            try {
+                d.notify({ index: index, cycle: cycle });
+                functions[index++]();
+            }
+            catch (ex) {
+                clearInterval(h);
+                d.reject(ex);
+            }
+        }, interval);
+        return d;
+    }
+    exports.slowloop = slowloop;
+});
+define("ol3-fun/is-primitive", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    function isPrimitive(a) {
+        switch (typeof a) {
+            case "boolean":
+                return true;
+            case "number":
+                return true;
+            case "object":
+                return null === a;
+            case "string":
+                return true;
+            case "symbol":
+                return true;
+            case "undefined":
+                return true;
+            default:
+                throw "unknown type: " + typeof a;
+        }
+    }
+    exports.isPrimitive = isPrimitive;
+});
+define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], function (require, exports, is_primitive_1) {
+    "use strict";
+    exports.__esModule = true;
+    function isCyclic(a) {
+        if (is_primitive_1.isPrimitive(a))
+            return false;
+        var test = function (o, history) {
+            if (is_primitive_1.isPrimitive(o))
+                return false;
+            if (0 <= history.indexOf(o)) {
+                return true;
+            }
+            return Object.keys(o).some(function (k) { return test(o[k], [o].concat(history)); });
+        };
+        return Object.keys(a).some(function (k) { return test(a[k], [a]); });
+    }
+    exports.isCyclic = isCyclic;
+});
+define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
+    "use strict";
+    exports.__esModule = true;
+    function extend(a, b, trace, history) {
+        if (history === void 0) { history = []; }
+        if (!b) {
+            b = a;
+            a = {};
+        }
+        var merger = new Merger(trace, history);
+        return merger.deepExtend(a, b, []);
+    }
+    exports.extend = extend;
+    function isUndefined(a) {
+        return typeof a === "undefined";
+    }
+    function isArray(val) {
+        return Array.isArray(val);
+    }
+    function isHash(val) {
+        return !is_primitive_2.isPrimitive(val) && !canClone(val) && !isArray(val);
+    }
+    function canClone(val) {
+        if (val instanceof Date)
+            return true;
+        if (val instanceof RegExp)
+            return true;
+        return false;
+    }
+    function clone(val) {
+        if (val instanceof Date)
+            return new Date(val.getTime());
+        if (val instanceof RegExp)
+            return new RegExp(val.source);
+        throw "unclonable type encounted: " + typeof val;
+    }
+    var Merger = (function () {
+        function Merger(traceItems, history) {
+            this.traceItems = traceItems;
+            this.history = history;
+        }
+        Merger.prototype.trace = function (item) {
+            if (this.traceItems) {
+                this.traceItems.push(item);
+            }
+            return item.path;
+        };
+        Merger.prototype.deepExtend = function (target, source, path) {
+            var _this = this;
+            if (target === source)
+                return target;
+            if (!target || (!isHash(target) && !isArray(target))) {
+                throw "first argument must be an object";
+            }
+            if (!source || (!isHash(source) && !isArray(source))) {
+                throw "second argument must be an object";
+            }
+            if (typeof source === "function") {
+                return target;
+            }
+            this.push(source);
+            if (isArray(source)) {
+                if (!isArray(target)) {
+                    throw "attempting to merge an array into a non-array";
+                }
+                this.mergeArray("id", target, source, path);
+                return target;
+            }
+            else if (isArray(target)) {
+                throw "attempting to merge a non-array into an array";
+            }
+            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k], [k].concat(path)); });
+            return target;
+        };
+        Merger.prototype.cloneArray = function (val, path) {
+            var _this = this;
+            this.push(val);
+            return val.map(function (v) {
+                if (is_primitive_2.isPrimitive(v))
+                    return v;
+                if (isHash(v))
+                    return _this.deepExtend({}, v, path);
+                if (isArray(v))
+                    return _this.cloneArray(v, path);
+                if (canClone(v))
+                    return clone(v);
+                throw "unknown type encountered: " + typeof v;
+            });
+        };
+        Merger.prototype.push = function (a) {
+            if (is_primitive_2.isPrimitive(a))
+                return;
+            if (-1 < this.history.indexOf(a)) {
+                if (is_cyclic_1.isCyclic(a)) {
+                    throw "circular reference detected";
+                }
+            }
+            else
+                this.history.push(a);
+        };
+        Merger.prototype.mergeChild = function (key, target, sourceValue, path) {
+            var targetValue = target[key];
+            if (sourceValue === targetValue)
+                return;
+            if (is_primitive_2.isPrimitive(sourceValue)) {
+                path = this.trace({
+                    path: path,
+                    key: key,
+                    target: target,
+                    was: targetValue,
+                    value: sourceValue
+                });
+                target[key] = sourceValue;
+                return;
+            }
+            if (canClone(sourceValue)) {
+                sourceValue = clone(sourceValue);
+                path = this.trace({
+                    path: path,
+                    key: key,
+                    target: target,
+                    was: targetValue,
+                    value: sourceValue
+                });
+                target[key] = sourceValue;
+                return;
+            }
+            if (isArray(sourceValue)) {
+                if (isArray(targetValue)) {
+                    this.deepExtend(targetValue, sourceValue, path);
+                    return;
+                }
+                sourceValue = this.cloneArray(sourceValue, path);
+                path = this.trace({
+                    path: path,
+                    key: key,
+                    target: target,
+                    was: targetValue,
+                    value: sourceValue
+                });
+                target[key] = sourceValue;
+                return;
+            }
+            if (!isHash(sourceValue)) {
+                throw "unexpected source type: " + typeof sourceValue;
+            }
+            if (!isHash(targetValue)) {
+                var merger = new Merger(null, this.history);
+                sourceValue = merger.deepExtend({}, sourceValue, path);
+                path = this.trace({
+                    path: path,
+                    key: key,
+                    target: target,
+                    was: targetValue,
+                    value: sourceValue
+                });
+                target[key] = sourceValue;
+                return;
+            }
+            this.deepExtend(targetValue, sourceValue, path);
+            return;
+        };
+        Merger.prototype.mergeArray = function (key, target, source, path) {
+            var _this = this;
+            if (!isArray(target))
+                throw "target must be an array";
+            if (!isArray(source))
+                throw "input must be an array";
+            if (!source.length)
+                return target;
+            var hash = {};
+            target.forEach(function (item, i) {
+                if (!item[key])
+                    return;
+                hash[item[key]] = i;
+            });
+            source.forEach(function (sourceItem, i) {
+                var sourceKey = sourceItem[key];
+                var targetIndex = hash[sourceKey];
+                if (isUndefined(sourceKey)) {
+                    if (isHash(target[i]) && !!target[i][key]) {
+                        throw "cannot replace an identified array item with a non-identified array item";
+                    }
+                    _this.mergeChild(i, target, sourceItem, path);
+                    return;
+                }
+                if (isUndefined(targetIndex)) {
+                    _this.mergeChild(target.length, target, sourceItem, path);
+                    return;
+                }
+                _this.mergeChild(targetIndex, target, sourceItem, path);
+                return;
+            });
+            return target;
+        };
+        return Merger;
+    }());
+});
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_5, navigation_2, parse_dms_2, slowloop_1, deep_extend_1) {
+    "use strict";
+    var index = {
+        asArray: common_5.asArray,
+        cssin: common_5.cssin,
+        debounce: common_5.debounce,
+        defaults: common_5.defaults,
+        doif: common_5.doif,
+        deepExtend: deep_extend_1.extend,
+        getParameterByName: common_5.getParameterByName,
+        getQueryParameters: common_5.getQueryParameters,
+        html: common_5.html,
+        mixin: common_5.mixin,
+        pair: common_5.pair,
+        parse: common_5.parse,
+        range: common_5.range,
+        shuffle: common_5.shuffle,
+        toggle: common_5.toggle,
+        uuid: common_5.uuid,
+        slowloop: slowloop_1.slowloop,
+        dms: {
+            parse: parse_dms_2.parse,
+            fromDms: function (dms) { return parse_dms_2.parse(dms); },
+            fromLonLat: function (o) { return parse_dms_2.parse(o); }
+        },
+        navigation: {
+            zoomToFeature: navigation_2.zoomToFeature
+        }
+    };
+    return index;
+});
+define("tests/base", ["require", "exports", "ol3-fun/slowloop"], function (require, exports, slowloop_2) {
+    "use strict";
+    exports.__esModule = true;
+    exports.slowloop = slowloop_2.slowloop;
+    function describe(title, fn) {
+        console.log(title || "undocumented test group");
+        return window.describe(title, fn);
+    }
+    exports.describe = describe;
+    function it(title, fn) {
+        console.log(title || "undocumented test");
+        return window.it(title, fn);
+    }
+    exports.it = it;
+    function should(result, message) {
+        console.log(message || "undocumented assertion");
+        if (!result)
+            throw message;
+    }
+    exports.should = should;
+    function shouldEqual(a, b, message) {
+        if (a != b) {
+            var msg = "\"" + a + "\" <> \"" + b + "\"";
+            message = (message ? message + ": " : "") + msg;
+            console.warn(msg);
+        }
+        should(a == b, message);
+    }
+    exports.shouldEqual = shouldEqual;
+    function shouldThrow(fn, message) {
+        try {
+            fn();
+        }
+        catch (ex) {
+            should(!!ex, ex);
+            return ex;
+        }
+        should(false, "expected an exception" + (message ? ": " + message : ""));
+    }
+    exports.shouldThrow = shouldThrow;
+    function stringify(o) {
+        return JSON.stringify(o, null, "\t");
+    }
+    exports.stringify = stringify;
+});
+define("examples/extras/data/featureserver", ["require", "exports"], function (require, exports) {
+    "use strict";
+    var featureServer = {
+        currentVersion: 10.3,
+        id: 8,
+        name: "Lansing River",
+        type: "Feature Layer",
+        description: "",
+        copyrightText: "",
+        defaultVisibility: true,
+        editFieldsInfo: null,
+        ownershipBasedAccessControlForFeatures: null,
+        syncCanReturnChanges: false,
+        relationships: [],
+        isDataVersioned: false,
+        supportsRollbackOnFailureParameter: true,
+        supportsStatistics: true,
+        supportsAdvancedQueries: true,
+        advancedQueryCapabilities: {
+            supportsPagination: true,
+            supportsStatistics: true,
+            supportsOrderBy: true,
+            supportsDistinct: true
+        },
+        geometryType: "esriGeometryPolyline",
+        minScale: 0,
+        maxScale: 0,
+        extent: {
+            xmin: -344.426566832,
+            ymin: -85.921450151,
+            xmax: 6994102.02410803,
+            ymax: 5840137.74983172,
+            spatialReference: {
+                wkid: 4326,
+                latestWkid: 4326
+            }
+        },
+        drawingInfo: {
+            renderer: {
+                type: "simple",
+                symbol: {
+                    type: "esriSLS",
+                    style: "esriSLSSolid",
+                    color: [0, 58, 166, 255],
+                    width: 5
+                },
+                label: "",
+                description: ""
+            },
+            transparency: 0,
+            labelingInfo: null
+        },
+        hasM: false,
+        hasZ: false,
+        allowGeometryUpdates: true,
+        hasAttachments: false,
+        htmlPopupType: "esriServerHTMLPopupTypeAsHTMLText",
+        objectIdField: "objectid",
+        globalIdField: "",
+        displayField: "st_length(shape)",
+        typeIdField: "",
+        fields: [
+            {
+                name: "objectid",
+                type: "esriFieldTypeOID",
+                alias: "OBJECTID",
+                domain: null,
+                editable: false,
+                nullable: false
+            }
+        ],
+        types: [],
+        templates: [
+            {
+                name: "Lansing River",
+                description: "River",
+                prototype: {
+                    attributes: {}
+                },
+                drawingTool: "esriFeatureEditToolLine"
+            }
+        ],
+        maxRecordCount: 1000,
+        supportedQueryFormats: "JSON, AMF",
+        capabilities: "Create,Delete,Query,Update,Uploads,Editing",
+        useStandardizedQueries: true
+    };
+    return featureServer;
+});
+define("examples/extras/data/mapserver", ["require", "exports"], function (require, exports) {
+    "use strict";
+    var mapserver = {
+        currentVersion: 10.3,
+        id: 8,
+        name: "Lansing River",
+        type: "Feature Layer",
+        description: "",
+        geometryType: "esriGeometryPolyline",
+        copyrightText: "",
+        parentLayer: {
+            id: 7,
+            name: "AO_Lion"
+        },
+        subLayers: [],
+        minScale: 0,
+        maxScale: 0,
+        drawingInfo: {
+            renderer: {
+                type: "simple",
+                symbol: {
+                    type: "esriSLS",
+                    style: "esriSLSSolid",
+                    color: [0, 58, 166, 255],
+                    width: 5
+                },
+                label: "",
+                description: ""
+            },
+            transparency: 0,
+            labelingInfo: null
+        },
+        defaultVisibility: true,
+        extent: {
+            xmin: -344.426566832,
+            ymin: -85.921450151,
+            xmax: 6994102.02410803,
+            ymax: 5840137.74983172,
+            spatialReference: {
+                wkid: 4326,
+                latestWkid: 4326
+            }
+        },
+        hasAttachments: false,
+        htmlPopupType: "esriServerHTMLPopupTypeAsHTMLText",
+        displayField: "st_length(shape)",
+        typeIdField: null,
+        fields: [
+            {
+                name: "objectid",
+                type: "esriFieldTypeOID",
+                alias: "OBJECTID",
+                domain: null
+            },
+            {
+                name: "shape",
+                type: "esriFieldTypeGeometry",
+                alias: "SHAPE",
+                domain: null
+            },
+            {
+                name: "st_length(shape)",
+                type: "esriFieldTypeDouble",
+                alias: "st_length(shape)",
+                domain: null
+            }
+        ],
+        relationships: [],
+        canModifyLayer: false,
+        canScaleSymbols: false,
+        hasLabels: false,
+        capabilities: "Map,Query,Data",
+        maxRecordCount: 1000,
+        supportsStatistics: true,
+        supportsAdvancedQueries: true,
+        supportedQueryFormats: "JSON, AMF",
+        ownershipBasedAccessControlForFeatures: { allowOthersToQuery: true },
+        useStandardizedQueries: true,
+        advancedQueryCapabilities: {
+            useStandardizedQueries: true,
+            supportsStatistics: true,
+            supportsOrderBy: true,
+            supportsDistinct: true,
+            supportsPagination: true,
+            supportsTrueCurve: true
+        }
+    };
+    return mapserver;
+});
+define("examples/jsondiff", ["require", "exports", "index", "tests/base", "examples/extras/data/featureserver", "examples/extras/data/mapserver"], function (require, exports, index_1, base_1, featureserver, mapserver) {
+    "use strict";
+    exports.__esModule = true;
+    var css = "\ntextarea {\n    background: black;\n    color: white;\n    min-width: 400px;\n    min-height: 600px;\n    white-space: nowrap;  \n    overflow: auto;\n}\n";
+    var html = "\n<table>\n    <tr>\n    <td><label for=\"json1\">Input 1</label></td>\n    <td><label for=\"json2\">Input 2</label></td>\n    <td><label for=\"result\">Diff</label></td></tr>\n    <tr>\n    <td><textarea id=\"json1\" class=\"json-editor\">{\"a\": 1}</textarea></td>\n    <td><textarea id=\"json2\" class=\"json-editor\">{\"b\": 2}</textarea></td>\n    <td><textarea id=\"result\" class=\"json-editor\">[result]</textarea></td>\n    </tr>\n    </table>\n</div>\n";
+    function forcePath(o, path) {
+        var node = o;
+        path.forEach(function (n) { return (node = node[n] = node[n] || {}); });
+        return node;
+    }
+    function diff(trace) {
+        var result = {};
+        trace.forEach(function (t) {
+            var path = t.path.reverse();
+            var key = path.pop();
+            forcePath(result, path)[key] = t.value;
+        });
+        return result;
+    }
+    function run() {
+        index_1.cssin("jsondiff", css);
+        document.getElementById("map").remove();
+        document.body.appendChild(index_1.html(html));
+        var left = document.getElementById("json1");
+        var right = document.getElementById("json2");
+        var target = document.getElementById("result");
+        var trace = [];
+        var doit = index_1.debounce(function () {
+            try {
+                var js1 = JSON.parse(left.value);
+                var js2 = JSON.parse(right.value);
+                index_1.deepExtend(js1, js2, (trace = []));
+                target.value = base_1.stringify(diff(trace));
+            }
+            catch (ex) {
+                target.value = ex;
+            }
+        }, 200);
+        left.addEventListener("keydown", function () { return doit(); });
+        right.addEventListener("keypress", function () { return doit(); });
+        left.value = base_1.stringify(mapserver);
+        right.value = base_1.stringify(featureserver);
+        doit();
+    }
+    exports.run = run;
+});
+define("examples/index", ["require", "exports", "examples/debounce", "examples/goto", "examples/polyline", "examples/zoomToFeature", "examples/jsondiff"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
     function run() {
         var l = window.location;
         var path = "" + l.origin + l.pathname + "?run=examples/";
-        var labs = "\n    debounce\n    goto\n    polyline\n    zoomToFeature\n    index\n    ";
+        var labs = "\n    debounce\n    goto\n    jsondiff\n    polyline\n    zoomToFeature\n    index\n    ";
         var styles = document.createElement("style");
         document.head.appendChild(styles);
         styles.innerText += "\n    #map {\n        display: none;\n    }\n    .test {\n        margin: 20px;\n    }\n    ";
@@ -747,6 +1321,5 @@ define("examples/index", ["require", "exports", "examples/debounce", "examples/g
             .join("\n");
     }
     exports.run = run;
-    ;
 });
 //# sourceMappingURL=examples.max.js.map
