@@ -395,14 +395,13 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function extend(a, b, trace, history) {
-        if (trace === void 0) { trace = []; }
         if (history === void 0) { history = []; }
         if (!b) {
             b = a;
             a = {};
         }
         var merger = new Merger(trace, history);
-        return merger.deepExtend(a, b);
+        return merger.deepExtend(a, b, []);
     }
     exports.extend = extend;
     function isUndefined(a) {
@@ -429,11 +428,17 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
         throw "unclonable type encounted: " + typeof val;
     }
     var Merger = (function () {
-        function Merger(trace, history) {
-            this.trace = trace;
+        function Merger(traceItems, history) {
+            this.traceItems = traceItems;
             this.history = history;
         }
-        Merger.prototype.deepExtend = function (target, source) {
+        Merger.prototype.trace = function (item) {
+            if (this.traceItems) {
+                this.traceItems.push(item);
+            }
+            return item.path;
+        };
+        Merger.prototype.deepExtend = function (target, source, path) {
             var _this = this;
             if (target === source)
                 return target;
@@ -451,19 +456,29 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 if (!isArray(target)) {
                     throw "attempting to merge an array into a non-array";
                 }
-                this.merge("id", target, source);
+                this.mergeArray("id", target, source, path);
                 return target;
             }
             else if (isArray(target)) {
                 throw "attempting to merge a non-array into an array";
             }
-            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k]); });
+            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k], [k].concat(path)); });
             return target;
         };
-        Merger.prototype.cloneArray = function (val) {
+        Merger.prototype.cloneArray = function (val, path) {
             var _this = this;
             this.push(val);
-            return val.map(function (v) { return (isArray(v) ? _this.cloneArray(v) : canClone(v) ? clone(v) : v); });
+            return val.map(function (v) {
+                if (is_primitive_2.isPrimitive(v))
+                    return v;
+                if (isHash(v))
+                    return _this.deepExtend({}, v, path);
+                if (isArray(v))
+                    return _this.cloneArray(v, path);
+                if (canClone(v))
+                    return clone(v);
+                throw "unknown type encountered: " + typeof v;
+            });
         };
         Merger.prototype.push = function (a) {
             if (is_primitive_2.isPrimitive(a))
@@ -476,12 +491,13 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             else
                 this.history.push(a);
         };
-        Merger.prototype.mergeChild = function (key, target, sourceValue) {
+        Merger.prototype.mergeChild = function (key, target, sourceValue, path) {
             var targetValue = target[key];
             if (sourceValue === targetValue)
                 return;
             if (is_primitive_2.isPrimitive(sourceValue)) {
-                this.trace.push({
+                path = this.trace({
+                    path: path,
                     key: key,
                     target: target,
                     was: targetValue,
@@ -492,7 +508,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             }
             if (canClone(sourceValue)) {
                 sourceValue = clone(sourceValue);
-                this.trace.push({
+                path = this.trace({
+                    path: path,
                     key: key,
                     target: target,
                     was: targetValue,
@@ -503,11 +520,12 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             }
             if (isArray(sourceValue)) {
                 if (isArray(targetValue)) {
-                    this.deepExtend(targetValue, sourceValue);
+                    this.deepExtend(targetValue, sourceValue, path);
                     return;
                 }
-                sourceValue = this.cloneArray(sourceValue);
-                this.trace.push({
+                sourceValue = this.cloneArray(sourceValue, path);
+                path = this.trace({
+                    path: path,
                     key: key,
                     target: target,
                     was: targetValue,
@@ -520,14 +538,10 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 throw "unexpected source type: " + typeof sourceValue;
             }
             if (!isHash(targetValue)) {
-                var traceIndex = this.trace.length;
-                try {
-                    sourceValue = this.deepExtend({}, sourceValue);
-                }
-                finally {
-                    this.trace.splice(traceIndex, this.trace.length - traceIndex);
-                }
-                this.trace.push({
+                var merger = new Merger(null, this.history);
+                sourceValue = merger.deepExtend({}, sourceValue, path);
+                path = this.trace({
+                    path: path,
                     key: key,
                     target: target,
                     was: targetValue,
@@ -536,10 +550,10 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 target[key] = sourceValue;
                 return;
             }
-            this.deepExtend(targetValue, sourceValue);
+            this.deepExtend(targetValue, sourceValue, path);
             return;
         };
-        Merger.prototype.merge = function (key, target, source) {
+        Merger.prototype.mergeArray = function (key, target, source, path) {
             var _this = this;
             if (!isArray(target))
                 throw "target must be an array";
@@ -560,14 +574,14 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                     if (isHash(target[i]) && !!target[i][key]) {
                         throw "cannot replace an identified array item with a non-identified array item";
                     }
-                    _this.mergeChild(i, target, sourceItem);
+                    _this.mergeChild(i, target, sourceItem, path);
                     return;
                 }
                 if (isUndefined(targetIndex)) {
-                    _this.mergeChild(target.length, target, sourceItem);
+                    _this.mergeChild(target.length, target, sourceItem, path);
                     return;
                 }
-                _this.mergeChild(targetIndex, target, sourceItem);
+                _this.mergeChild(targetIndex, target, sourceItem, path);
                 return;
             });
             return target;
