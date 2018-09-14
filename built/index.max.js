@@ -350,7 +350,251 @@ define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
     }
     exports.slowloop = slowloop;
 });
-define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop"], function (require, exports, common_2, navigation_1, parse_dms_1, slowloop_1) {
+define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function extend(a, b, trace, history) {
+        if (trace === void 0) { trace = []; }
+        if (history === void 0) { history = []; }
+        var merger = new Merger(trace, history);
+        return merger.deepExtend(a, b);
+    }
+    exports.extend = extend;
+    function isPrimitive(a) {
+        switch (typeof a) {
+            case "object":
+                return null === a;
+            case "string":
+                return true;
+            case "number":
+                return true;
+            case "undefined":
+                return true;
+            default:
+                throw "unknown type: " + typeof a;
+        }
+    }
+    function canClone(val) {
+        return val instanceof Date || val instanceof RegExp ? true : false;
+    }
+    function isHash(val) {
+        return !isPrimitive(val) && !canClone(val);
+    }
+    function clone(val) {
+        if (val instanceof Date)
+            return new Date(val.getTime());
+        if (val instanceof RegExp)
+            return new RegExp(val.source);
+        throw "unclonable type encounted: " + typeof val;
+    }
+    function push(history, a) {
+        if (isPrimitive(a))
+            return;
+        if (-1 < history.indexOf(a)) {
+            var keys = Object.keys(a);
+            if (keys.some(function (k) { return !isPrimitive(a[k]); })) {
+                var values = Object.keys(a)
+                    .map(function (k) { return a[k]; })
+                    .filter(isPrimitive);
+                throw "possible circular reference detected, nested shared objects prohibited: " + keys + "=" + values;
+            }
+        }
+        else
+            history.push(a);
+    }
+    var Merger = (function () {
+        function Merger(trace, history) {
+            this.trace = trace;
+            this.history = history;
+        }
+        Merger.prototype.deepExtend = function (a, b) {
+            var _this = this;
+            var trace = this.trace;
+            var history = this.history;
+            if (a === b)
+                return a;
+            if (!a)
+                return b;
+            if (!b)
+                return a;
+            if (!isHash(a)) {
+                throw "first argument must be an object";
+            }
+            if (!isHash(b)) {
+                throw "second argument must be an object";
+            }
+            var target = a;
+            var source = b;
+            push(history, a);
+            if (typeof source === "function") {
+                return target;
+            }
+            if (Array.isArray(source)) {
+                if (!Array.isArray(target)) {
+                    throw "attempting to merge an array into a non-array";
+                }
+                this.merge("id", target, source);
+                return target;
+            }
+            else if (Array.isArray(target)) {
+                throw "attempting to merge an array into a non-array";
+            }
+            Object.keys(source).forEach(function (key) {
+                var targetValue = target[key];
+                var sourceValue = source[key];
+                if (sourceValue === targetValue)
+                    return;
+                if (isPrimitive(sourceValue)) {
+                    trace.push({
+                        key: key,
+                        target: target,
+                        was: targetValue,
+                        value: sourceValue
+                    });
+                    target[key] = sourceValue;
+                    return;
+                }
+                if (canClone(sourceValue)) {
+                    sourceValue = clone(sourceValue);
+                    trace.push({
+                        key: key,
+                        target: target,
+                        was: targetValue,
+                        value: sourceValue
+                    });
+                    target[key] = sourceValue;
+                    return;
+                }
+                if (Array.isArray(sourceValue)) {
+                    if (Array.isArray(targetValue)) {
+                        _this.deepExtend(targetValue, sourceValue);
+                        return;
+                    }
+                    trace.push({
+                        key: key,
+                        target: target,
+                        was: targetValue,
+                        value: sourceValue
+                    });
+                    target[key] = sourceValue;
+                    return;
+                }
+                if (!isHash(sourceValue)) {
+                    throw "unexpected source type: " + typeof sourceValue;
+                }
+                if (!isHash(targetValue)) {
+                    trace.push({
+                        key: key,
+                        target: target,
+                        was: targetValue,
+                        value: sourceValue
+                    });
+                    target[key] = sourceValue;
+                    return;
+                }
+                _this.deepExtend(targetValue, sourceValue);
+                return;
+            });
+            return target;
+        };
+        Merger.prototype.deepCloneArray = function (arr, history) {
+            var _this = this;
+            if (history === void 0) { history = []; }
+            var clone = [];
+            arr.forEach(function (item, index) {
+                push(history, item);
+                if (typeof item === "object" && item !== null) {
+                    if (Array.isArray(item)) {
+                        clone[index] = _this.deepCloneArray(item, history);
+                    }
+                    else if (canClone(item)) {
+                        clone[index] = clone(item);
+                    }
+                    else {
+                        clone[index] = extend({}, item, _this.trace, history);
+                    }
+                }
+                else {
+                    clone[index] = item;
+                }
+                push(history, clone[index]);
+            });
+            return clone;
+        };
+        Merger.prototype.merge = function (key, target, input) {
+            var _this = this;
+            if (!input.length)
+                return target;
+            var hash = {};
+            target.forEach(function (item, i) { return (hash[item[key]] = i); });
+            input.forEach(function (item) {
+                var id = item[key];
+                if (typeof hash[id] === "undefined") {
+                    hash[id] = target.push(item) - 1;
+                    _this.trace &&
+                        _this.trace.push({
+                            key: hash[id],
+                            target: target,
+                            value: item,
+                            was: undefined
+                        });
+                    return;
+                }
+                _this.deepExtend(target[hash[id]], item);
+            });
+            return target;
+        };
+        return Merger;
+    }());
+});
+define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var Extensions = (function () {
+        function Extensions() {
+            this.extensions = [];
+            this.hash = {};
+        }
+        Extensions.prototype.isExtended = function (o) {
+            return 0 <= this.extensions.indexOf(o);
+        };
+        Extensions.prototype.getExtensionKey = function (o, force) {
+            if (force === void 0) { force = true; }
+            force && !this.isExtended(o) && this.extend(o);
+            return this.extensions.indexOf(o);
+        };
+        Extensions.prototype.extend = function (o, ext) {
+            if (!this.isExtended(o)) {
+                this.extensions.push(o);
+            }
+            var key = this.getExtensionKey(o, true);
+            var hashData = (this.hash[key] = this.hash[key] || {});
+            if (ext) {
+                Object.keys(ext).forEach(function (k) { return (hashData[k] = ext[k]); });
+                console.log("hashData", hashData);
+            }
+            return hashData;
+        };
+        Extensions.prototype.bind = function (o1, o2) {
+            if (this.isExtended(o1)) {
+                if (this.isExtended(o2)) {
+                    if (this.getExtensionKey(o1) !== this.getExtensionKey(o2)) {
+                        throw "both objects already bound";
+                    }
+                }
+                else {
+                    this.hash[this.getExtensionKey(o2, true)] = this.extend(o1);
+                }
+            }
+            else {
+                this.hash[this.getExtensionKey(o1, true)] = this.extend(o2);
+            }
+        };
+        return Extensions;
+    }());
+    exports.Extensions = Extensions;
+});
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, navigation_1, parse_dms_1, slowloop_1, deep_extend_1) {
     "use strict";
     var index = {
         asArray: common_2.asArray,
@@ -358,6 +602,7 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "
         debounce: common_2.debounce,
         defaults: common_2.defaults,
         doif: common_2.doif,
+        deepExtend: deep_extend_1.extend,
         getParameterByName: common_2.getParameterByName,
         getQueryParameters: common_2.getQueryParameters,
         html: common_2.html,
@@ -371,10 +616,12 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "
         slowloop: slowloop_1.slowloop,
         dms: {
             parse: parse_dms_1.parse,
+            fromDms: function (dms) { return parse_dms_1.parse(dms); },
+            fromLonLat: function (o) { return parse_dms_1.parse(o); }
         },
         navigation: {
-            zoomToFeature: navigation_1.zoomToFeature,
-        },
+            zoomToFeature: navigation_1.zoomToFeature
+        }
     };
     return index;
 });
