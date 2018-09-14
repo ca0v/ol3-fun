@@ -84,7 +84,6 @@ describe("utils/deep-extend", () => {
 
 	it("clones arrays", () => {
 		let source = { v1: range(1).map(i => ({ id: i + 1, value: i })) };
-		debugger;
 		let o = deepExtend(source);
 		should(source !== o, "clones source");
 		should(source.v1 !== o.v1, "clones v1");
@@ -236,21 +235,54 @@ describe("utils/deep-extend", () => {
 		shouldEqual(t.value, target.object, "target.object");
 	});
 
-	it("generates a diff from the trace", () => {
+	it("generates empty diff from the trace", () => {
 		let trace = <Array<TraceItem>>[];
 		let a = {
+			personalInfo: {
+				email: "aliceames@email.org",
+				lastName: "Ames",
+				firstName: "Alice"
+			},
 			name: "name"
 		};
 		let b = {
 			name: "name",
-			firstName: "Alice",
-			lastName: "Ames"
+			personalInfo: {
+				firstName: "Alice",
+				lastName: "Ames",
+				email: "aliceames@email.org"
+			}
+		};
+		let expected = {};
+		deepExtend(a, b, (trace = []));
+		console.log("trace", stringify(trace));
+		shouldEqual(stringify(diff(trace)), stringify(expected));
+	});
+
+	it("generates a diff from the trace", () => {
+		let trace = <Array<TraceItem>>[];
+		let a = {
+			name: "name",
+			personalInfo: {
+				firstName: "Alice",
+				lastName: "Ames"
+			}
+		};
+		let b = {
+			name: "name",
+			personalInfo: {
+				firstName: "Alice",
+				lastName: "Ames",
+				email: "aliceames@email.org"
+			}
 		};
 		let expected = {
-			firstName: "Alice",
-			lastName: "Ames"
+			personalInfo: {
+				email: "aliceames@email.org"
+			}
 		};
 		deepExtend(a, b, (trace = []));
+		console.log("trace", stringify(trace));
 		/**
 		 * I want a minimal version of b, in this case it should drop the name
 		 */
@@ -258,16 +290,18 @@ describe("utils/deep-extend", () => {
 	});
 });
 
-function forcePath(o: any, path: string) {
-	let nodes = path.split(",");
+function forcePath(o: any, path: Array<string>) {
 	let node = o;
-	return nodes.map(n => (node = node[n] = node[n] || <any>{})).pop();
+	path.forEach(n => (node = node[n] = node[n] || <any>{}));
+	return node;
 }
 
 function diff(trace: Array<TraceItem>) {
 	let result = <any>{};
 	trace.forEach(t => {
-		forcePath(result, t.path)[t.key] = t.value;
+		let path = t.path.reverse();
+		let key = path.pop();
+		forcePath(result, path)[key] = t.value;
 	});
 	return result;
 }

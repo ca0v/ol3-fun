@@ -2,7 +2,7 @@
 	function cssin(css: string) {
 		let styleTag = document.createElement("style");
 		styleTag.type = "text/css";
-		document.head.appendChild(styleTag);
+		document.body.appendChild(styleTag);
 		styleTag.appendChild(document.createTextNode(css));
 	}
 
