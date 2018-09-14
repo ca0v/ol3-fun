@@ -13,7 +13,7 @@ describe("utils/deep-extend", () => {
 
 	it("invalid merges", () => {
 		shouldThrow(() => deepExtend({}, []), "{} and []");
-		shouldThrow(() => deepExtend([], {}), "[] and {}");
+		shouldThrow(() => deepExtend(<any>[], {}), "[] and {}");
 		shouldThrow(() => deepExtend(<any>1, <any>2), "primitives");
 		shouldThrow(() => deepExtend(new Date(2000, 1, 1), new Date(2000, 1, 2)), "clonable primitives");
 		let a = { a: 1 };

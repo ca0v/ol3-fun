@@ -38,7 +38,7 @@
 		"@types/jquery": "^3.3.6",
 		"@types/ol": "^4.6.2",
 		"@types/requirejs": "^2.1.31",
-		"typescript": "^3.0.1",
+		"typescript": "^3.1.0-dev.20180914",
 		"uglify-js": "^3.4.8"
 	},
 	"devDependencies": {
