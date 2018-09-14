@@ -1,7 +1,14 @@
 ﻿import { describe, it, should, shouldEqual, shouldThrow } from "../base";
 import { Extensions } from "../../ol3-fun/extensions";
+import { range, shuffle } from "../../ol3-fun/common";
 
 describe("data/extensions", () => {
+	it("ensures the api", () => {
+		let x = new Extensions();
+		shouldEqual(typeof x.extend, "function", "extend method");
+		shouldEqual(typeof x.bind, "function", "bind method");
+	});
+
 	it("ensures no side-effects on the object", () => {
 		let x = new Extensions();
 		let o = {};
@@ -19,127 +26,71 @@ describe("data/extensions", () => {
 		shouldEqual(Math.round(math.sqrt2 * (<any>x.extend(Number)).sqrt2), 2, "sqrt2*sqrt2 = 2");
 	});
 
-	it("ensures two objects can be bound to same extension data", () => {
-		let x = new Extensions();
-	});
-});
-
-describe("100% code coverage for data/extensions", () => {
-	let ext1: Extensions;
-	let ext2: Extensions;
-
-	it("creates two extension instances", done => {
-		ext1 = new Extensions();
-		shouldEqual(typeof ext1.extend, "function", "extensions has an extend method");
-		shouldEqual(typeof ext1.getExtensionKey, "function", "extensions has an getExtensionKey method");
-		ext2 = new Extensions();
-
-		let o1 = {};
-		let o2 = {};
-		let xo1 = ext1.extend(o1, { v1: 1 });
-		shouldEqual(xo1, ext1.extend(o1), "extend returns extension object");
-		shouldEqual(xo1.v1, 1, "ext1 v1");
-
-		let xo2 = ext2.extend(o2, { v2: 2 });
-		shouldEqual(xo2.v2, 2, "ext2 v2");
-
-		ext2.extend(o1, { v2: 2 });
-		shouldEqual(xo2.v2, 2, "ext2 v2");
-		shouldEqual(xo1.v1, 1, "ext1 v1");
-
-		done();
-	});
-
-	it("extends an object using the first extension instance", done => {
-		let o = { v1: 1 };
-		ext1.extend(o, { v1: 2 });
-		shouldEqual(o.v1, 1, "v1 is unchanged");
-		shouldEqual(
-			(<any>ext1.extend(o)).v1,
-			2,
-			"the extended object has a value for v1 in the context of the first extender"
-		);
-		false &&
-			shouldEqual(
-				ext1.getExtensionKey(o),
-				ext2.getExtensionKey(o),
-				"the internal extension key for an object should be the same for both extension instances"
-			);
-		shouldEqual(
-			typeof ext2.extend(o),
-			"object",
-			"the extended object exists in the context of the second extender"
-		);
-		shouldEqual(
-			typeof (<any>ext2.extend(o)).v1,
-			"undefined",
-			"the extended object has no extension values in the context of the second extender"
-		);
-		done();
-	});
-
-	it("extends an object using the both extension instances", done => {
-		let o = { v1: 1 };
-		ext1.extend(o, { v1: 2 });
-		ext2.extend(o, { v1: 3 });
-		shouldEqual(o.v1, 1, "v1 is unchanged");
-		shouldEqual(
-			(<any>ext1.extend(o)).v1,
-			2,
-			"the extended object has a value for v1 in the context of the first extender"
-		);
-		shouldEqual(
-			(<any>ext2.extend(o)).v1,
-			3,
-			"the extended object has a value for v1 in the context of the second extender"
-		);
-		done();
-	});
-
-	it("forces a key to exist on an object without setting any values", done => {
+	it("ensures two extensions can bind data to the same object", () => {
+		let ext1 = new Extensions();
+		let ext2 = new Extensions();
 		let o = {};
-		ext1.getExtensionKey(o, true);
-		shouldEqual(
-			Object.keys(ext1.extend(o)).length,
-			0,
-			"the extended object has no extension values in the context of the first extender"
-		);
-		shouldEqual(
-			Object.keys(ext2.extend(o)).length,
-			0,
-			"the extended object has no extension values in the context of the second extender"
-		);
-		should(ext1 !== ext2, "extensions should be unique");
-		done();
+		ext1.extend(o, { ext: 1 });
+		ext2.extend(o, { ext: 2 });
+		shouldEqual((<any>ext1.extend(o)).ext, 1, "ext1");
+		shouldEqual((<any>ext2.extend(o)).ext, 2, "ext2");
 	});
 
-	it("binds two objects to the same extension", done => {
+	it("ensures two extended objects cannot be bound", () => {
+		let x = new Extensions();
+		let o = {};
+		let p = {};
+		x.extend(o);
+		x.extend(p);
+		shouldThrow(() => x.bind(o, p), "cannot bind extended objects");
+	});
+
+	it("extension references are preserved", () => {
+		let x = new Extensions();
+		let o = {};
+		let p = <any>x.extend(o);
+		x.extend(o, { name: "P" });
+		shouldEqual(p.name, "P", "extension references are preserved");
+	});
+
+	it("binds two objects to the same extension", () => {
+		let x = new Extensions();
 		let o1 = { id: 1 };
 		let o2 = Object.create({ id: 2 });
 
-		ext1.bind(o1, o2);
-		ext1.extend(o1, { foo: "foo1" });
-		shouldEqual((<any>ext1.extend(o1)).foo, "foo1");
-		ext1.extend(o2, { foo: "foo2" });
-		shouldEqual((<any>ext1.extend(o1)).foo, "foo2");
-
-		done();
+		x.bind(o1, o2);
+		x.extend(o1, { foo: "foo1" });
+		shouldEqual((<any>x.extend(o1)).foo, "foo1");
+		x.extend(o2, { foo: "foo2" });
+		shouldEqual((<any>x.extend(o1)).foo, "foo2");
 	});
 
-	it("binds a new object to an extended object", done => {
-		let o1 = { id: 1 };
-		ext1.extend(o1, { foo: "foo1" });
-		shouldEqual((<any>ext1.extend(o1)).foo, "foo1");
-
-		let o3 = { id: 3 };
-		ext1.bind(o1, o3);
-		shouldEqual((<any>ext1.extend(o3)).foo, "foo1");
-
-		let o4 = { id: 4 };
-		ext1.extend(o4, { foo: "foo4" });
-		shouldEqual((<any>ext1.extend(o4)).foo, "foo4");
-		shouldThrow(() => ext1.bind(o1, o4), "should fail to bind since o4 already extended");
-
-		done();
+	it("extension integrity testing (100 objects X 10 extensions)", () => {
+		let x = range(10).map(n => new Extensions());
+		let data = range(1000).map(n => Object.create({ id: n }));
+		data.map((d, i) => x[i % 10].extend(d, { data: shuffle(range(1000)) }));
+		data.forEach((d, i) => {
+			let data = (<{ data: Array<number> }>x[i % 10].extend(d)).data;
+			data = data.filter(v => v <= d.id);
+			x[i % 10].extend(d, { data });
+		});
+		let sums = data.map((d, i) => {
+			let ext = x[i % 10].extend(d) as { data: Array<number> };
+			shouldEqual(ext.data.length, i + 1, `extension data has ${i + 1} items`);
+			return ext.data.reduce((a, b) => a + b, 0);
+		});
+		console.log(sums);
+		// CODEFIGHTS: what is the closed expression for this?
+		shouldEqual(sums.reduce((a, b) => a + b, 0), 166666500);
 	});
+
+	it("extensions performance testing (1 million accesses)", () => {
+		// how to capture memory?
+		let x = new Extensions();
+		let data = range(500000).map(n => ({ id: n }));
+		let counter = { count: 0 };
+		data.forEach(d => x.extend(d, { counter }));
+		data.forEach(d => (<{ counter: { count: number } }>x.extend(d)).counter.count++);
+		shouldEqual(counter.count, data.length, `accessed ${data.length} items`);
+	}).timeout(600);
 });
