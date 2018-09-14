@@ -1,6 +1,6 @@
 ﻿// from https://github.com/unclechu/node-deep-extend/blob/master/lib/deep-extend.js
 
-import { Dictionary } from "./extensions";
+import { Dictionary } from "./dictionary";
 import { isCyclic } from "./is-cyclic";
 import { isPrimitive } from "./is-primitive";
 
