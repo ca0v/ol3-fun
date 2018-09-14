@@ -19,7 +19,16 @@ describe("utils/deep-extend", () => {
 		let a = { a: 1 };
 		let b = { b: a };
 		(<any>a).b = b;
-		shouldThrow(() => deepExtend(b), "b->a->b");
+		shouldEqual(shouldThrow(() => deepExtend(b), "b->a->b"), "circular reference detected");
+	});
+
+	it("merges with duplicate objects that might be detected as recursive", () => {
+		let o = { a: { date: new Date(Date.now() - 1000), address: { street: "main" } } };
+		let p = { o1: o, o2: o };
+		shouldEqual(stringify(deepExtend(p)), stringify(p), "two children pointing to the same object");
+		let q = { p1: p, p2: [p], p3: [{ id: "P", value: p }] };
+		let actual = stringify(deepExtend(q, <any>deepExtend(p, <any>o)));
+		should(!!actual, "complex linked");
 	});
 
 	it("simple data merges", () => {

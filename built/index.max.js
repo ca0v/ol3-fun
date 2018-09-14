@@ -378,7 +378,48 @@ define("ol3-fun/extensions", ["require", "exports"], function (require, exports)
     }
     exports.Extensions = Extensions;
 });
-define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports) {
+define("ol3-fun/is-primitive", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function isPrimitive(a) {
+        switch (typeof a) {
+            case "boolean":
+                return true;
+            case "number":
+                return true;
+            case "object":
+                return null === a;
+            case "string":
+                return true;
+            case "symbol":
+                return true;
+            case "undefined":
+                return true;
+            default:
+                throw `unknown type: ${typeof a}`;
+        }
+    }
+    exports.isPrimitive = isPrimitive;
+});
+define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], function (require, exports, is_primitive_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function isCyclic(a) {
+        if (is_primitive_1.isPrimitive(a))
+            return false;
+        let test = (o, history) => {
+            if (is_primitive_1.isPrimitive(o))
+                return false;
+            if (0 <= history.indexOf(o)) {
+                return true;
+            }
+            return Object.keys(o).some(k => test(o[k], [o].concat(history)));
+        };
+        return Object.keys(a).some(k => test(a[k], [a]));
+    }
+    exports.isCyclic = isCyclic;
+});
+define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function extend(a, b, trace = [], history = []) {
@@ -393,25 +434,11 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
     function isUndefined(a) {
         return typeof a === "undefined";
     }
-    function isPrimitive(a) {
-        switch (typeof a) {
-            case "object":
-                return null === a;
-            case "string":
-                return true;
-            case "number":
-                return true;
-            case "undefined":
-                return true;
-            default:
-                throw `unknown type: ${typeof a}`;
-        }
-    }
     function isArray(val) {
         return Array.isArray(val);
     }
     function isHash(val) {
-        return !isPrimitive(val) && !canClone(val) && !isArray(val);
+        return !is_primitive_2.isPrimitive(val) && !canClone(val) && !isArray(val);
     }
     function canClone(val) {
         if (val instanceof Date)
@@ -427,31 +454,12 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
             return new RegExp(val.source);
         throw `unclonable type encounted: ${typeof val}`;
     }
-    function cloneArray(val) {
-        return val.map(v => (isArray(v) ? cloneArray(v) : canClone(v) ? clone(v) : v));
-    }
-    function push(history, a) {
-        if (isPrimitive(a))
-            return;
-        if (-1 < history.indexOf(a)) {
-            let keys = Object.keys(a);
-            if (keys.some(k => !isPrimitive(a[k]))) {
-                let values = Object.keys(a)
-                    .map(k => a[k])
-                    .filter(isPrimitive);
-                throw `possible circular reference detected, nested shared objects prohibited: ${keys}=${values}`;
-            }
-        }
-        else
-            history.push(a);
-    }
     class Merger {
         constructor(trace, history) {
             this.trace = trace;
             this.history = history;
         }
         deepExtend(target, source) {
-            let history = this.history;
             if (target === source)
                 return target;
             if (!target || (!isHash(target) && !isArray(target))) {
@@ -460,10 +468,10 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
             if (!source || (!isHash(source) && !isArray(source))) {
                 throw "second argument must be an object";
             }
-            push(history, target);
             if (typeof source === "function") {
                 return target;
             }
+            this.push(source);
             if (isArray(source)) {
                 if (!isArray(target)) {
                     throw "attempting to merge an array into a non-array";
@@ -477,11 +485,26 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
             Object.keys(source).forEach(k => this.mergeChild(k, target, source[k]));
             return target;
         }
+        cloneArray(val) {
+            this.push(val);
+            return val.map(v => (isArray(v) ? this.cloneArray(v) : canClone(v) ? clone(v) : v));
+        }
+        push(a) {
+            if (is_primitive_2.isPrimitive(a))
+                return;
+            if (-1 < this.history.indexOf(a)) {
+                if (is_cyclic_1.isCyclic(a)) {
+                    throw `circular reference detected`;
+                }
+            }
+            else
+                this.history.push(a);
+        }
         mergeChild(key, target, sourceValue) {
             let targetValue = target[key];
             if (sourceValue === targetValue)
                 return;
-            if (isPrimitive(sourceValue)) {
+            if (is_primitive_2.isPrimitive(sourceValue)) {
                 this.trace.push({
                     key: key,
                     target: target,
@@ -507,7 +530,7 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
                     this.deepExtend(targetValue, sourceValue);
                     return;
                 }
-                sourceValue = cloneArray(sourceValue);
+                sourceValue = this.cloneArray(sourceValue);
                 this.trace.push({
                     key: key,
                     target: target,

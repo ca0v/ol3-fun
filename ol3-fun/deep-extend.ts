@@ -1,7 +1,12 @@
-﻿import { Dictionary } from "./extensions";
+﻿// from https://github.com/unclechu/node-deep-extend/blob/master/lib/deep-extend.js
 
-// from https://github.com/unclechu/node-deep-extend/blob/master/lib/deep-extend.js
+import { Dictionary } from "./extensions";
+import { isCyclic } from "./is-cyclic";
+import { isPrimitive } from "./is-primitive";
 
+/**
+ * Each merge action is recorded in a trace item
+ */
 export interface TraceItem {
 	path?: string;
 	target: Object;
@@ -10,8 +15,19 @@ export interface TraceItem {
 	was: any;
 }
 
-export type History = Array<object>;
+/**
+ * Internally tracks visited objects for cycle detection
+ */
+type History = Array<object>;
 
+/**
+ * deep mixin, replacing items in a with items in b
+ * array items with an "id" are used to identify pairs, otherwise b overwrites a
+ * @param a object to extend
+ * @param b data to inject into the object
+ * @param trace optional change tracking
+ * @param history object added here are not visited
+ */
 export function extend<A extends object>(a: A, b?: Partial<A>, trace = <Array<TraceItem>>[], history: History = []) {
 	if (!b) {
 		b = <A>a;
@@ -23,21 +39,6 @@ export function extend<A extends object>(a: A, b?: Partial<A>, trace = <Array<Tr
 
 function isUndefined(a: any) {
 	return typeof a === "undefined";
-}
-
-function isPrimitive(a: any) {
-	switch (typeof a) {
-		case "object":
-			return null === a;
-		case "string":
-			return true;
-		case "number":
-			return true;
-		case "undefined":
-			return true;
-		default:
-			throw `unknown type: ${typeof a}`;
-	}
 }
 
 function isArray(val: any) {
@@ -60,23 +61,9 @@ function clone(val: any): any {
 	throw `unclonable type encounted: ${typeof val}`;
 }
 
-function cloneArray(val: Array<any>): Array<any> {
-	return val.map(v => (isArray(v) ? cloneArray(v) : canClone(v) ? clone(v) : v));
-}
-
-function push(history: Array<any>, a: any) {
-	if (isPrimitive(a)) return;
-	if (-1 < history.indexOf(a)) {
-		let keys = Object.keys(a);
-		if (keys.some(k => !isPrimitive(a[k]))) {
-			let values = Object.keys(a)
-				.map(k => a[k])
-				.filter(isPrimitive);
-			throw `possible circular reference detected, nested shared objects prohibited: ${keys}=${values}`;
-		}
-	} else history.push(a);
-}
-
+/**
+ * Hepler class for managing the trace
+ */
 class Merger {
 	constructor(public trace: Array<TraceItem>, public history: History) {}
 
@@ -91,8 +78,6 @@ class Merger {
 	 *   deepExtend({}, yourObj_1, [yourObj_N]);
 	 */
 	public deepExtend<T extends any, U extends any>(target: T, source: U) {
-		let history = this.history;
-
 		if (<any>target === source) return target; // nothing left to merge
 
 		if (!target || (!isHash(target) && !isArray(target))) {
@@ -103,16 +88,16 @@ class Merger {
 		}
 
 		/**
-		 * only track objects that trigger a recursion
-		 */
-		push(history, target);
-
-		/**
 		 * ignore functions
 		 */
 		if (typeof source === "function") {
 			return target;
 		}
+
+		/**
+		 * only track objects that trigger a recursion
+		 */
+		this.push(source);
 
 		/**
 		 * copy arrays into array
@@ -133,6 +118,20 @@ class Merger {
 		Object.keys(source).forEach(k => this.mergeChild(k, target, source[k]));
 
 		return target;
+	}
+
+	private cloneArray(val: Array<any>): Array<any> {
+		this.push(val);
+		return val.map(v => (isArray(v) ? this.cloneArray(v) : canClone(v) ? clone(v) : v));
+	}
+
+	private push(a: any) {
+		if (isPrimitive(a)) return;
+		if (-1 < this.history.indexOf(a)) {
+			if (isCyclic(a)) {
+				throw `circular reference detected`;
+			}
+		} else this.history.push(a);
 	}
 
 	private mergeChild(key: string | number, target: any, sourceValue: any): void {
@@ -185,7 +184,7 @@ class Merger {
 			/**
 			 * create/update the target with the source array
 			 */
-			sourceValue = cloneArray(sourceValue);
+			sourceValue = this.cloneArray(sourceValue);
 			this.trace.push({
 				key: key,
 				target: target,

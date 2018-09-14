@@ -66,7 +66,7 @@ define("tests/base", ["require", "exports", "ol3-fun/slowloop"], function (requi
         }
         catch (ex) {
             should(!!ex, ex);
-            return;
+            return ex;
         }
         should(false, `expected an exception${message ? ": " + message : ""}`);
     }
@@ -423,7 +423,48 @@ define("ol3-fun/extensions", ["require", "exports"], function (require, exports)
     }
     exports.Extensions = Extensions;
 });
-define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports) {
+define("ol3-fun/is-primitive", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function isPrimitive(a) {
+        switch (typeof a) {
+            case "boolean":
+                return true;
+            case "number":
+                return true;
+            case "object":
+                return null === a;
+            case "string":
+                return true;
+            case "symbol":
+                return true;
+            case "undefined":
+                return true;
+            default:
+                throw `unknown type: ${typeof a}`;
+        }
+    }
+    exports.isPrimitive = isPrimitive;
+});
+define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], function (require, exports, is_primitive_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function isCyclic(a) {
+        if (is_primitive_1.isPrimitive(a))
+            return false;
+        let test = (o, history) => {
+            if (is_primitive_1.isPrimitive(o))
+                return false;
+            if (0 <= history.indexOf(o)) {
+                return true;
+            }
+            return Object.keys(o).some(k => test(o[k], [o].concat(history)));
+        };
+        return Object.keys(a).some(k => test(a[k], [a]));
+    }
+    exports.isCyclic = isCyclic;
+});
+define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function extend(a, b, trace = [], history = []) {
@@ -438,25 +479,11 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
     function isUndefined(a) {
         return typeof a === "undefined";
     }
-    function isPrimitive(a) {
-        switch (typeof a) {
-            case "object":
-                return null === a;
-            case "string":
-                return true;
-            case "number":
-                return true;
-            case "undefined":
-                return true;
-            default:
-                throw `unknown type: ${typeof a}`;
-        }
-    }
     function isArray(val) {
         return Array.isArray(val);
     }
     function isHash(val) {
-        return !isPrimitive(val) && !canClone(val) && !isArray(val);
+        return !is_primitive_2.isPrimitive(val) && !canClone(val) && !isArray(val);
     }
     function canClone(val) {
         if (val instanceof Date)
@@ -472,31 +499,12 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
             return new RegExp(val.source);
         throw `unclonable type encounted: ${typeof val}`;
     }
-    function cloneArray(val) {
-        return val.map(v => (isArray(v) ? cloneArray(v) : canClone(v) ? clone(v) : v));
-    }
-    function push(history, a) {
-        if (isPrimitive(a))
-            return;
-        if (-1 < history.indexOf(a)) {
-            let keys = Object.keys(a);
-            if (keys.some(k => !isPrimitive(a[k]))) {
-                let values = Object.keys(a)
-                    .map(k => a[k])
-                    .filter(isPrimitive);
-                throw `possible circular reference detected, nested shared objects prohibited: ${keys}=${values}`;
-            }
-        }
-        else
-            history.push(a);
-    }
     class Merger {
         constructor(trace, history) {
             this.trace = trace;
             this.history = history;
         }
         deepExtend(target, source) {
-            let history = this.history;
             if (target === source)
                 return target;
             if (!target || (!isHash(target) && !isArray(target))) {
@@ -505,10 +513,10 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
             if (!source || (!isHash(source) && !isArray(source))) {
                 throw "second argument must be an object";
             }
-            push(history, target);
             if (typeof source === "function") {
                 return target;
             }
+            this.push(source);
             if (isArray(source)) {
                 if (!isArray(target)) {
                     throw "attempting to merge an array into a non-array";
@@ -522,11 +530,26 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
             Object.keys(source).forEach(k => this.mergeChild(k, target, source[k]));
             return target;
         }
+        cloneArray(val) {
+            this.push(val);
+            return val.map(v => (isArray(v) ? this.cloneArray(v) : canClone(v) ? clone(v) : v));
+        }
+        push(a) {
+            if (is_primitive_2.isPrimitive(a))
+                return;
+            if (-1 < this.history.indexOf(a)) {
+                if (is_cyclic_1.isCyclic(a)) {
+                    throw `circular reference detected`;
+                }
+            }
+            else
+                this.history.push(a);
+        }
         mergeChild(key, target, sourceValue) {
             let targetValue = target[key];
             if (sourceValue === targetValue)
                 return;
-            if (isPrimitive(sourceValue)) {
+            if (is_primitive_2.isPrimitive(sourceValue)) {
                 this.trace.push({
                     key: key,
                     target: target,
@@ -552,7 +575,7 @@ define("ol3-fun/deep-extend", ["require", "exports"], function (require, exports
                     this.deepExtend(targetValue, sourceValue);
                     return;
                 }
-                sourceValue = cloneArray(sourceValue);
+                sourceValue = this.cloneArray(sourceValue);
                 this.trace.push({
                     key: key,
                     target: target,
@@ -934,25 +957,384 @@ define("tests/spec/slowloop", ["require", "exports", "tests/base", "ol3-fun/comm
         });
     });
 });
-define("tests/spec/openlayers-test", ["require", "exports", "tests/base", "openlayers"], function (require, exports, base_4, ol) {
+define("tests/spec/deep-extend", ["require", "exports", "tests/base", "ol3-fun/deep-extend"], function (require, exports, base_4, deep_extend_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    describe("utils/deep-extend", () => {
+        it("trivial merges", () => {
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend({}, {})), base_4.stringify({}), "empty objects");
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([], [])), base_4.stringify([]), "empty arrays");
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([,], [, ,])), base_4.stringify([,]), "arrays with empty items");
+            let o = { a: 1 };
+            base_4.shouldEqual(o, deep_extend_2.extend(o, o), "merges same object");
+            base_4.should(o !== deep_extend_2.extend(o), "clones when second argument not provided");
+        });
+        it("invalid merges", () => {
+            base_4.shouldThrow(() => deep_extend_2.extend({}, []), "{} and []");
+            base_4.shouldThrow(() => deep_extend_2.extend([], {}), "[] and {}");
+            base_4.shouldThrow(() => deep_extend_2.extend(1, 2), "primitives");
+            base_4.shouldThrow(() => deep_extend_2.extend(new Date(2000, 1, 1), new Date(2000, 1, 2)), "clonable primitives");
+            let a = { a: 1 };
+            let b = { b: a };
+            a.b = b;
+            base_4.shouldEqual(base_4.shouldThrow(() => deep_extend_2.extend(b), "b->a->b"), "circular reference detected");
+        });
+        it("merges with duplicate objects that might be detected as recursive", () => {
+            let o = { a: { date: new Date(Date.now() - 1000), address: { street: "main" } } };
+            let p = { o1: o, o2: o };
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend(p)), base_4.stringify(p), "two children pointing to the same object");
+            let q = { p1: p, p2: [p], p3: [{ id: "P", value: p }] };
+            let actual = base_4.stringify(deep_extend_2.extend(q, deep_extend_2.extend(p, o)));
+            base_4.should(!!actual, "complex linked");
+        });
+        it("simple data merges", () => {
+            let o = deep_extend_2.extend({ v1: 1 });
+            base_4.shouldEqual(o.v1, 1, "adds v1");
+            deep_extend_2.extend(o, { v1: 2 });
+            base_4.shouldEqual(o.v1, 2, "updates v1");
+        });
+        it("simple array merges", () => {
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([1], [])), base_4.stringify([1]), "[1] + []");
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([1], [2])), base_4.stringify([2]), "[1] + [2]");
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([1, 2, 3], [2])), base_4.stringify([2, 2, 3]), "[1,2,3] + [2]");
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([2], [1, 2, 3])), base_4.stringify([1, 2, 3]), "[2] + [1,2,3]");
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([, , , 4], [1, 2, 3])), base_4.stringify([1, 2, 3, 4]), "array can have empty items");
+            base_4.shouldEqual(base_4.stringify(deep_extend_2.extend([{ id: 1 }], [{ id: 2 }])), base_4.stringify([{ id: 1 }, { id: 2 }]), "[1] + [2] with ids");
+        });
+        it("preserves array ordering", () => {
+            base_4.shouldEqual(deep_extend_2.extend([{ id: 1 }], [{ id: 1 }, { id: 2 }])[0].id, 1, "first item id");
+            base_4.shouldEqual(deep_extend_2.extend([{ id: 2 }], [{ id: 1 }, { id: 2 }])[0].id, 2, "first item id");
+            base_4.shouldEqual(deep_extend_2.extend([{ id: 1 }, { id: 3 }], [{ id: 2 }, { id: 1, v: 1 }])[0].v, 1, "first item id");
+        });
+        it("clones objects with primitives", () => {
+            let source = { v1: { v2: { v3: 1 } } };
+            let o = deep_extend_2.extend(source);
+            base_4.shouldEqual(o.v1.v2.v3, 1, "properly extends {}");
+            base_4.should(source.v1 !== o.v1, "properly clones objects");
+        });
+        it("clones dates", () => {
+            let source = { date: new Date() };
+            let o = deep_extend_2.extend(source);
+            base_4.should(source.date !== o.date, "dates are clones");
+            base_4.shouldEqual(source.date.getUTCDate(), o.date.getUTCDate(), "date values are preserved");
+        });
+        it("confirms references are preserved", () => {
+            let x = { foo: { bar: "foo" }, array: [{ id: "a", value: "ax" }] };
+            let y = { foo: { bar: "bar" }, array: [{ id: "a", value: "ay" }] };
+            let xfoo = x.foo;
+            let xarray = x.array[0];
+            let z = deep_extend_2.extend(x, y);
+            base_4.shouldEqual(x, z, "returns x");
+            base_4.shouldEqual(xfoo, z.foo, "reference foo preserved");
+            base_4.shouldEqual(xarray.value, "ay", "existing array references are preserved");
+        });
+        it("confirms array merge is 'id' aware", () => {
+            let o1 = {
+                values: [
+                    {
+                        id: "v1",
+                        value: { v1: 1 }
+                    },
+                    {
+                        id: "v2",
+                        value: { v2: 1 }
+                    },
+                    {
+                        id: "v9",
+                        value: { v9: 1 }
+                    }
+                ]
+            };
+            let o2 = {
+                values: [
+                    {
+                        id: "v1",
+                        value: { v1: 2 }
+                    },
+                    {
+                        id: "v9",
+                        value: { v9: 2 }
+                    }
+                ]
+            };
+            let o = deep_extend_2.extend(o1);
+            base_4.shouldEqual(o.values[0].value.v1, 1, "object is clone of o1, v1");
+            base_4.shouldEqual(o.values[1].value.v2, 1, "object is clone of o1, v2");
+            base_4.shouldEqual(o.values[2].value.v9, 1, "object is clone of o1, v9");
+            deep_extend_2.extend(o, o2);
+            base_4.shouldEqual(o.values[0].value.v1, 2, "merge replaces v1");
+            base_4.shouldEqual(o.values[1].value.v2, 1, "merge preserves v2");
+            base_4.shouldEqual(o.values[2].value.v9, 2, "merge replaces v9");
+        });
+        it("confirms array references are preserved", () => {
+            let x = { foo: { bar: "foo" } };
+            let y = { foo: { bar: "bar" } };
+            let xfoo = x.foo;
+            let z = deep_extend_2.extend(x, y);
+            base_4.shouldEqual(x, z, "returns x");
+            base_4.shouldEqual(xfoo, z.foo, "reference foo preserved");
+        });
+        it("confirms trace is empty when merging duplicate objects", () => {
+            let trace = [];
+            deep_extend_2.extend({}, {}, trace);
+            base_4.shouldEqual(trace.length, 0, "no activity 0");
+            deep_extend_2.extend({ a: 1 }, { a: 1 }, trace);
+            base_4.shouldEqual(trace.length, 0, "no activity 1");
+            deep_extend_2.extend({ a: 1, b: [1] }, { a: 1, b: [1] }, trace);
+            base_4.shouldEqual(trace.length, 0, "no activity 2");
+            deep_extend_2.extend({ a: 1, b: [1], c: {} }, { a: 1, b: [1], c: {} }, trace);
+            base_4.shouldEqual(trace.length, 0, "no activity 3");
+            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [1], c: { d: 1 } }, trace);
+            base_4.shouldEqual(trace.length, 0, "no activity 4");
+            deep_extend_2.extend({ a: [1, 2, 3] }, { a: [1, 2, 3] }, (trace = []));
+            base_4.shouldEqual(trace.length, 0, "no activity 5");
+            deep_extend_2.extend({ a: [1, 2, [3]] }, { a: [1, 2, [3]] }, (trace = []));
+            base_4.shouldEqual(trace.length, 0, "no activity 6");
+        });
+        it("confirms trace is 1 when exactly one change is merged", () => {
+            let trace = [];
+            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 2, b: [1], c: { d: 1 } }, (trace = []));
+            base_4.shouldEqual(trace.length, 1, "a:1->2");
+            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [2], c: { d: 1 } }, (trace = []));
+            base_4.shouldEqual(trace.length, 1, "b:1->2");
+            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [1], c: { d: 2 } }, (trace = []));
+            base_4.shouldEqual(trace.length, 1, "d:1->2");
+            deep_extend_2.extend({ a: [1, 2, 3] }, { a: [1, 2, 30] }, (trace = []));
+            base_4.shouldEqual(trace.length, 1, "3->30");
+            deep_extend_2.extend({ a: [1, 2, [3]] }, { a: [1, 2, [3, 4]] }, (trace = []));
+            base_4.shouldEqual(trace.length, 1, "[3]->[3,4]");
+        });
+        it("confirms trace is 2 when exactly two changes is merged", () => {
+            let trace = [];
+            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 2, b: [1, 2], c: { d: 1 } }, (trace = []));
+            base_4.shouldEqual(trace.length, 2, "a:1->2, b:adds 2");
+            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [2, 1], c: { d: 1 } }, (trace = []));
+            base_4.shouldEqual(trace.length, 2, "b:1->2,adds 1");
+            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [1], c: { d: 2, e: 3 } }, (trace = []));
+            base_4.shouldEqual(trace.length, 2, "c.d:1->2, c.e:added");
+            deep_extend_2.extend({ a: [1, 2, 3] }, { a: [10, 2, 30] }, (trace = []));
+            base_4.shouldEqual(trace.length, 2, "1->10, 3->30");
+            deep_extend_2.extend({ a: [1, 2, [3]] }, { a: [1, 2, [3, 4], 5] }, (trace = []));
+            base_4.shouldEqual(trace.length, 2, "[3]->[3,4], 4 added");
+        });
+        it("confirms change log", done => {
+            let target = {
+                foo: 1,
+                bar: 2
+            };
+            let trace = [];
+            deep_extend_2.extend(target, {
+                foo: target.foo,
+                property: "should fire 'add' event with this object and string path to it",
+                object: {
+                    p1: "p1",
+                    p2: 2,
+                    a1: [1, 2, 3],
+                    a2: [{ id: "v1", value: 1 }]
+                }
+            }, trace);
+            base_4.shouldEqual(trace.length, 2, "property added, object added");
+            base_4.shouldEqual(trace.length, trace.filter(t => t.value !== t.was).length, "no trivial trace elements");
+            base_4.shouldEqual(trace.map(t => t.key).join(" "), "property object", "changes are depth first");
+            let t = trace.shift();
+            base_4.shouldEqual(t.key, "property", "property");
+            base_4.shouldEqual(t.value, target.property, "target.property");
+            t = trace.shift();
+            base_4.shouldEqual(t.key, "object", "object");
+            base_4.shouldEqual(t.value, target.object, "target.object");
+            deep_extend_2.extend(target, {
+                object: {}
+            }, (trace = []));
+            base_4.shouldEqual(trace.length, 0, "object was merged (but unchanged)");
+            deep_extend_2.extend(target, {
+                object: {
+                    p1: 1,
+                    p2: target.object.p2
+                }
+            }, (trace = []));
+            base_4.shouldEqual(trace.length, 1, "object.p1 was touched");
+            t = trace.shift();
+            base_4.shouldEqual(t.key, "p1", "p1 changed");
+            base_4.shouldEqual(t.was, "p1", "it was 'p1'");
+            base_4.shouldEqual(t.value, 1, "it is 1");
+            deep_extend_2.extend(target, {
+                object: {
+                    a2: [
+                        {
+                            id: "v1",
+                            value: 2
+                        },
+                        {
+                            id: "v2",
+                            value: "val2"
+                        }
+                    ]
+                }
+            }, (trace = []));
+            base_4.shouldEqual(trace.map(t => t.key).join(" "), "value 1", "object.a2(2) had one change(1) and one addition(3)");
+            trace = trace.filter(t => t.value !== t.was);
+            base_4.shouldEqual(trace.length, 2, "a2.v1 -> 2, a2.v2 was created");
+            t = trace.shift();
+            base_4.shouldEqual(t.key, "value", "a2.v1 -> 2");
+            base_4.shouldEqual(t.was, 1, "it was 1");
+            base_4.shouldEqual(t.value, 2, "it is 2");
+            t = trace.shift();
+            base_4.shouldEqual(t.key, "1", "v2 was added");
+            base_4.shouldEqual(typeof t.was, "undefined", "it was undefined");
+            base_4.shouldEqual(t.value.value, "val2", "a2.v2 is 'val2'");
+            done();
+        });
+    });
+});
+define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/extensions"], function (require, exports, base_5, extensions_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    base_5.describe("data/extensions", () => {
+        base_5.it("ensures no side-effects on the object", () => {
+            let x = new extensions_1.Extensions();
+            let o = {};
+            let expected = JSON.stringify(o);
+            x.extend(o, { custom: "data" });
+            let actual = JSON.stringify(o);
+            base_5.shouldEqual(expected, actual, "no side-effects");
+        });
+        base_5.it("ensures two objects can be bound to same extension data", () => {
+            let x = new extensions_1.Extensions();
+            let math = x.extend(Math, { sqrt2: Math.sqrt(2) });
+            base_5.should(!!x.extend(Math).sqrt2, "Math.sqrt2");
+            x.bind(Number, Math);
+            base_5.shouldEqual(Math.round(math.sqrt2 * x.extend(Number).sqrt2), 2, "sqrt2*sqrt2 = 2");
+        });
+        base_5.it("ensures two objects can be bound to same extension data", () => {
+            let x = new extensions_1.Extensions();
+        });
+    });
+    base_5.describe("100% code coverage for data/extensions", () => {
+        let ext1;
+        let ext2;
+        base_5.it("creates two extension instances", done => {
+            ext1 = new extensions_1.Extensions();
+            base_5.shouldEqual(typeof ext1.extend, "function", "extensions has an extend method");
+            base_5.shouldEqual(typeof ext1.getExtensionKey, "function", "extensions has an getExtensionKey method");
+            ext2 = new extensions_1.Extensions();
+            let o1 = {};
+            let o2 = {};
+            let xo1 = ext1.extend(o1, { v1: 1 });
+            base_5.shouldEqual(xo1, ext1.extend(o1), "extend returns extension object");
+            base_5.shouldEqual(xo1.v1, 1, "ext1 v1");
+            let xo2 = ext2.extend(o2, { v2: 2 });
+            base_5.shouldEqual(xo2.v2, 2, "ext2 v2");
+            ext2.extend(o1, { v2: 2 });
+            base_5.shouldEqual(xo2.v2, 2, "ext2 v2");
+            base_5.shouldEqual(xo1.v1, 1, "ext1 v1");
+            done();
+        });
+        base_5.it("extends an object using the first extension instance", done => {
+            let o = { v1: 1 };
+            ext1.extend(o, { v1: 2 });
+            base_5.shouldEqual(o.v1, 1, "v1 is unchanged");
+            base_5.shouldEqual(ext1.extend(o).v1, 2, "the extended object has a value for v1 in the context of the first extender");
+            false &&
+                base_5.shouldEqual(ext1.getExtensionKey(o), ext2.getExtensionKey(o), "the internal extension key for an object should be the same for both extension instances");
+            base_5.shouldEqual(typeof ext2.extend(o), "object", "the extended object exists in the context of the second extender");
+            base_5.shouldEqual(typeof ext2.extend(o).v1, "undefined", "the extended object has no extension values in the context of the second extender");
+            done();
+        });
+        base_5.it("extends an object using the both extension instances", done => {
+            let o = { v1: 1 };
+            ext1.extend(o, { v1: 2 });
+            ext2.extend(o, { v1: 3 });
+            base_5.shouldEqual(o.v1, 1, "v1 is unchanged");
+            base_5.shouldEqual(ext1.extend(o).v1, 2, "the extended object has a value for v1 in the context of the first extender");
+            base_5.shouldEqual(ext2.extend(o).v1, 3, "the extended object has a value for v1 in the context of the second extender");
+            done();
+        });
+        base_5.it("forces a key to exist on an object without setting any values", done => {
+            let o = {};
+            ext1.getExtensionKey(o, true);
+            base_5.shouldEqual(Object.keys(ext1.extend(o)).length, 0, "the extended object has no extension values in the context of the first extender");
+            base_5.shouldEqual(Object.keys(ext2.extend(o)).length, 0, "the extended object has no extension values in the context of the second extender");
+            base_5.should(ext1 !== ext2, "extensions should be unique");
+            done();
+        });
+        base_5.it("binds two objects to the same extension", done => {
+            let o1 = { id: 1 };
+            let o2 = Object.create({ id: 2 });
+            ext1.bind(o1, o2);
+            ext1.extend(o1, { foo: "foo1" });
+            base_5.shouldEqual(ext1.extend(o1).foo, "foo1");
+            ext1.extend(o2, { foo: "foo2" });
+            base_5.shouldEqual(ext1.extend(o1).foo, "foo2");
+            done();
+        });
+        base_5.it("binds a new object to an extended object", done => {
+            let o1 = { id: 1 };
+            ext1.extend(o1, { foo: "foo1" });
+            base_5.shouldEqual(ext1.extend(o1).foo, "foo1");
+            let o3 = { id: 3 };
+            ext1.bind(o1, o3);
+            base_5.shouldEqual(ext1.extend(o3).foo, "foo1");
+            let o4 = { id: 4 };
+            ext1.extend(o4, { foo: "foo4" });
+            base_5.shouldEqual(ext1.extend(o4).foo, "foo4");
+            base_5.shouldThrow(() => ext1.bind(o1, o4), "should fail to bind since o4 already extended");
+            done();
+        });
+    });
+});
+define("tests/spec/is-primitive", ["require", "exports", "tests/base", "ol3-fun/is-primitive"], function (require, exports, base_6, is_primitive_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    base_6.describe("is-primitive", () => {
+        base_6.it("true tests", () => {
+            ["A", 1, true, null, undefined, Symbol(0)].forEach(v => base_6.should(is_primitive_3.isPrimitive(v), `${v && v.toString ? v.toString() : v} is primitive`));
+        });
+        base_6.it("false tests", () => {
+            [new Date(), new RegExp(""), {}, []].forEach(v => base_6.should(!is_primitive_3.isPrimitive(v), `${v && v.toString ? v.toString() : v} is primitive`));
+        });
+    });
+});
+define("tests/spec/is-cycle", ["require", "exports", "tests/base", "ol3-fun/is-cyclic"], function (require, exports, base_7, is_cyclic_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    base_7.describe("is-cycle", () => {
+        base_7.it("false tests", () => {
+            let a = {};
+            let b = { a: a };
+            base_7.should(!is_cyclic_2.isCyclic({
+                a,
+                b
+            }), "nothing in this graph refers back to an ancestor of itself");
+        });
+        base_7.it("true tests", () => {
+            let a = { b: "" };
+            let b = { a: a };
+            a.b = b;
+            base_7.should(is_cyclic_2.isCyclic(b), "b->a->b");
+            base_7.should(is_cyclic_2.isCyclic({ b }), "{}->b->a->b");
+            base_7.shouldThrow(() => base_7.stringify(b), "cycles cannot be serialized");
+        });
+    });
+});
+define("tests/spec/openlayers-test", ["require", "exports", "tests/base", "openlayers"], function (require, exports, base_8, ol) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     describe("ol/Map", () => {
         it("ol/Map", () => {
-            base_4.should(!!ol.Map, "Map");
+            base_8.should(!!ol.Map, "Map");
         });
     });
 });
-define("tests/spec/parse-dms", ["require", "exports", "tests/base", "ol3-fun/parse-dms"], function (require, exports, base_5, parse_dms_2) {
+define("tests/spec/parse-dms", ["require", "exports", "tests/base", "ol3-fun/parse-dms"], function (require, exports, base_9, parse_dms_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    base_5.describe("parse-dms", () => {
-        base_5.it("parse", () => {
+    base_9.describe("parse-dms", () => {
+        base_9.it("parse", () => {
             let dms = parse_dms_2.parse(`10 5'2" 10`);
             if (typeof dms === "number")
                 throw "lat-lon expected";
-            base_5.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
-            base_5.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
+            base_9.should(dms.lat === 10.08388888888889, "10 degrees 5 minutes 2 seconds");
+            base_9.should(dms.lon === 10, "10 degrees 0 minutes 0 seconds");
         });
     });
 });
@@ -1047,35 +1429,35 @@ define("ol3-fun/ol3-polyline", ["require", "exports", "openlayers"], function (r
     }
     return PolylineEncoder;
 });
-define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/common"], function (require, exports, base_6, GooglePolylineEncoder, PolylineEncoder, common_5) {
+define("tests/spec/polyline", ["require", "exports", "tests/base", "ol3-fun/google-polyline", "ol3-fun/ol3-polyline", "ol3-fun/common"], function (require, exports, base_10, GooglePolylineEncoder, PolylineEncoder, common_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     describe("GooglePolylineEncoder", () => {
         it("GooglePolylineEncoder", () => {
-            base_6.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
+            base_10.should(!!GooglePolylineEncoder, "GooglePolylineEncoder");
         });
         let points = common_5.pair(common_5.range(10), common_5.range(10));
         let poly = new GooglePolylineEncoder();
         let encoded = poly.encode(points);
         let decoded = poly.decode(encoded);
-        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
-        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
+        base_10.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_10.shouldEqual(base_10.stringify(decoded), base_10.stringify(points), "encode->decode");
     });
     describe("PolylineEncoder", () => {
         it("PolylineEncoder", () => {
-            base_6.should(!!PolylineEncoder, "PolylineEncoder");
+            base_10.should(!!PolylineEncoder, "PolylineEncoder");
         });
         let points = common_5.pair(common_5.range(10), common_5.range(10));
         let poly = new PolylineEncoder();
         let encoded = poly.encode(points);
         let decoded = poly.decode(encoded);
-        base_6.shouldEqual(encoded.length, 533, "encoding is 533 characters");
-        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
+        base_10.shouldEqual(encoded.length, 533, "encoding is 533 characters");
+        base_10.shouldEqual(base_10.stringify(decoded), base_10.stringify(points), "encode->decode");
         poly = new PolylineEncoder(6);
         encoded = poly.encode(points);
         decoded = poly.decode(encoded);
-        base_6.shouldEqual(encoded.length, 632, "encoding is 632 characters");
-        base_6.shouldEqual(base_6.stringify(decoded), base_6.stringify(points), "encode->decode");
+        base_10.shouldEqual(encoded.length, 632, "encoding is 632 characters");
+        base_10.shouldEqual(base_10.stringify(decoded), base_10.stringify(points), "encode->decode");
     });
 });
 define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (require, exports, ol) {
@@ -1128,7 +1510,7 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
     }
     return Snapshot;
 });
-define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_7, Snapshot, ol, common_6) {
+define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snapshot", "openlayers", "ol3-fun/common"], function (require, exports, base_11, Snapshot, ol, common_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const pointData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFdUlEQVR4Xu1aXUybVRh+3hiWxiX+ZNSMECvjJxiqyaROyq5M2MWUZGyDLEZg0WzhJ2QELharjmbWGgqOOTRxTMDIGHpBpIwE40Un3ujA0EmUYkhcRpoJRObfJkJG9Ji3+1gWoP2+rudrSvq9l/2e857nPOc5/yUkeVCStx+GAIYDklwBYwgkuQGMSdAYAsYQSHIFjCGQ5AYwVgFjCBhDIMkViPsQEEKkANgFIB2AGcCjAP4AsADgOoBxIlqJV7/ETQAhRCWAlwA8D+DBCA38G8DXAD4jok/1FkJ3AYQQVgDdAAruozHfAqgloh/uo6ymIroKIIQ4DOBjAA9oYrMx6F8AVUTEeaSHLgIIITjvOwBel8jYTURNEvOFUuklQDMAh2yyAJqJ6A2ZeaULIIR4GUCfTJJrch0ion5Z+aUKIIRIA/CzyiwfK/d/AGQQES+bMYdsAc4D4OVO7/iEiF6VUYk0AYQQvMyNyiClMUc+EX2vERsWJlOAqHp/enoaY2NjmJubQ1paGgoKCpCbmxtNe3qI6JVoCmyElSKAsuz9CiBVC6GzZ8+ioaEBt2/fvgvfsmUL2tvbUVNToyUFYxaI6DGt4HA4WQLw3v47LWQ6OjpQW1sbFnru3DlUVVVpScWYZ4hoQitYTwfwjq9HjQjbPTMzE8vLy2GhJpMJS0tLaqlWvzuIqEUrWE8BGgC8p0ZkYGAApaWlajAIIVQxCuArIirSCtZTgDcBuNWInDp1CsePH1eDRSPA70S0TTVhBICsOYAH9YdqRLxeLw4ePKgGi0aAL4noBdWEcRCAW/W5GpHZ2VlkZWXJnAP4qNyhVm+k77IckKVsgVW58Cwfaanr7OzE0aNHVfMogGwiuqoVrNscwImFEDMAntBCpr+/H/X19Zifn78LT09Px5kzZ1BWVqYlBWOuE9HjWsHhcFIcoAjQCUBz162srGB0dBRXrlxBfn4+7HY7UlL4ulBzfERE1ZrRYYAyBXgOwFishKIov4uIxqPAbwiVJoDigosA9sVKSkP5QSI6oAGnCpEtwJMAflKtNTbAfwDyiGg6tjR3SksVQHEBX4XxlZhe8RoRtcpKLl0AJjY+Pt5jMpn4fICtW7ciIyMjIt+ZmZkQzmzmd5KI0U5EvO2WFnoIwHvddT3Ep8Dq6vWT9tDQEEpKSkINunbt2jqxFhYW4Ha7MTg4OB8MBrMBLEprvR5DAMD7gUDgWF5e3l2efO5vaWnB7t27UVRUhMnJSRARrFYr+vr6sH37drALcnJyYLFYQuUWFxdDYjQ3Nwuz2Uw3b96E0+l8GsBkwgvg9/uPDQ8PM+He1NTUhzweT0lhYSFaW1tx48YN8DcOm82GiooKNDY2btgmi8XyZzAYfMTv94fKOJ1OP4BnN5MAfE2Grq6uwyyA3W7/y+v1Pswu4JiamkJxcTF/DzmAY//+/di27c4B79KlS6Hfjxw5glu3bqGurg69vb1Sh63UZErPrBsCq+TZ4nwbdPr06W+6u7t/GxkZ2Xf58uWQ1VcF2Lt3L5qamrw7duw4UF5ezlvmoMvlsigO4MliaDM5YJXrFwBGXC7Xu9zjNputgj/4fL4Lq4BVAViMPXv2VFRWVl5wOBxwOBxXT548maUIsOnmgHsJP+VyuX5kB3g8nom2trZfAoFA8VoHqAjwNgDnZnLA2h477/P5Ku+dA6xW64TP59sZzgEnTpyYcLvdO7Ozs0MridPp5JtgKa9CLKQecwCfBfhMwLY/tGbd5p0Ov/AeU3rxA+Uxhd8SAwB4m8ui2QHUKa9Mbyn/KHkxTM6YDKGHADERindhQ4B4K55o9RkOSLQeiTcfwwHxVjzR6jMckGg9Em8+hgPirXii1Zf0DvgfGiXvUAsr6xQAAAAASUVORK5CYII=";
@@ -1153,9 +1535,9 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
     }
     describe("Snapshot", () => {
         it("Snapshot", () => {
-            base_7.should(!!Snapshot, "Snapshot");
-            base_7.should(!!Snapshot.render, "Snapshot.render");
-            base_7.should(!!Snapshot.snapshot, "Snapshot.snapshot");
+            base_11.should(!!Snapshot, "Snapshot");
+            base_11.should(!!Snapshot.render, "Snapshot.render");
+            base_11.should(!!Snapshot.snapshot, "Snapshot.snapshot");
         });
         it("Converts a point to image data", () => {
             let feature = new ol.Feature(new ol.geom.Point([0, 0]));
@@ -1185,7 +1567,7 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
             if (1 === window.devicePixelRatio) {
                 if (data !== pointData)
                     show(pointData);
-                base_7.shouldEqual(data, pointData, "point data as expected");
+                base_11.shouldEqual(data, pointData, "point data as expected");
             }
         });
         it("Converts a triangle to image data", () => {
@@ -1205,20 +1587,20 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
         it("Converts a polygon to image data", () => {
             let geom = new ol.geom.Polygon([circle(3 + 100 * Math.random())]);
             let feature = new ol.Feature(geom);
-            base_7.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
+            base_11.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
             feature.setStyle(createStyle("Circle"));
-            let originalCoordinates = base_7.stringify(geom.getCoordinates());
+            let originalCoordinates = base_11.stringify(geom.getCoordinates());
             let data = Snapshot.snapshot(feature, 64);
             console.log(data);
-            base_7.should(!!data, "snapshot returns data");
+            base_11.should(!!data, "snapshot returns data");
             show(data);
-            let finalCoordinates = base_7.stringify(geom.getCoordinates());
-            base_7.shouldEqual(originalCoordinates, finalCoordinates, "coordinates unchanged");
-            base_7.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
+            let finalCoordinates = base_11.stringify(geom.getCoordinates());
+            base_11.shouldEqual(originalCoordinates, finalCoordinates, "coordinates unchanged");
+            base_11.shouldEqual(feature.getGeometry(), geom, "geom still assigned");
             if (1 === window.devicePixelRatio) {
                 if (data !== pointData)
                     show(circleData);
-                base_7.shouldEqual(data, circleData, "circle data as expected");
+                base_11.shouldEqual(data, circleData, "circle data as expected");
             }
         });
     });
@@ -1245,12 +1627,12 @@ define("tests/spec/snapshot", ["require", "exports", "tests/base", "ol3-fun/snap
         });
     }
 });
-define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests/base", "ol3-fun/navigation"], function (require, exports, ol, base_8, navigation_2) {
+define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests/base", "ol3-fun/navigation"], function (require, exports, ol, base_12, navigation_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     describe("zoomToFeature", () => {
         it("zoomToFeature", (done) => {
-            base_8.should(!!navigation_2.zoomToFeature, "zoomToFeature");
+            base_12.should(!!navigation_2.zoomToFeature, "zoomToFeature");
             let map = new ol.Map({
                 view: new ol.View({
                     zoom: 0,
@@ -1268,333 +1650,16 @@ define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests
                     minResolution: res / 4,
                 }).then(() => {
                     let [cx, cy] = map.getView().getCenter();
-                    base_8.should(map.getView().getZoom() === zoom + 2, "zoom in two because minRes is 1/4 of initial res");
-                    base_8.should(cx === 100, "center-x");
-                    base_8.should(cy === 100, "center-y");
+                    base_12.should(map.getView().getZoom() === zoom + 2, "zoom in two because minRes is 1/4 of initial res");
+                    base_12.should(cx === 100, "center-x");
+                    base_12.should(cy === 100, "center-y");
                     done();
                 });
             });
         });
     });
 });
-define("tests/spec/deep-extend", ["require", "exports", "tests/base", "ol3-fun/deep-extend"], function (require, exports, base_9, deep_extend_2) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    describe("utils/deep-extend", () => {
-        it("trivial merges", () => {
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend({}, {})), base_9.stringify({}), "empty objects");
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([], [])), base_9.stringify([]), "empty arrays");
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([,], [, ,])), base_9.stringify([,]), "arrays with empty items");
-            let o = { a: 1 };
-            base_9.shouldEqual(o, deep_extend_2.extend(o, o), "merges same object");
-            base_9.should(o !== deep_extend_2.extend(o), "clones when second argument not provided");
-        });
-        it("invalid merges", () => {
-            base_9.shouldThrow(() => deep_extend_2.extend({}, []), "{} and []");
-            base_9.shouldThrow(() => deep_extend_2.extend([], {}), "[] and {}");
-            base_9.shouldThrow(() => deep_extend_2.extend(1, 2), "primitives");
-            base_9.shouldThrow(() => deep_extend_2.extend(new Date(2000, 1, 1), new Date(2000, 1, 2)), "clonable primitives");
-            let a = { a: 1 };
-            let b = { b: a };
-            a.b = b;
-            base_9.shouldThrow(() => deep_extend_2.extend(b), "b->a->b");
-        });
-        it("simple data merges", () => {
-            let o = deep_extend_2.extend({ v1: 1 });
-            base_9.shouldEqual(o.v1, 1, "adds v1");
-            deep_extend_2.extend(o, { v1: 2 });
-            base_9.shouldEqual(o.v1, 2, "updates v1");
-        });
-        it("simple array merges", () => {
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([1], [])), base_9.stringify([1]), "[1] + []");
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([1], [2])), base_9.stringify([2]), "[1] + [2]");
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([1, 2, 3], [2])), base_9.stringify([2, 2, 3]), "[1,2,3] + [2]");
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([2], [1, 2, 3])), base_9.stringify([1, 2, 3]), "[2] + [1,2,3]");
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([, , , 4], [1, 2, 3])), base_9.stringify([1, 2, 3, 4]), "array can have empty items");
-            base_9.shouldEqual(base_9.stringify(deep_extend_2.extend([{ id: 1 }], [{ id: 2 }])), base_9.stringify([{ id: 1 }, { id: 2 }]), "[1] + [2] with ids");
-        });
-        it("preserves array ordering", () => {
-            base_9.shouldEqual(deep_extend_2.extend([{ id: 1 }], [{ id: 1 }, { id: 2 }])[0].id, 1, "first item id");
-            base_9.shouldEqual(deep_extend_2.extend([{ id: 2 }], [{ id: 1 }, { id: 2 }])[0].id, 2, "first item id");
-            base_9.shouldEqual(deep_extend_2.extend([{ id: 1 }, { id: 3 }], [{ id: 2 }, { id: 1, v: 1 }])[0].v, 1, "first item id");
-        });
-        it("clones objects with primitives", () => {
-            let source = { v1: { v2: { v3: 1 } } };
-            let o = deep_extend_2.extend(source);
-            base_9.shouldEqual(o.v1.v2.v3, 1, "properly extends {}");
-            base_9.should(source.v1 !== o.v1, "properly clones objects");
-        });
-        it("clones dates", () => {
-            let source = { date: new Date() };
-            let o = deep_extend_2.extend(source);
-            base_9.should(source.date !== o.date, "dates are clones");
-            base_9.shouldEqual(source.date.getUTCDate(), o.date.getUTCDate(), "date values are preserved");
-        });
-        it("confirms references are preserved", () => {
-            let x = { foo: { bar: "foo" }, array: [{ id: "a", value: "ax" }] };
-            let y = { foo: { bar: "bar" }, array: [{ id: "a", value: "ay" }] };
-            let xfoo = x.foo;
-            let xarray = x.array[0];
-            let z = deep_extend_2.extend(x, y);
-            base_9.shouldEqual(x, z, "returns x");
-            base_9.shouldEqual(xfoo, z.foo, "reference foo preserved");
-            base_9.shouldEqual(xarray.value, "ay", "existing array references are preserved");
-        });
-        it("confirms array merge is 'id' aware", () => {
-            let o1 = {
-                values: [
-                    {
-                        id: "v1",
-                        value: { v1: 1 }
-                    },
-                    {
-                        id: "v2",
-                        value: { v2: 1 }
-                    },
-                    {
-                        id: "v9",
-                        value: { v9: 1 }
-                    }
-                ]
-            };
-            let o2 = {
-                values: [
-                    {
-                        id: "v1",
-                        value: { v1: 2 }
-                    },
-                    {
-                        id: "v9",
-                        value: { v9: 2 }
-                    }
-                ]
-            };
-            let o = deep_extend_2.extend(o1);
-            base_9.shouldEqual(o.values[0].value.v1, 1, "object is clone of o1, v1");
-            base_9.shouldEqual(o.values[1].value.v2, 1, "object is clone of o1, v2");
-            base_9.shouldEqual(o.values[2].value.v9, 1, "object is clone of o1, v9");
-            deep_extend_2.extend(o, o2);
-            base_9.shouldEqual(o.values[0].value.v1, 2, "merge replaces v1");
-            base_9.shouldEqual(o.values[1].value.v2, 1, "merge preserves v2");
-            base_9.shouldEqual(o.values[2].value.v9, 2, "merge replaces v9");
-        });
-        it("confirms array references are preserved", () => {
-            let x = { foo: { bar: "foo" } };
-            let y = { foo: { bar: "bar" } };
-            let xfoo = x.foo;
-            let z = deep_extend_2.extend(x, y);
-            base_9.shouldEqual(x, z, "returns x");
-            base_9.shouldEqual(xfoo, z.foo, "reference foo preserved");
-        });
-        it("confirms trace is empty when merging duplicate objects", () => {
-            let trace = [];
-            deep_extend_2.extend({}, {}, trace);
-            base_9.shouldEqual(trace.length, 0, "no activity 0");
-            deep_extend_2.extend({ a: 1 }, { a: 1 }, trace);
-            base_9.shouldEqual(trace.length, 0, "no activity 1");
-            deep_extend_2.extend({ a: 1, b: [1] }, { a: 1, b: [1] }, trace);
-            base_9.shouldEqual(trace.length, 0, "no activity 2");
-            deep_extend_2.extend({ a: 1, b: [1], c: {} }, { a: 1, b: [1], c: {} }, trace);
-            base_9.shouldEqual(trace.length, 0, "no activity 3");
-            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [1], c: { d: 1 } }, trace);
-            base_9.shouldEqual(trace.length, 0, "no activity 4");
-            deep_extend_2.extend({ a: [1, 2, 3] }, { a: [1, 2, 3] }, (trace = []));
-            base_9.shouldEqual(trace.length, 0, "no activity 5");
-            deep_extend_2.extend({ a: [1, 2, [3]] }, { a: [1, 2, [3]] }, (trace = []));
-            base_9.shouldEqual(trace.length, 0, "no activity 6");
-        });
-        it("confirms trace is 1 when exactly one change is merged", () => {
-            let trace = [];
-            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 2, b: [1], c: { d: 1 } }, (trace = []));
-            base_9.shouldEqual(trace.length, 1, "a:1->2");
-            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [2], c: { d: 1 } }, (trace = []));
-            base_9.shouldEqual(trace.length, 1, "b:1->2");
-            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [1], c: { d: 2 } }, (trace = []));
-            base_9.shouldEqual(trace.length, 1, "d:1->2");
-            deep_extend_2.extend({ a: [1, 2, 3] }, { a: [1, 2, 30] }, (trace = []));
-            base_9.shouldEqual(trace.length, 1, "3->30");
-            deep_extend_2.extend({ a: [1, 2, [3]] }, { a: [1, 2, [3, 4]] }, (trace = []));
-            base_9.shouldEqual(trace.length, 1, "[3]->[3,4]");
-        });
-        it("confirms trace is 2 when exactly two changes is merged", () => {
-            let trace = [];
-            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 2, b: [1, 2], c: { d: 1 } }, (trace = []));
-            base_9.shouldEqual(trace.length, 2, "a:1->2, b:adds 2");
-            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [2, 1], c: { d: 1 } }, (trace = []));
-            base_9.shouldEqual(trace.length, 2, "b:1->2,adds 1");
-            deep_extend_2.extend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [1], c: { d: 2, e: 3 } }, (trace = []));
-            base_9.shouldEqual(trace.length, 2, "c.d:1->2, c.e:added");
-            deep_extend_2.extend({ a: [1, 2, 3] }, { a: [10, 2, 30] }, (trace = []));
-            base_9.shouldEqual(trace.length, 2, "1->10, 3->30");
-            deep_extend_2.extend({ a: [1, 2, [3]] }, { a: [1, 2, [3, 4], 5] }, (trace = []));
-            base_9.shouldEqual(trace.length, 2, "[3]->[3,4], 4 added");
-        });
-        it("confirms change log", done => {
-            let target = {
-                foo: 1,
-                bar: 2
-            };
-            let trace = [];
-            deep_extend_2.extend(target, {
-                foo: target.foo,
-                property: "should fire 'add' event with this object and string path to it",
-                object: {
-                    p1: "p1",
-                    p2: 2,
-                    a1: [1, 2, 3],
-                    a2: [{ id: "v1", value: 1 }]
-                }
-            }, trace);
-            base_9.shouldEqual(trace.length, 2, "property added, object added");
-            base_9.shouldEqual(trace.length, trace.filter(t => t.value !== t.was).length, "no trivial trace elements");
-            base_9.shouldEqual(trace.map(t => t.key).join(" "), "property object", "changes are depth first");
-            let t = trace.shift();
-            base_9.shouldEqual(t.key, "property", "property");
-            base_9.shouldEqual(t.value, target.property, "target.property");
-            t = trace.shift();
-            base_9.shouldEqual(t.key, "object", "object");
-            base_9.shouldEqual(t.value, target.object, "target.object");
-            deep_extend_2.extend(target, {
-                object: {}
-            }, (trace = []));
-            base_9.shouldEqual(trace.length, 0, "object was merged (but unchanged)");
-            deep_extend_2.extend(target, {
-                object: {
-                    p1: 1,
-                    p2: target.object.p2
-                }
-            }, (trace = []));
-            base_9.shouldEqual(trace.length, 1, "object.p1 was touched");
-            t = trace.shift();
-            base_9.shouldEqual(t.key, "p1", "p1 changed");
-            base_9.shouldEqual(t.was, "p1", "it was 'p1'");
-            base_9.shouldEqual(t.value, 1, "it is 1");
-            deep_extend_2.extend(target, {
-                object: {
-                    a2: [
-                        {
-                            id: "v1",
-                            value: 2
-                        },
-                        {
-                            id: "v2",
-                            value: "val2"
-                        }
-                    ]
-                }
-            }, (trace = []));
-            base_9.shouldEqual(trace.map(t => t.key).join(" "), "value 1", "object.a2(2) had one change(1) and one addition(3)");
-            trace = trace.filter(t => t.value !== t.was);
-            base_9.shouldEqual(trace.length, 2, "a2.v1 -> 2, a2.v2 was created");
-            t = trace.shift();
-            base_9.shouldEqual(t.key, "value", "a2.v1 -> 2");
-            base_9.shouldEqual(t.was, 1, "it was 1");
-            base_9.shouldEqual(t.value, 2, "it is 2");
-            t = trace.shift();
-            base_9.shouldEqual(t.key, "1", "v2 was added");
-            base_9.shouldEqual(typeof t.was, "undefined", "it was undefined");
-            base_9.shouldEqual(t.value.value, "val2", "a2.v2 is 'val2'");
-            done();
-        });
-    });
-});
-define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/extensions"], function (require, exports, base_10, extensions_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    describe("data/extensions", () => {
-        it("ensures no side-effects on the object", () => {
-            let x = new extensions_1.Extensions();
-            let o = {};
-            let expected = JSON.stringify(o);
-            x.extend(o, { custom: "data" });
-            let actual = JSON.stringify(o);
-            base_10.shouldEqual(expected, actual, "no side-effects");
-        });
-        it("ensures two objects can be bound to same extension data", () => {
-            let x = new extensions_1.Extensions();
-            let math = x.extend(Math, { sqrt2: Math.sqrt(2) });
-            base_10.should(!!x.extend(Math).sqrt2, "Math.sqrt2");
-            x.bind(Number, Math);
-            base_10.shouldEqual(Math.round(math.sqrt2 * x.extend(Number).sqrt2), 2, "sqrt2*sqrt2 = 2");
-        });
-        it("ensures two objects can be bound to same extension data", () => {
-            let x = new extensions_1.Extensions();
-        });
-    });
-    describe("100% code coverage for data/extensions", () => {
-        let ext1;
-        let ext2;
-        it("creates two extension instances", done => {
-            ext1 = new extensions_1.Extensions();
-            base_10.shouldEqual(typeof ext1.extend, "function", "extensions has an extend method");
-            base_10.shouldEqual(typeof ext1.getExtensionKey, "function", "extensions has an getExtensionKey method");
-            ext2 = new extensions_1.Extensions();
-            let o1 = {};
-            let o2 = {};
-            let xo1 = ext1.extend(o1, { v1: 1 });
-            base_10.shouldEqual(xo1, ext1.extend(o1), "extend returns extension object");
-            base_10.shouldEqual(xo1.v1, 1, "ext1 v1");
-            let xo2 = ext2.extend(o2, { v2: 2 });
-            base_10.shouldEqual(xo2.v2, 2, "ext2 v2");
-            ext2.extend(o1, { v2: 2 });
-            base_10.shouldEqual(xo2.v2, 2, "ext2 v2");
-            base_10.shouldEqual(xo1.v1, 1, "ext1 v1");
-            done();
-        });
-        it("extends an object using the first extension instance", done => {
-            let o = { v1: 1 };
-            ext1.extend(o, { v1: 2 });
-            base_10.shouldEqual(o.v1, 1, "v1 is unchanged");
-            base_10.shouldEqual(ext1.extend(o).v1, 2, "the extended object has a value for v1 in the context of the first extender");
-            false &&
-                base_10.shouldEqual(ext1.getExtensionKey(o), ext2.getExtensionKey(o), "the internal extension key for an object should be the same for both extension instances");
-            base_10.shouldEqual(typeof ext2.extend(o), "object", "the extended object exists in the context of the second extender");
-            base_10.shouldEqual(typeof ext2.extend(o).v1, "undefined", "the extended object has no extension values in the context of the second extender");
-            done();
-        });
-        it("extends an object using the both extension instances", done => {
-            let o = { v1: 1 };
-            ext1.extend(o, { v1: 2 });
-            ext2.extend(o, { v1: 3 });
-            base_10.shouldEqual(o.v1, 1, "v1 is unchanged");
-            base_10.shouldEqual(ext1.extend(o).v1, 2, "the extended object has a value for v1 in the context of the first extender");
-            base_10.shouldEqual(ext2.extend(o).v1, 3, "the extended object has a value for v1 in the context of the second extender");
-            done();
-        });
-        it("forces a key to exist on an object without setting any values", done => {
-            let o = {};
-            ext1.getExtensionKey(o, true);
-            base_10.shouldEqual(Object.keys(ext1.extend(o)).length, 0, "the extended object has no extension values in the context of the first extender");
-            base_10.shouldEqual(Object.keys(ext2.extend(o)).length, 0, "the extended object has no extension values in the context of the second extender");
-            base_10.should(ext1 !== ext2, "extensions should be unique");
-            done();
-        });
-        it("binds two objects to the same extension", done => {
-            let o1 = { id: 1 };
-            let o2 = Object.create({ id: 2 });
-            ext1.bind(o1, o2);
-            ext1.extend(o1, { foo: "foo1" });
-            base_10.shouldEqual(ext1.extend(o1).foo, "foo1");
-            ext1.extend(o2, { foo: "foo2" });
-            base_10.shouldEqual(ext1.extend(o1).foo, "foo2");
-            done();
-        });
-        it("binds a new object to an extended object", done => {
-            let o1 = { id: 1 };
-            ext1.extend(o1, { foo: "foo1" });
-            base_10.shouldEqual(ext1.extend(o1).foo, "foo1");
-            let o3 = { id: 3 };
-            ext1.bind(o1, o3);
-            base_10.shouldEqual(ext1.extend(o3).foo, "foo1");
-            let o4 = { id: 4 };
-            ext1.extend(o4, { foo: "foo4" });
-            base_10.shouldEqual(ext1.extend(o4).foo, "foo4");
-            base_10.shouldThrow(() => ext1.bind(o1, o4), "should fail to bind since o4 already extended");
-            done();
-        });
-    });
-});
-define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/common", "tests/spec/slowloop", "tests/spec/openlayers-test", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature", "tests/spec/deep-extend", "tests/spec/extensions"], function (require, exports) {
+define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/common", "tests/spec/slowloop", "tests/spec/deep-extend", "tests/spec/extensions", "tests/spec/is-primitive", "tests/spec/is-cycle", "tests/spec/openlayers-test", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
 });

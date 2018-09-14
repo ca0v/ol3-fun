@@ -32,7 +32,7 @@ export function shouldThrow(fn: Function, message?: string) {
 		fn();
 	} catch (ex) {
 		should(!!ex, ex);
-		return;
+		return ex;
 	}
 	should(false, `expected an exception${message ? ": " + message : ""}`);
 }

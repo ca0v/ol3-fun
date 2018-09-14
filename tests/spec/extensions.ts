@@ -1,4 +1,4 @@
-﻿import { should, shouldEqual, shouldThrow } from "../base";
+﻿import { describe, it, should, shouldEqual, shouldThrow } from "../base";
 import { Extensions } from "../../ol3-fun/extensions";
 
 describe("data/extensions", () => {
