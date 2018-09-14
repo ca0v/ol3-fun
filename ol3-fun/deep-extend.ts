@@ -28,7 +28,7 @@ type History = Array<object>;
  * @param trace optional change tracking
  * @param history object added here are not visited
  */
-export function extend<A extends object>(a: A, b?: Partial<A>, trace = <Array<TraceItem>>[], history: History = []) {
+export function extend<A extends object>(a: A, b?: Partial<A>, trace?: Array<TraceItem>, history: History = []) {
 	if (!b) {
 		b = <A>a;
 		a = <any>{};
@@ -65,7 +65,13 @@ function clone(val: any): any {
  * Hepler class for managing the trace
  */
 class Merger {
-	constructor(public trace: Array<TraceItem>, public history: History) {}
+	private trace(item: TraceItem) {
+		if (this.traceItems) {
+			this.traceItems.push(item);
+		}
+	}
+
+	constructor(public traceItems: Array<TraceItem>, public history: History) {}
 
 	/**
 	 * @param target Object to be extended is the first argument
@@ -122,7 +128,13 @@ class Merger {
 
 	private cloneArray(val: Array<any>): Array<any> {
 		this.push(val);
-		return val.map(v => (isArray(v) ? this.cloneArray(v) : canClone(v) ? clone(v) : v));
+		return val.map(v => {
+			if (isPrimitive(v)) return v;
+			if (isHash(v)) return this.deepExtend({}, v);
+			if (isArray(v)) return this.cloneArray(v);
+			if (canClone(v)) return clone(v);
+			throw `unknown type encountered: ${typeof v}`;
+		});
 	}
 
 	private push(a: any) {
@@ -146,7 +158,7 @@ class Merger {
 		 */
 		if (isPrimitive(sourceValue)) {
 			// record change
-			this.trace.push({
+			this.trace({
 				key: key,
 				target: target,
 				was: targetValue,
@@ -161,7 +173,7 @@ class Merger {
 		if (canClone(sourceValue)) {
 			sourceValue = clone(sourceValue);
 			// record change
-			this.trace.push({
+			this.trace({
 				key: key,
 				target: target,
 				was: targetValue,
@@ -185,7 +197,7 @@ class Merger {
 			 * create/update the target with the source array
 			 */
 			sourceValue = this.cloneArray(sourceValue);
-			this.trace.push({
+			this.trace({
 				key: key,
 				target: target,
 				was: targetValue,
@@ -206,13 +218,9 @@ class Merger {
 		 */
 		if (!isHash(targetValue)) {
 			// clone the source
-			let traceIndex = this.trace.length;
-			try {
-				sourceValue = this.deepExtend({}, sourceValue);
-			} finally {
-				this.trace.splice(traceIndex, this.trace.length - traceIndex);
-			}
-			this.trace.push({
+			let merger = new Merger(null, this.history);
+			sourceValue = merger.deepExtend({}, sourceValue);
+			this.trace({
 				key: key,
 				target: target,
 				was: targetValue,

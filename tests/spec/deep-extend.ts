@@ -1,5 +1,7 @@
 ﻿import { should, shouldEqual, stringify, shouldThrow } from "../base";
 import { extend as deepExtend, TraceItem } from "../../ol3-fun/deep-extend";
+import { createDiffieHellman } from "crypto";
+import { range } from "ol3-fun/common";
 
 describe("utils/deep-extend", () => {
 	it("trivial merges", () => {
@@ -69,6 +71,25 @@ describe("utils/deep-extend", () => {
 		let o = deepExtend(source);
 		should(source.date !== o.date, "dates are clones");
 		shouldEqual(source.date.getUTCDate(), o.date.getUTCDate(), "date values are preserved");
+	});
+
+	it("clones nested objects", () => {
+		let source = { v1: { v2: { v3: 1 } } };
+		let o = deepExtend(source);
+		should(source !== o, "clones source");
+		shouldEqual(source.v1.v2.v3, o.v1.v2.v3, "properly extends v3");
+		should(source.v1 !== o.v1, "properly clones v1");
+		should(source.v1.v2 !== o.v1.v2, "properly clones v1.v2");
+	});
+
+	it("clones arrays", () => {
+		let source = { v1: range(1).map(i => ({ id: i + 1, value: i })) };
+		debugger;
+		let o = deepExtend(source);
+		should(source !== o, "clones source");
+		should(source.v1 !== o.v1, "clones v1");
+		should(source.v1[0].value === o.v1[0].value, "extends v1[1].value");
+		should(source.v1[0] !== o.v1[0], "clones v1[1]");
 	});
 
 	it("confirms references are preserved", () => {
@@ -151,7 +172,7 @@ describe("utils/deep-extend", () => {
 		shouldEqual(trace.length, 0, "no activity 6");
 	});
 
-	it("confirms trace is 1 when exactly one change is merged", () => {
+	it("confirms trace count is 1 when exactly one change is merged", () => {
 		let trace: Array<TraceItem> = [];
 		deepExtend({ a: 1, b: [1], c: { d: 1 } }, { a: 2, b: [1], c: { d: 1 } }, (trace = []));
 		shouldEqual(trace.length, 1, "a:1->2");
@@ -165,7 +186,7 @@ describe("utils/deep-extend", () => {
 		shouldEqual(trace.length, 1, "[3]->[3,4]");
 	});
 
-	it("confirms trace is 2 when exactly two changes is merged", () => {
+	it("confirms trace count is 2 when exactly two changes is merged", () => {
 		let trace: Array<TraceItem> = [];
 		deepExtend({ a: 1, b: [1], c: { d: 1 } }, { a: 2, b: [1, 2], c: { d: 1 } }, (trace = []));
 		shouldEqual(trace.length, 2, "a:1->2, b:adds 2");
@@ -179,18 +200,16 @@ describe("utils/deep-extend", () => {
 		shouldEqual(trace.length, 2, "[3]->[3,4], 4 added");
 	});
 
-	it("confirms change log", done => {
-		let target = <any>{
-			foo: 1,
-			bar: 2
-		};
-
+	it("confirms trace content", () => {
 		let trace = <Array<TraceItem>>[];
 
-		deepExtend(
-			target,
+		let target = deepExtend(
+			<any>{
+				foo: 1,
+				bar: 2
+			},
 			{
-				foo: target.foo,
+				foo: 1,
 				property: "should fire 'add' event with this object and string path to it",
 				object: {
 					p1: "p1",
@@ -215,73 +234,40 @@ describe("utils/deep-extend", () => {
 		t = trace.shift();
 		shouldEqual(t.key, "object", "object");
 		shouldEqual(t.value, target.object, "target.object");
+	});
 
-		// do a noop merge
-		deepExtend(
-			target,
-			{
-				object: {}
-			},
-			(trace = [])
-		);
-
-		shouldEqual(trace.length, 0, "object was merged (but unchanged)");
-
-		// do a merge which changes p1
-		deepExtend(
-			target,
-			{
-				object: {
-					p1: 1,
-					p2: target.object.p2
-				}
-			},
-			(trace = [])
-		);
-
-		shouldEqual(trace.length, 1, "object.p1 was touched");
-
-		t = trace.shift();
-		shouldEqual(t.key, "p1", "p1 changed");
-		shouldEqual(t.was, "p1", "it was 'p1'");
-		shouldEqual(t.value, 1, "it is 1");
-
-		// do a merge which changes a2
-		// currently it is a2: [{ id: "v1", value: 1 }]
-		deepExtend(
-			target,
-			{
-				object: {
-					a2: [
-						{
-							id: "v1",
-							value: 2
-						},
-						{
-							id: "v2",
-							value: "val2"
-						}
-					]
-				}
-			},
-			(trace = [])
-		);
-
-		shouldEqual(trace.map(t => t.key).join(" "), "value 1", "object.a2(2) had one change(1) and one addition(3)");
-
-		trace = trace.filter(t => t.value !== t.was);
-		shouldEqual(trace.length, 2, "a2.v1 -> 2, a2.v2 was created");
-
-		t = trace.shift();
-		shouldEqual(t.key, "value", "a2.v1 -> 2");
-		shouldEqual(t.was, 1, "it was 1");
-		shouldEqual(t.value, 2, "it is 2");
-
-		t = trace.shift();
-		shouldEqual(t.key, "1", "v2 was added");
-		shouldEqual(typeof t.was, "undefined", "it was undefined");
-		shouldEqual(t.value.value, "val2", "a2.v2 is 'val2'");
-
-		done();
+	it("generates a diff from the trace", () => {
+		let trace = <Array<TraceItem>>[];
+		let a = {
+			name: "name"
+		};
+		let b = {
+			name: "name",
+			firstName: "Alice",
+			lastName: "Ames"
+		};
+		let expected = {
+			firstName: "Alice",
+			lastName: "Ames"
+		};
+		deepExtend(a, b, (trace = []));
+		/**
+		 * I want a minimal version of b, in this case it should drop the name
+		 */
+		shouldEqual(stringify(diff(trace)), stringify(expected));
 	});
 });
+
+function forcePath(o: any, path: string) {
+	let nodes = path.split(",");
+	let node = o;
+	return nodes.map(n => (node = node[n] = node[n] || <any>{})).pop();
+}
+
+function diff(trace: Array<TraceItem>) {
+	let result = <any>{};
+	trace.forEach(t => {
+		forcePath(result, t.path)[t.key] = t.value;
+	});
+	return result;
+}
