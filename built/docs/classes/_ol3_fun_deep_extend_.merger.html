@@ -98,7 +98,7 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#history" class="tsd-kind-icon">history</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#trace" class="tsd-kind-icon">trace</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#traceitems" class="tsd-kind-icon">trace<wbr>Items</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-not-exported">
@@ -106,9 +106,10 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#clonearray" class="tsd-kind-icon">clone<wbr>Array</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#deepextend" class="tsd-kind-icon">deep<wbr>Extend</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#merge" class="tsd-kind-icon">merge</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#mergearray" class="tsd-kind-icon">merge<wbr>Array</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#mergechild" class="tsd-kind-icon">merge<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#push" class="tsd-kind-icon">push</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.merger.html#trace" class="tsd-kind-icon">trace</a></li>
 							</ul>
 						</section>
 					</div>
@@ -120,19 +121,19 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Merger<span class="tsd-signature-symbol">(</span>trace<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">&gt;</span>, history<span class="tsd-signature-symbol">: </span><a href="../modules/_ol3_fun_deep_extend_.html#history" class="tsd-signature-type">History</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_ol3_fun_deep_extend_.merger.html" class="tsd-signature-type">Merger</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Merger<span class="tsd-signature-symbol">(</span>traceItems<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">&gt;</span>, history<span class="tsd-signature-symbol">: </span><a href="../modules/_ol3_fun_deep_extend_.html#history" class="tsd-signature-type">History</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_ol3_fun_deep_extend_.merger.html" class="tsd-signature-type">Merger</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L67">ol3-fun/deep-extend.ts:67</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L74">ol3-fun/deep-extend.ts:74</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>trace: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">&gt;</span></h5>
+									<h5>traceItems: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
 									<h5>history: <a href="../modules/_ol3_fun_deep_extend_.html#history" class="tsd-signature-type">History</a></h5>
@@ -151,17 +152,17 @@
 					<div class="tsd-signature tsd-kind-icon">history<span class="tsd-signature-symbol">:</span> <a href="../modules/_ol3_fun_deep_extend_.html#history" class="tsd-signature-type">History</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L68">ol3-fun/deep-extend.ts:68</a></li>
+							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L76">ol3-fun/deep-extend.ts:76</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-not-exported">
-					<a name="trace" class="tsd-anchor"></a>
-					<h3>trace</h3>
-					<div class="tsd-signature tsd-kind-icon">trace<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">&gt;</span></div>
+					<a name="traceitems" class="tsd-anchor"></a>
+					<h3>trace<wbr>Items</h3>
+					<div class="tsd-signature tsd-kind-icon">trace<wbr>Items<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L68">ol3-fun/deep-extend.ts:68</a></li>
+							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L76">ol3-fun/deep-extend.ts:76</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -172,19 +173,22 @@
 					<a name="clonearray" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> clone<wbr>Array</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">clone<wbr>Array<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">clone<wbr>Array<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, path<span class="tsd-signature-symbol">: </span><a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L123">ol3-fun/deep-extend.ts:123</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L126">ol3-fun/deep-extend.ts:126</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>val: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>path: <a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -195,13 +199,13 @@
 					<a name="deepextend" class="tsd-anchor"></a>
 					<h3>deep<wbr>Extend</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">deep<wbr>Extend&lt;T, U&gt;<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">U</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+						<li class="tsd-signature tsd-kind-icon">deep<wbr>Extend&lt;T, U&gt;<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">U</span>, path<span class="tsd-signature-symbol">: </span><a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L80">ol3-fun/deep-extend.ts:80</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L83">ol3-fun/deep-extend.ts:83</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -220,35 +224,35 @@
 								<li>
 									<h5>target: <span class="tsd-signature-type">T</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>Object to be extended is the first argument</p>
+										<p>Object to be extended</p>
 									</div>
 								</li>
 								<li>
 									<h5>source: <span class="tsd-signature-type">U</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>Object with values to be copied into target is the second parameter</p>
+										<p>Object with values to be copied into target</p>
 									</div>
+								</li>
+								<li>
+									<h5>path: <a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
-							<p>extended object or false if have no target object or incorrect type.</p>
-							<p>If you wish to clone source object (without modify it), just use empty new
-								object as first argument, like this:
-							deepExtend({}, yourObj_1, [yourObj_N]);</p>
+							<p>extended object</p>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
-					<a name="merge" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> merge</h3>
+					<a name="mergearray" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> merge<wbr>Array</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">merge<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">merge<wbr>Array<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, path<span class="tsd-signature-symbol">: </span><a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L231">ol3-fun/deep-extend.ts:231</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L240">ol3-fun/deep-extend.ts:240</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -262,6 +266,9 @@
 								<li>
 									<h5>source: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
+								<li>
+									<h5>path: <a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a></h5>
+								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
@@ -271,13 +278,13 @@
 					<a name="mergechild" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> merge<wbr>Child</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">merge<wbr>Child<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span>, target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, sourceValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">merge<wbr>Child<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span>, target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, sourceValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, path<span class="tsd-signature-symbol">: </span><a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L137">ol3-fun/deep-extend.ts:137</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L146">ol3-fun/deep-extend.ts:146</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -290,6 +297,9 @@
 								</li>
 								<li>
 									<h5>sourceValue: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5>path: <a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-signature-type">Path</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -306,7 +316,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/deep-extend.ts#L128">ol3-fun/deep-extend.ts:128</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L137">ol3-fun/deep-extend.ts:137</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -316,6 +326,29 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
+					<a name="trace" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> trace</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
+						<li class="tsd-signature tsd-kind-icon">trace<span class="tsd-signature-symbol">(</span>item<span class="tsd-signature-symbol">: </span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L69">ol3-fun/deep-extend.ts:69</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>item: <a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -332,6 +365,9 @@
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_ol3_fun_common_.html">"ol3-<wbr>fun/common"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_ol3_fun_css_.html">"ol3-<wbr>fun/css"</a>
 					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="../modules/_ol3_fun_deep_extend_.html">"ol3-<wbr>fun/deep-<wbr>extend"</a>
@@ -379,7 +415,7 @@
 								<a href="_ol3_fun_deep_extend_.merger.html#history" class="tsd-kind-icon">history</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-not-exported">
-								<a href="_ol3_fun_deep_extend_.merger.html#trace" class="tsd-kind-icon">trace</a>
+								<a href="_ol3_fun_deep_extend_.merger.html#traceitems" class="tsd-kind-icon">trace<wbr>Items</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
 								<a href="_ol3_fun_deep_extend_.merger.html#clonearray" class="tsd-kind-icon">clone<wbr>Array</a>
@@ -388,13 +424,16 @@
 								<a href="_ol3_fun_deep_extend_.merger.html#deepextend" class="tsd-kind-icon">deep<wbr>Extend</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
-								<a href="_ol3_fun_deep_extend_.merger.html#merge" class="tsd-kind-icon">merge</a>
+								<a href="_ol3_fun_deep_extend_.merger.html#mergearray" class="tsd-kind-icon">merge<wbr>Array</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
 								<a href="_ol3_fun_deep_extend_.merger.html#mergechild" class="tsd-kind-icon">merge<wbr>Child</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
 								<a href="_ol3_fun_deep_extend_.merger.html#push" class="tsd-kind-icon">push</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-not-exported">
+								<a href="_ol3_fun_deep_extend_.merger.html#trace" class="tsd-kind-icon">trace</a>
 							</li>
 						</ul>
 					</li>
@@ -405,6 +444,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="../modules/_ol3_fun_deep_extend_.html#history" class="tsd-kind-icon">History</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_ol3_fun_deep_extend_.html#path" class="tsd-kind-icon">Path</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="../modules/_ol3_fun_deep_extend_.html#canclone" class="tsd-kind-icon">can<wbr>Clone</a>

@@ -3,7 +3,6 @@
  */
 import {
 	asArray,
-	cssin,
 	debounce,
 	defaults,
 	doif,
@@ -18,6 +17,7 @@ import {
 	toggle,
 	uuid
 } from "./ol3-fun/common";
+import { cssin, loadCss } from "./ol3-fun/css";
 import { zoomToFeature } from "./ol3-fun/navigation";
 import { parse as dmsParse } from "./ol3-fun/parse-dms";
 import { slowloop } from "./ol3-fun/slowloop";
@@ -26,6 +26,7 @@ import { extend as deepExtend } from "./ol3-fun/deep-extend";
 let index = {
 	asArray,
 	cssin,
+	loadCss,
 	debounce,
 	defaults,
 	doif,

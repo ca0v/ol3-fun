@@ -74,7 +74,6 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_ol3_fun_common_.html#asarray" class="tsd-kind-icon">as<wbr>Array</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_ol3_fun_common_.html#cssin" class="tsd-kind-icon">cssin</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_ol3_fun_common_.html#debounce" class="tsd-kind-icon">debounce</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_ol3_fun_common_.html#defaults" class="tsd-kind-icon">defaults</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_ol3_fun_common_.html#doif" class="tsd-kind-icon">doif</a></li>
@@ -105,7 +104,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L20">ol3-fun/common.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L20">ol3-fun/common.ts:20</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -133,52 +132,6 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="cssin" class="tsd-anchor"></a>
-					<h3>cssin</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">cssin<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, css<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous function)</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L142">ol3-fun/common.ts:142</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Adds exactly one instance of the CSS to the app with a mechanism
-										for disposing by invoking the destructor returned by this method.
-										Note the css will not be removed until the dependency count reaches
-										0 meaning the number of calls to cssin(&#39;id&#39;) must match the number
-										of times the destructor is invoked.
-										let d1 = cssin(&#39;foo&#39;, &#39;.foo { background: white }&#39;);
-										let d2 = cssin(&#39;foo&#39;, &#39;.foo { background: white }&#39;);
-										d1(); // reduce dependency count
-									d2(); // really remove the css</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>name: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>unique id for this style tag</p>
-									</div>
-								</li>
-								<li>
-									<h5>css: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>css content</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">(Anonymous function)</span></h4>
-							<p>destructor</p>
-						</li>
-					</ul>
-				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 					<a name="debounce" class="tsd-anchor"></a>
 					<h3>debounce</h3>
@@ -189,7 +142,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L169">ol3-fun/common.ts:169</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L133">ol3-fun/common.ts:133</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -235,7 +188,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L119">ol3-fun/common.ts:119</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L119">ol3-fun/common.ts:119</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -284,7 +237,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L98">ol3-fun/common.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L98">ol3-fun/common.ts:98</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -345,7 +298,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L84">ol3-fun/common.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L84">ol3-fun/common.ts:84</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -383,7 +336,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L68">ol3-fun/common.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L68">ol3-fun/common.ts:68</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -420,7 +373,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L188">ol3-fun/common.ts:188</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L152">ol3-fun/common.ts:152</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -449,7 +402,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L107">ol3-fun/common.ts:107</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L107">ol3-fun/common.ts:107</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -498,7 +451,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L200">ol3-fun/common.ts:200</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L164">ol3-fun/common.ts:164</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -545,7 +498,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L53">ol3-fun/common.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L53">ol3-fun/common.ts:53</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -589,7 +542,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L211">ol3-fun/common.ts:211</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L175">ol3-fun/common.ts:175</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -620,7 +573,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L222">ol3-fun/common.ts:222</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L186">ol3-fun/common.ts:186</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -662,7 +615,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L34">ol3-fun/common.ts:34</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L34">ol3-fun/common.ts:34</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -701,7 +654,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/7fe6701/ol3-fun/common.ts#L7">ol3-fun/common.ts:7</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L7">ol3-fun/common.ts:7</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -728,6 +681,9 @@
 					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="_ol3_fun_common_.html">"ol3-<wbr>fun/common"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_ol3_fun_css_.html">"ol3-<wbr>fun/css"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_ol3_fun_deep_extend_.html">"ol3-<wbr>fun/deep-<wbr>extend"</a>
@@ -765,9 +721,6 @@
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="_ol3_fun_common_.html#asarray" class="tsd-kind-icon">as<wbr>Array</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_ol3_fun_common_.html#cssin" class="tsd-kind-icon">cssin</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="_ol3_fun_common_.html#debounce" class="tsd-kind-icon">debounce</a>

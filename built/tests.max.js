@@ -174,26 +174,6 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         return a;
     }
     exports.defaults = defaults;
-    function cssin(name, css) {
-        var id = "style-" + name;
-        var styleTag = document.getElementById(id);
-        if (!styleTag) {
-            styleTag = document.createElement("style");
-            styleTag.id = id;
-            styleTag.type = "text/css";
-            document.head.appendChild(styleTag);
-            styleTag.appendChild(document.createTextNode(css));
-        }
-        var dataset = styleTag.dataset;
-        dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
-        return function () {
-            dataset["count"] = parseInt(dataset["count"] || "0") - 1 + "";
-            if (dataset["count"] === "0") {
-                styleTag.remove();
-            }
-        };
-    }
-    exports.cssin = cssin;
     function debounce(func, wait, immediate) {
         if (wait === void 0) { wait = 50; }
         if (immediate === void 0) { immediate = false; }
@@ -250,6 +230,58 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         return array;
     }
     exports.shuffle = shuffle;
+});
+define("ol3-fun/css", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function cssin(name, css) {
+        var id = "style-" + name;
+        var styleTag = document.getElementById(id);
+        if (!styleTag) {
+            styleTag = document.createElement("style");
+            styleTag.id = id;
+            styleTag.type = "text/css";
+            document.head.appendChild(styleTag);
+            styleTag.appendChild(document.createTextNode(css));
+        }
+        var dataset = styleTag.dataset;
+        dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
+        return function () {
+            dataset["count"] = parseInt(dataset["count"] || "0") - 1 + "";
+            if (dataset["count"] === "0") {
+                styleTag.remove();
+            }
+        };
+    }
+    exports.cssin = cssin;
+    function loadCss(options) {
+        if (!options.url && !options.css)
+            throw "must provide either a url or css option";
+        if (options.url && options.css)
+            throw "cannot provide both a url and a css";
+        if (options.name && options.css)
+            return cssin(options.name, options.css);
+        var id = "style-" + options.name;
+        var head = document.getElementsByTagName("head")[0];
+        var link = document.getElementById(id);
+        if (!link) {
+            link = document.createElement("link");
+            link.id = id;
+            link.type = "text/css";
+            link.rel = "stylesheet";
+            link.href = options.url;
+            head.appendChild(link);
+        }
+        var dataset = link.dataset;
+        dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
+        return function () {
+            dataset["count"] = parseInt(dataset["count"] || "0") - 1 + "";
+            if (dataset["count"] === "0") {
+                link.remove();
+            }
+        };
+    }
+    exports.loadCss = loadCss;
 });
 define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_1) {
     "use strict";
@@ -634,11 +666,12 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
         return Merger;
     }());
 });
-define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, navigation_1, parse_dms_1, slowloop_2, deep_extend_1) {
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, css_1, navigation_1, parse_dms_1, slowloop_2, deep_extend_1) {
     "use strict";
     var index = {
         asArray: common_2.asArray,
-        cssin: common_2.cssin,
+        cssin: css_1.cssin,
+        loadCss: css_1.loadCss,
         debounce: common_2.debounce,
         defaults: common_2.defaults,
         doif: common_2.doif,
@@ -723,7 +756,7 @@ define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common
         });
         it("ensures all combinations", function () {
             var A = [1, 3, 5], B = [7, 11, 13], result = common_3.pair(A, B);
-            base_2.should((A.length * sum(B) + B.length * sum(A)) === sum(result.map(function (v) { return v[0] + v[1]; })), "create product from two vectors");
+            base_2.should(A.length * sum(B) + B.length * sum(A) === sum(result.map(function (v) { return v[0] + v[1]; })), "create product from two vectors");
         });
     });
     describe("range tests", function () {
@@ -808,10 +841,12 @@ define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common
         });
     });
     describe("doif tests", function () {
-        var die = function (n) { throw "doif callback not expected to execute: " + n; };
+        var die = function (n) {
+            throw "doif callback not expected to execute: " + n;
+        };
         var spawn = function () {
             var v = true;
-            return function () { return v = !v; };
+            return function () { return (v = !v); };
         };
         it("doif false tests", function () {
             common_3.doif(undefined, die);
@@ -841,7 +876,8 @@ define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common
         });
         it("nested mixins", function () {
             var _a;
-            base_2.shouldEqual(common_3.mixin({ vermont: { burlington: true } }, (_a = {}, _a["south carolina"] = { greenville: true }, _a))["south carolina"].greenville, true, "greenville is in south carolina");
+            base_2.shouldEqual(common_3.mixin({ vermont: { burlington: true } }, (_a = {}, _a["south carolina"] = { greenville: true }, _a))["south carolina"]
+                .greenville, true, "greenville is in south carolina");
             base_2.shouldEqual(common_3.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.greenville, false, "greenville is not in vermont");
             base_2.shouldEqual(common_3.mixin({ vermont: { burlington: true } }, { vermont: { greenville: false } }).vermont.burlington, undefined, "second vermont completely wipes out 1st");
         });
@@ -851,18 +887,6 @@ define("tests/spec/common", ["require", "exports", "tests/base", "ol3-fun/common
             base_2.shouldEqual(common_3.defaults({ a: 1 }, { a: 2, b: 3 }).a, 1, "a = 1");
             base_2.shouldEqual(common_3.defaults({ a: 1 }, { a: 2, b: 3 }).b, 3, "b = 3");
             base_2.shouldEqual(common_3.defaults({}, { a: 2, b: 3 }).a, 2, "a = 2");
-        });
-    });
-    describe("cssin tests", function () {
-        it("hides the body", function () {
-            var handles = [];
-            handles.push(common_3.cssin("css1", "body {display: none}"));
-            handles.push(common_3.cssin("css1", "body {display: block}"));
-            base_2.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
-            handles.shift()();
-            base_2.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");
-            handles.shift()();
-            base_2.shouldEqual(getComputedStyle(document.body).display, "block", "body is no longer hidden, css1 destroyed");
         });
     });
     describe("html tests", function () {
@@ -1738,5 +1762,40 @@ define("tests/spec/zoom-to-feature", ["require", "exports", "openlayers", "tests
 define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/common", "tests/spec/slowloop", "tests/spec/deep-extend", "tests/spec/extensions", "tests/spec/is-primitive", "tests/spec/is-cycle", "tests/spec/openlayers-test", "tests/spec/parse-dms", "tests/spec/polyline", "tests/spec/snapshot", "tests/spec/zoom-to-feature"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("tests/spec/load-css", ["require", "exports", "tests/base", "index"], function (require, exports, base_13, index_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    base_13.describe("cssin tests", function () {
+        base_13.it("hides the body", function () {
+            var handles = [];
+            handles.push(index_1.cssin("css1", "body {display: none}"));
+            handles.push(index_1.cssin("css1", "body {display: block}"));
+            base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
+            handles.shift()();
+            base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");
+            handles.shift()();
+            base_13.shouldEqual(getComputedStyle(document.body).display, "block", "body is no longer hidden, css1 destroyed");
+        });
+    });
+    base_13.describe("load-css", function () {
+        base_13.it("loads css file", function () {
+            base_13.should(!document.getElementById("style-load-css-test"), "node does not exist");
+            var remover = index_1.loadCss({ name: "load-css-test", url: "../loaders/theme.css" });
+            base_13.should(!!document.getElementById("style-load-css-test"), "node exists");
+            remover();
+            base_13.should(!document.getElementById("style-load-css-test"), "node does not exist");
+        });
+        base_13.it("loads css string", function () {
+            var handles = [];
+            handles.push(index_1.loadCss({ name: "css1", css: "body {display: none}" }));
+            handles.push(index_1.loadCss({ name: "css1", css: "body {display: block}" }));
+            base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
+            handles.shift()();
+            base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");
+            handles.shift()();
+            base_13.shouldEqual(getComputedStyle(document.body).display, "block", "body is no longer hidden, css1 destroyed");
+        });
+    });
 });
 //# sourceMappingURL=tests.max.js.map

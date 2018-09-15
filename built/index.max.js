@@ -94,26 +94,6 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         return a;
     }
     exports.defaults = defaults;
-    function cssin(name, css) {
-        var id = "style-" + name;
-        var styleTag = document.getElementById(id);
-        if (!styleTag) {
-            styleTag = document.createElement("style");
-            styleTag.id = id;
-            styleTag.type = "text/css";
-            document.head.appendChild(styleTag);
-            styleTag.appendChild(document.createTextNode(css));
-        }
-        var dataset = styleTag.dataset;
-        dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
-        return function () {
-            dataset["count"] = parseInt(dataset["count"] || "0") - 1 + "";
-            if (dataset["count"] === "0") {
-                styleTag.remove();
-            }
-        };
-    }
-    exports.cssin = cssin;
     function debounce(func, wait, immediate) {
         if (wait === void 0) { wait = 50; }
         if (immediate === void 0) { immediate = false; }
@@ -170,6 +150,58 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         return array;
     }
     exports.shuffle = shuffle;
+});
+define("ol3-fun/css", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function cssin(name, css) {
+        var id = "style-" + name;
+        var styleTag = document.getElementById(id);
+        if (!styleTag) {
+            styleTag = document.createElement("style");
+            styleTag.id = id;
+            styleTag.type = "text/css";
+            document.head.appendChild(styleTag);
+            styleTag.appendChild(document.createTextNode(css));
+        }
+        var dataset = styleTag.dataset;
+        dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
+        return function () {
+            dataset["count"] = parseInt(dataset["count"] || "0") - 1 + "";
+            if (dataset["count"] === "0") {
+                styleTag.remove();
+            }
+        };
+    }
+    exports.cssin = cssin;
+    function loadCss(options) {
+        if (!options.url && !options.css)
+            throw "must provide either a url or css option";
+        if (options.url && options.css)
+            throw "cannot provide both a url and a css";
+        if (options.name && options.css)
+            return cssin(options.name, options.css);
+        var id = "style-" + options.name;
+        var head = document.getElementsByTagName("head")[0];
+        var link = document.getElementById(id);
+        if (!link) {
+            link = document.createElement("link");
+            link.id = id;
+            link.type = "text/css";
+            link.rel = "stylesheet";
+            link.href = options.url;
+            head.appendChild(link);
+        }
+        var dataset = link.dataset;
+        dataset["count"] = parseInt(dataset["count"] || "0") + 1 + "";
+        return function () {
+            dataset["count"] = parseInt(dataset["count"] || "0") - 1 + "";
+            if (dataset["count"] === "0") {
+                link.remove();
+            }
+        };
+    }
+    exports.loadCss = loadCss;
 });
 define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_1) {
     "use strict";
@@ -589,11 +621,12 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
         return Merger;
     }());
 });
-define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, navigation_1, parse_dms_1, slowloop_1, deep_extend_1) {
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, css_1, navigation_1, parse_dms_1, slowloop_1, deep_extend_1) {
     "use strict";
     var index = {
         asArray: common_2.asArray,
-        cssin: common_2.cssin,
+        cssin: css_1.cssin,
+        loadCss: css_1.loadCss,
         debounce: common_2.debounce,
         defaults: common_2.defaults,
         doif: common_2.doif,
