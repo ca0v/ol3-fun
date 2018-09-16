@@ -1,6 +1,5 @@
 ﻿import { should, shouldEqual, stringify, shouldThrow } from "../base";
 import { extend as deepExtend, TraceItem } from "../../ol3-fun/deep-extend";
-import { createDiffieHellman } from "crypto";
 import { range } from "ol3-fun/common";
 
 describe("utils/deep-extend", () => {
