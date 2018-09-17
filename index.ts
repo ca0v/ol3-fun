@@ -22,6 +22,7 @@ import { zoomToFeature } from "./ol3-fun/navigation";
 import { parse as dmsParse } from "./ol3-fun/parse-dms";
 import { slowloop } from "./ol3-fun/slowloop";
 import { extend as deepExtend } from "./ol3-fun/deep-extend";
+import { Extensions } from "./ol3-fun/extensions";
 
 let index = {
 	asArray,
@@ -49,7 +50,8 @@ let index = {
 	},
 	navigation: {
 		zoomToFeature
-	}
+	},
+	Extensions: Extensions
 };
 
 export = index;

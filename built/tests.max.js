@@ -666,7 +666,45 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
         return Merger;
     }());
 });
-define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, css_1, navigation_1, parse_dms_1, slowloop_2, deep_extend_1) {
+define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var Extensions = (function () {
+        function Extensions() {
+            this.hash = new WeakMap(null);
+        }
+        Extensions.prototype.isExtended = function (o) {
+            return this.hash.has(o);
+        };
+        Extensions.prototype.extend = function (o, ext) {
+            var hashData = this.hash.get(o);
+            if (!hashData) {
+                hashData = {};
+                this.hash.set(o, hashData);
+            }
+            ext && Object.keys(ext).forEach(function (k) { return (hashData[k] = ext[k]); });
+            return hashData;
+        };
+        Extensions.prototype.bind = function (o1, o2) {
+            if (this.isExtended(o1)) {
+                if (this.isExtended(o2)) {
+                    if (this.hash.get(o1) === this.hash.get(o2))
+                        return;
+                    throw "both objects already bound";
+                }
+                else {
+                    this.hash.set(o2, this.extend(o1));
+                }
+            }
+            else {
+                this.hash.set(o1, this.extend(o2));
+            }
+        };
+        return Extensions;
+    }());
+    exports.Extensions = Extensions;
+});
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend", "ol3-fun/extensions"], function (require, exports, common_2, css_1, navigation_1, parse_dms_1, slowloop_2, deep_extend_1, extensions_1) {
     "use strict";
     var index = {
         asArray: common_2.asArray,
@@ -694,7 +732,8 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun
         },
         navigation: {
             zoomToFeature: navigation_1.zoomToFeature
-        }
+        },
+        Extensions: extensions_1.Extensions
     };
     return index;
 });
@@ -1240,55 +1279,18 @@ define("tests/spec/deep-extend", ["require", "exports", "tests/base", "ol3-fun/d
         return result;
     }
 });
-define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var Extensions = (function () {
-        function Extensions() {
-            this.hash = new WeakMap(null);
-        }
-        Extensions.prototype.isExtended = function (o) {
-            return this.hash.has(o);
-        };
-        Extensions.prototype.extend = function (o, ext) {
-            var hashData = this.hash.get(o);
-            if (!hashData) {
-                hashData = {};
-                this.hash.set(o, hashData);
-            }
-            ext && Object.keys(ext).forEach(function (k) { return (hashData[k] = ext[k]); });
-            return hashData;
-        };
-        Extensions.prototype.bind = function (o1, o2) {
-            if (this.isExtended(o1)) {
-                if (this.isExtended(o2)) {
-                    if (this.hash.get(o1) === this.hash.get(o2))
-                        return;
-                    throw "both objects already bound";
-                }
-                else {
-                    this.hash.set(o2, this.extend(o1));
-                }
-            }
-            else {
-                this.hash.set(o1, this.extend(o2));
-            }
-        };
-        return Extensions;
-    }());
-    exports.Extensions = Extensions;
-});
-define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/extensions", "ol3-fun/common"], function (require, exports, base_5, extensions_1, common_6) {
+define("tests/spec/extensions", ["require", "exports", "tests/base", "index", "ol3-fun/common"], function (require, exports, base_5, index_1, common_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     base_5.describe("data/extensions", function () {
         base_5.it("ensures the api", function () {
-            var x = new extensions_1.Extensions();
+            var x = new index_1.Extensions();
             base_5.shouldEqual(typeof x.extend, "function", "extend method");
             base_5.shouldEqual(typeof x.bind, "function", "bind method");
+            base_5.shouldEqual(typeof x.isExtended, "function", "isExtended method");
         });
         base_5.it("ensures no side-effects on the object", function () {
-            var x = new extensions_1.Extensions();
+            var x = new index_1.Extensions();
             var o = {};
             var expected = JSON.stringify(o);
             x.extend(o, { custom: "data" });
@@ -1296,15 +1298,15 @@ define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/ex
             base_5.shouldEqual(expected, actual, "no side-effects");
         });
         base_5.it("ensures two objects can be bound to same extension data", function () {
-            var x = new extensions_1.Extensions();
+            var x = new index_1.Extensions();
             var math = x.extend(Math, { sqrt2: Math.sqrt(2) });
             base_5.should(!!x.extend(Math).sqrt2, "Math.sqrt2");
             x.bind(Number, Math);
             base_5.shouldEqual(Math.round(math.sqrt2 * x.extend(Number).sqrt2), 2, "sqrt2*sqrt2 = 2");
         });
         base_5.it("ensures two extensions can bind data to the same object", function () {
-            var ext1 = new extensions_1.Extensions();
-            var ext2 = new extensions_1.Extensions();
+            var ext1 = new index_1.Extensions();
+            var ext2 = new index_1.Extensions();
             var o = {};
             ext1.extend(o, { ext: 1 });
             ext2.extend(o, { ext: 2 });
@@ -1312,22 +1314,33 @@ define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/ex
             base_5.shouldEqual(ext2.extend(o).ext, 2, "ext2");
         });
         base_5.it("ensures two extended objects cannot be bound", function () {
-            var x = new extensions_1.Extensions();
+            var x = new index_1.Extensions();
             var o = {};
             var p = {};
             x.extend(o);
             x.extend(p);
             base_5.shouldThrow(function () { return x.bind(o, p); }, "cannot bind extended objects");
         });
+        base_5.it("ensures isExtended returns true iff it is extended", function () {
+            var x1 = new index_1.Extensions();
+            var x2 = new index_1.Extensions();
+            var o = {};
+            base_5.should(!x1.isExtended(o), "not extended in x1");
+            x1.extend(o);
+            base_5.should(x1.isExtended(o), "extended in x1");
+            base_5.should(!x2.isExtended(o), "not extended in x2");
+            x2.extend(o);
+            base_5.should(x2.isExtended(o), "extended in x2");
+        });
         base_5.it("extension references are preserved", function () {
-            var x = new extensions_1.Extensions();
+            var x = new index_1.Extensions();
             var o = {};
             var p = x.extend(o);
             x.extend(o, { name: "P" });
             base_5.shouldEqual(p.name, "P", "extension references are preserved");
         });
         base_5.it("binds two objects to the same extension", function () {
-            var x = new extensions_1.Extensions();
+            var x = new index_1.Extensions();
             var o1 = { id: 1 };
             var o2 = Object.create({ id: 2 });
             x.bind(o1, o2);
@@ -1337,7 +1350,7 @@ define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/ex
             base_5.shouldEqual(x.extend(o1).foo, "foo2");
         });
         base_5.it("extension integrity testing (100 objects X 10 extensions)", function () {
-            var x = common_6.range(10).map(function (n) { return new extensions_1.Extensions(); });
+            var x = common_6.range(10).map(function (n) { return new index_1.Extensions(); });
             var data = common_6.range(1000).map(function (n) { return Object.create({ id: n }); });
             data.map(function (d, i) { return x[i % 10].extend(d, { data: common_6.shuffle(common_6.range(1000)) }); });
             data.forEach(function (d, i) {
@@ -1354,13 +1367,13 @@ define("tests/spec/extensions", ["require", "exports", "tests/base", "ol3-fun/ex
             base_5.shouldEqual(sums.reduce(function (a, b) { return a + b; }, 0), 166666500);
         });
         base_5.it("extensions performance testing (1 million accesses)", function () {
-            var x = new extensions_1.Extensions();
+            var x = new index_1.Extensions();
             var data = common_6.range(500000).map(function (n) { return ({ id: n }); });
             var counter = { count: 0 };
             data.forEach(function (d) { return x.extend(d, { counter: counter }); });
             data.forEach(function (d) { return x.extend(d).counter.count++; });
             base_5.shouldEqual(counter.count, data.length, "accessed " + data.length + " items");
-        }).timeout(600);
+        }).timeout(1000);
     });
 });
 define("tests/spec/is-primitive", ["require", "exports", "tests/base", "ol3-fun/is-primitive"], function (require, exports, base_6, is_primitive_3) {
@@ -1763,14 +1776,14 @@ define("tests/index", ["require", "exports", "tests/spec/api", "tests/spec/commo
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
 });
-define("tests/spec/load-css", ["require", "exports", "tests/base", "index"], function (require, exports, base_13, index_1) {
+define("tests/spec/load-css", ["require", "exports", "tests/base", "index"], function (require, exports, base_13, index_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     base_13.describe("cssin tests", function () {
         base_13.it("hides the body", function () {
             var handles = [];
-            handles.push(index_1.cssin("css1", "body {display: none}"));
-            handles.push(index_1.cssin("css1", "body {display: block}"));
+            handles.push(index_2.cssin("css1", "body {display: none}"));
+            handles.push(index_2.cssin("css1", "body {display: block}"));
             base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
             handles.shift()();
             base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");
@@ -1781,15 +1794,15 @@ define("tests/spec/load-css", ["require", "exports", "tests/base", "index"], fun
     base_13.describe("load-css", function () {
         base_13.it("loads css file", function () {
             base_13.should(!document.getElementById("style-load-css-test"), "node does not exist");
-            var remover = index_1.loadCss({ name: "load-css-test", url: "../loaders/theme.css" });
+            var remover = index_2.loadCss({ name: "load-css-test", url: "../loaders/theme.css" });
             base_13.should(!!document.getElementById("style-load-css-test"), "node exists");
             remover();
             base_13.should(!document.getElementById("style-load-css-test"), "node does not exist");
         });
         base_13.it("loads css string", function () {
             var handles = [];
-            handles.push(index_1.loadCss({ name: "css1", css: "body {display: none}" }));
-            handles.push(index_1.loadCss({ name: "css1", css: "body {display: block}" }));
+            handles.push(index_2.loadCss({ name: "css1", css: "body {display: none}" }));
+            handles.push(index_2.loadCss({ name: "css1", css: "body {display: block}" }));
             base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is hidden, 1st css1 wins");
             handles.shift()();
             base_13.shouldEqual(getComputedStyle(document.body).display, "none", "body is still hidden, 1st css1 still registered");

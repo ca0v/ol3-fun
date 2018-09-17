@@ -1,5 +1,5 @@
 ﻿import { describe, it, should, shouldEqual, shouldThrow } from "../base";
-import { Extensions } from "../../ol3-fun/extensions";
+import { Extensions } from "../../index";
 import { range, shuffle } from "../../ol3-fun/common";
 
 describe("data/extensions", () => {
@@ -7,6 +7,7 @@ describe("data/extensions", () => {
 		let x = new Extensions();
 		shouldEqual(typeof x.extend, "function", "extend method");
 		shouldEqual(typeof x.bind, "function", "bind method");
+		shouldEqual(typeof x.isExtended, "function", "isExtended method");
 	});
 
 	it("ensures no side-effects on the object", () => {
@@ -43,6 +44,18 @@ describe("data/extensions", () => {
 		x.extend(o);
 		x.extend(p);
 		shouldThrow(() => x.bind(o, p), "cannot bind extended objects");
+	});
+
+	it("ensures isExtended returns true iff it is extended", () => {
+		let x1 = new Extensions();
+		let x2 = new Extensions();
+		let o = {};
+		should(!x1.isExtended(o), "not extended in x1");
+		x1.extend(o);
+		should(x1.isExtended(o), "extended in x1");
+		should(!x2.isExtended(o), "not extended in x2");
+		x2.extend(o);
+		should(x2.isExtended(o), "extended in x2");
 	});
 
 	it("extension references are preserved", () => {
@@ -92,5 +105,5 @@ describe("data/extensions", () => {
 		data.forEach(d => x.extend(d, { counter }));
 		data.forEach(d => (<{ counter: { count: number } }>x.extend(d)).counter.count++);
 		shouldEqual(counter.count, data.length, `accessed ${data.length} items`);
-	}).timeout(600);
+	}).timeout(1000);
 });

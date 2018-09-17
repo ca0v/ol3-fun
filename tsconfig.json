@@ -11,7 +11,8 @@
 		"outFile": "./built/index.max.js",
 		"moduleResolution": "node",
 		"baseUrl": "./",
-		"lib": ["dom", "esnext"]
+		"lib": ["dom", "esnext"],
+		"types": ["requirejs", "ol", "jquery"]
 	},
 	"include": ["index.ts", "ol3-fun/**/*.ts"],
 	"exclude": ["ol3-fun/examples", "ol3-fun/tests"]

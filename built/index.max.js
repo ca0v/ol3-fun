@@ -621,38 +621,6 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
         return Merger;
     }());
 });
-define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_2, css_1, navigation_1, parse_dms_1, slowloop_1, deep_extend_1) {
-    "use strict";
-    var index = {
-        asArray: common_2.asArray,
-        cssin: css_1.cssin,
-        loadCss: css_1.loadCss,
-        debounce: common_2.debounce,
-        defaults: common_2.defaults,
-        doif: common_2.doif,
-        deepExtend: deep_extend_1.extend,
-        getParameterByName: common_2.getParameterByName,
-        getQueryParameters: common_2.getQueryParameters,
-        html: common_2.html,
-        mixin: common_2.mixin,
-        pair: common_2.pair,
-        parse: common_2.parse,
-        range: common_2.range,
-        shuffle: common_2.shuffle,
-        toggle: common_2.toggle,
-        uuid: common_2.uuid,
-        slowloop: slowloop_1.slowloop,
-        dms: {
-            parse: parse_dms_1.parse,
-            fromDms: function (dms) { return parse_dms_1.parse(dms); },
-            fromLonLat: function (o) { return parse_dms_1.parse(o); }
-        },
-        navigation: {
-            zoomToFeature: navigation_1.zoomToFeature
-        }
-    };
-    return index;
-});
 define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -690,6 +658,39 @@ define("ol3-fun/extensions", ["require", "exports"], function (require, exports)
         return Extensions;
     }());
     exports.Extensions = Extensions;
+});
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend", "ol3-fun/extensions"], function (require, exports, common_2, css_1, navigation_1, parse_dms_1, slowloop_1, deep_extend_1, extensions_1) {
+    "use strict";
+    var index = {
+        asArray: common_2.asArray,
+        cssin: css_1.cssin,
+        loadCss: css_1.loadCss,
+        debounce: common_2.debounce,
+        defaults: common_2.defaults,
+        doif: common_2.doif,
+        deepExtend: deep_extend_1.extend,
+        getParameterByName: common_2.getParameterByName,
+        getQueryParameters: common_2.getQueryParameters,
+        html: common_2.html,
+        mixin: common_2.mixin,
+        pair: common_2.pair,
+        parse: common_2.parse,
+        range: common_2.range,
+        shuffle: common_2.shuffle,
+        toggle: common_2.toggle,
+        uuid: common_2.uuid,
+        slowloop: slowloop_1.slowloop,
+        dms: {
+            parse: parse_dms_1.parse,
+            fromDms: function (dms) { return parse_dms_1.parse(dms); },
+            fromLonLat: function (o) { return parse_dms_1.parse(o); }
+        },
+        navigation: {
+            zoomToFeature: navigation_1.zoomToFeature
+        },
+        Extensions: extensions_1.Extensions
+    };
+    return index;
 });
 define("ol3-fun/google-polyline", ["require", "exports"], function (require, exports) {
     "use strict";

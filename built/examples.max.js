@@ -1,6 +1,6 @@
 define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function uuid() {
         return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
             var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
@@ -153,7 +153,7 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
 });
 define("examples/debounce", ["require", "exports", "openlayers", "ol3-fun/common"], function (require, exports, ol, common_1) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function run() {
         var msgs = ["Allowing 0.1 seconds between clicks, click the map multiple times to create markers, they will clear after 1 second of being idle", "uses debounce to prevent user from clicking too fast and to clear markers after on second if no clicking"];
         console.log(msgs);
@@ -167,7 +167,7 @@ define("examples/debounce", ["require", "exports", "openlayers", "ol3-fun/common
             view: new ol.View({
                 center: [-8200000, 4000000],
                 zoom: 3,
-                projection: "EPSG:3857"
+                projection: "EPSG:3857",
             }),
             layers: [new ol.layer.Tile({
                     source: new ol.source.OSM()
@@ -188,7 +188,7 @@ define("examples/debounce", ["require", "exports", "openlayers", "ol3-fun/common
 });
 define("ol3-fun/css", ["require", "exports"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function cssin(name, css) {
         var id = "style-" + name;
         var styleTag = document.getElementById(id);
@@ -240,7 +240,7 @@ define("ol3-fun/css", ["require", "exports"], function (require, exports) {
 });
 define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_2) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function zoomToFeature(map, feature, options) {
         var promise = $.Deferred();
         options = common_2.defaults(options || {}, {
@@ -286,7 +286,7 @@ define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3
 });
 define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function decDegFromMatch(m) {
         var signIndex = {
             "-": -1,
@@ -384,7 +384,7 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
 });
 define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function slowloop(functions, interval, cycles) {
         if (interval === void 0) { interval = 1000; }
         if (cycles === void 0) { cycles = 1; }
@@ -419,7 +419,7 @@ define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
 });
 define("ol3-fun/is-primitive", ["require", "exports"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function isPrimitive(a) {
         switch (typeof a) {
             case "boolean":
@@ -442,7 +442,7 @@ define("ol3-fun/is-primitive", ["require", "exports"], function (require, export
 });
 define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], function (require, exports, is_primitive_1) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function isCyclic(a) {
         if (is_primitive_1.isPrimitive(a))
             return false;
@@ -460,7 +460,7 @@ define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], func
 });
 define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function extend(a, b, trace, history) {
         if (history === void 0) { history = []; }
         if (!b) {
@@ -656,7 +656,45 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
         return Merger;
     }());
 });
-define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend"], function (require, exports, common_3, css_1, navigation_1, parse_dms_1, slowloop_1, deep_extend_1) {
+define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var Extensions = (function () {
+        function Extensions() {
+            this.hash = new WeakMap(null);
+        }
+        Extensions.prototype.isExtended = function (o) {
+            return this.hash.has(o);
+        };
+        Extensions.prototype.extend = function (o, ext) {
+            var hashData = this.hash.get(o);
+            if (!hashData) {
+                hashData = {};
+                this.hash.set(o, hashData);
+            }
+            ext && Object.keys(ext).forEach(function (k) { return (hashData[k] = ext[k]); });
+            return hashData;
+        };
+        Extensions.prototype.bind = function (o1, o2) {
+            if (this.isExtended(o1)) {
+                if (this.isExtended(o2)) {
+                    if (this.hash.get(o1) === this.hash.get(o2))
+                        return;
+                    throw "both objects already bound";
+                }
+                else {
+                    this.hash.set(o2, this.extend(o1));
+                }
+            }
+            else {
+                this.hash.set(o1, this.extend(o2));
+            }
+        };
+        return Extensions;
+    }());
+    exports.Extensions = Extensions;
+});
+define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun/navigation", "ol3-fun/parse-dms", "ol3-fun/slowloop", "ol3-fun/deep-extend", "ol3-fun/extensions"], function (require, exports, common_3, css_1, navigation_1, parse_dms_1, slowloop_1, deep_extend_1, extensions_1) {
     "use strict";
     var index = {
         asArray: common_3.asArray,
@@ -684,13 +722,14 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun
         },
         navigation: {
             zoomToFeature: navigation_1.zoomToFeature
-        }
+        },
+        Extensions: extensions_1.Extensions
     };
     return index;
 });
 define("examples/goto", ["require", "exports", "openlayers", "index", "ol3-fun/parse-dms"], function (require, exports, ol, index_1, parse_dms_2) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     index_1.cssin("html", "\n\n.notebook {\n    background: white;\n    border: 1px solid rgba(66,66,66,1);\n    padding: 4px;\n}\n\n.notebook:after {\n    content: \"+\";\n    position: absolute;\n    left: calc(50% - 5px);\n}\n\n.notebook textarea {\n    width: 240px;\n    height: 80px;\n    background: rgb(250, 250, 210);\n    resize: none;\n}\n\n.parse-container {\n    position: absolute;\n    top: 1em;\n    right: 1em;\n}\n");
     function run() {
         alert("click the map to create a marker, enter 59 15 in the 'Enter Coordinates' area");
@@ -852,7 +891,7 @@ define("ol3-fun/google-polyline", ["require", "exports"], function (require, exp
 });
 define("examples/polyline", ["require", "exports", "openlayers", "ol3-fun/ol3-polyline", "ol3-fun/google-polyline", "jquery"], function (require, exports, ol, PolylineEncoder, GoogleEncoder, $) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     var PRECISION = 6;
     var css = "\n<style>\n    .polyline-encoder .area {\n        margin: 20px;\n    }\n\n    .polyline-encoder .area p {\n        font-size: smaller;\n    }\n\n    .polyline-encoder .area canvas {\n        vertical-align: top;\n    }\n\n    .polyline-encoder .area label {\n        display: block;\n        margin: 10px;\n        border-bottom: 1px solid black;\n    }\n\n    .polyline-encoder .area textarea {\n        min-width: 400px;\n        min-height: 200px;\n    }\n</style>\n";
     var ux = "\n<div class='polyline-encoder'>\n    <p>\n    Demonstrates simplifying a geometry and then encoding it.  Enter an Input Geometry (e.g. [[1,2],[3,4]]) and watch the magic happen\n    </p>\n\n    <div class='input area'>\n        <label>Input Geometry</label>\n        <p>Enter a geometry here as an array of points in the form [[x1,y1], [x2,y2], ..., [xn, yn]]</p>\n        <textarea></textarea>\n        <canvas></canvas>\n    </div>\n\n    <div class='simplified area'>\n        <label>Simplified Geometry</label>\n        <p>This is a 'simplified' version of the Input Geometry.  \n        You can also enter a geometry here as an array of points in the form [[x1,y1], [x2,y2], ..., [xn, yn]]</p>\n        <textarea></textarea>\n        <canvas></canvas>\n    </div>\n\n    <div class='encoded area'>\n        <label>Encoded Simplified Geometry</label>\n        <p>This is an encoding of the Simplified Geometry.  You can also enter an encoded value here</p>\n        <textarea>[encoding]</textarea>\n        <div>Use google encoder?</div>\n        <input type='checkbox' id='use-google' />\n        <p>Ported to Typescript from https://github.com/DeMoehn/Cloudant-nyctaxi/blob/master/app/js/polyline.js</p>\n    </div>\n\n    <div class='decoded area'>\n        <label>Decoded Simplified Geometry</label>\n        <p>This is the decoding of the Encoded Geometry</p>\n        <textarea>[decoded]</textarea>\n        <canvas></canvas>\n    </div>\n\n</div>\n";
@@ -940,7 +979,7 @@ define("examples/polyline", ["require", "exports", "openlayers", "ol3-fun/ol3-po
 });
 define("examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/navigation", "ol3-fun/common"], function (require, exports, ol, navigation_2, common_4) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function randomCoordinate(size, _a) {
         if (size === void 0) { size = 100; }
         var _b = _a === void 0 ? [-8238299, 4970071] : _a, x = _b[0], y = _b[1];
@@ -987,7 +1026,7 @@ define("examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/n
             view: new ol.View({
                 center: [-8200000, 4000000],
                 zoom: 3,
-                projection: "EPSG:3857"
+                projection: "EPSG:3857",
             }),
             layers: [tiles, vectors]
         });
@@ -1067,7 +1106,7 @@ define("examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/n
 });
 define("tests/base", ["require", "exports", "ol3-fun/slowloop"], function (require, exports, slowloop_2) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     exports.slowloop = slowloop_2.slowloop;
     function describe(title, fn) {
         console.log(title || "undocumented test group");
@@ -1290,7 +1329,7 @@ define("examples/extras/data/mapserver", ["require", "exports"], function (requi
 });
 define("examples/jsondiff", ["require", "exports", "index", "tests/base", "examples/extras/data/featureserver", "examples/extras/data/mapserver"], function (require, exports, index_2, base_1, featureserver, mapserver) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     var css = "\ntextarea {\n    background: black;\n    color: white;\n    min-width: 400px;\n    min-height: 600px;\n    white-space: nowrap;  \n    overflow: auto;\n}\n";
     var html = "\n<table>\n    <tr>\n    <td><label for=\"json1\">Input 1</label></td>\n    <td><label for=\"json2\">Input 2</label></td>\n    <td><label for=\"result\">Diff</label></td></tr>\n    <tr>\n    <td><textarea id=\"json1\" class=\"json-editor\">{\"a\": 1}</textarea></td>\n    <td><textarea id=\"json2\" class=\"json-editor\">{\"b\": 2}</textarea></td>\n    <td><textarea id=\"result\" class=\"json-editor\">[result]</textarea></td>\n    </tr>\n    </table>\n</div>\n";
     function forcePath(o, path) {
@@ -1336,7 +1375,7 @@ define("examples/jsondiff", ["require", "exports", "index", "tests/base", "examp
 });
 define("examples/index", ["require", "exports", "examples/debounce", "examples/goto", "examples/polyline", "examples/zoomToFeature", "examples/jsondiff"], function (require, exports) {
     "use strict";
-    exports.__esModule = true;
+    Object.defineProperty(exports, "__esModule", { value: true });
     function run() {
         var l = window.location;
         var path = "" + l.origin + l.pathname + "?run=examples/";

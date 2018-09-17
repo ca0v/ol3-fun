@@ -4,7 +4,7 @@
 export class Extensions {
 	private hash = new WeakMap(null);
 
-	private isExtended(o: any) {
+	public isExtended(o: any) {
 		return this.hash.has(o);
 	}
 
