@@ -95,7 +95,7 @@ export function getParameterByName(name: string, url = window.location.href) {
  * @param v passing a non-trivial value will invoke the callback with this as the sole argument
  * @param cb callback to execute when the value is non-trivial (not null, not undefined)
  */
-export function doif<T>(v: T, cb: (v: T) => void) {
+export function doif<T>(v: T | undefined | null, cb: (v: T) => void) {
 	if (v !== undefined && v !== null) cb(v);
 }
 
