@@ -155,7 +155,10 @@ define("examples/debounce", ["require", "exports", "openlayers", "ol3-fun/common
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function run() {
-        var msgs = ["Allowing 0.1 seconds between clicks, click the map multiple times to create markers, they will clear after 1 second of being idle", "uses debounce to prevent user from clicking too fast and to clear markers after on second if no clicking"];
+        var msgs = [
+            "Allowing 0.1 seconds between clicks, click the map multiple times to create markers, they will clear after 1 second of being idle",
+            "uses debounce to prevent user from clicking too fast and to clear markers after on second if no clicking"
+        ];
         console.log(msgs);
         alert(msgs.join("\n"));
         var map = new ol.Map({
@@ -167,11 +170,16 @@ define("examples/debounce", ["require", "exports", "openlayers", "ol3-fun/common
             view: new ol.View({
                 center: [-8200000, 4000000],
                 zoom: 3,
-                projection: "EPSG:3857",
+                projection: "EPSG:3857"
             }),
-            layers: [new ol.layer.Tile({
-                    source: new ol.source.OSM()
-                })]
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.TileDebug({
+                        projection: "EPSG:3857",
+                        tileGrid: ol.tilegrid.createXYZ({ tileSize: 256 })
+                    })
+                })
+            ]
         });
         var vectors = new ol.layer.Vector({
             source: new ol.source.Vector()
@@ -461,6 +469,10 @@ define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], func
 define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    function isArrayLike(o) {
+        var keys = Object.keys(o);
+        return keys.every(function (k) { return k === parseInt(k, 10).toString(); });
+    }
     function extend(a, b, trace, history) {
         if (history === void 0) { history = []; }
         if (!b) {
@@ -503,7 +515,6 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             if (this.traceItems) {
                 this.traceItems.push(item);
             }
-            return item.path;
         };
         Merger.prototype.deepExtend = function (target, source, path) {
             var _this = this;
@@ -527,9 +538,11 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 return target;
             }
             else if (isArray(target)) {
-                throw "attempting to merge a non-array into an array";
+                if (!isArrayLike(source)) {
+                    throw "attempting to merge a non-array into an array";
+                }
             }
-            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k], [k].concat(path)); });
+            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k], path.slice()); });
             return target;
         };
         Merger.prototype.cloneArray = function (val, path) {
@@ -563,7 +576,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             if (sourceValue === targetValue)
                 return;
             if (is_primitive_2.isPrimitive(sourceValue)) {
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -575,7 +589,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             }
             if (canClone(sourceValue)) {
                 sourceValue = clone(sourceValue);
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -587,11 +602,12 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             }
             if (isArray(sourceValue)) {
                 if (isArray(targetValue)) {
-                    this.deepExtend(targetValue, sourceValue, path);
+                    this.deepExtendWithKey(targetValue, sourceValue, path, key);
                     return;
                 }
                 sourceValue = this.cloneArray(sourceValue, path);
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -607,7 +623,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             if (!isHash(targetValue)) {
                 var merger = new Merger(null, this.history);
                 sourceValue = merger.deepExtend({}, sourceValue, path);
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -617,8 +634,14 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 target[key] = sourceValue;
                 return;
             }
-            this.deepExtend(targetValue, sourceValue, path);
+            this.deepExtendWithKey(targetValue, sourceValue, path, key);
             return;
+        };
+        Merger.prototype.deepExtendWithKey = function (targetValue, sourceValue, path, key) {
+            var index = path.push(key);
+            this.deepExtend(targetValue, sourceValue, path);
+            if (index === path.length)
+                path.pop();
         };
         Merger.prototype.mergeArray = function (key, target, source, path) {
             var _this = this;
@@ -641,14 +664,14 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                     if (isHash(target[i]) && !!target[i][key]) {
                         throw "cannot replace an identified array item with a non-identified array item";
                     }
-                    _this.mergeChild(i, target, sourceItem, path);
+                    _this.mergeChild(i, target, sourceItem, path.slice());
                     return;
                 }
                 if (isUndefined(targetIndex)) {
-                    _this.mergeChild(target.length, target, sourceItem, path);
+                    _this.mergeChild(target.length, target, sourceItem, path.slice());
                     return;
                 }
-                _this.mergeChild(targetIndex, target, sourceItem, path);
+                _this.mergeChild(targetIndex, target, sourceItem, path.slice());
                 return;
             });
             return target;
@@ -752,7 +775,10 @@ define("examples/goto", ["require", "exports", "openlayers", "index", "ol3-fun/p
             }),
             layers: [
                 new ol.layer.Tile({
-                    source: new ol.source.OSM()
+                    source: new ol.source.TileDebug({
+                        projection: "EPSG:3857",
+                        tileGrid: ol.tilegrid.createXYZ({ tileSize: 256 })
+                    })
                 })
             ]
         });
@@ -1104,10 +1130,776 @@ define("examples/zoomToFeature", ["require", "exports", "openlayers", "ol3-fun/n
     }
     exports.run = run;
 });
-define("tests/base", ["require", "exports", "ol3-fun/slowloop"], function (require, exports, slowloop_2) {
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/expectation", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/boolean-expectation", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/number-expectation", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/string-expectation", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/array-expectation", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/function-expectation", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/object-expectation", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/interfaces/expect", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("node_modules/@ca0v/ceylon/ceylon/fast-deep-equal", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function equal(a, b) {
+        if (a === b)
+            return true;
+        if ([Object, Array, Date, RegExp].some(function (t) { return a instanceof t !== b instanceof t; }))
+            return false;
+        if (typeof a == "object" && typeof b == "object") {
+            if (Array.isArray(a) && Array.isArray(b)) {
+                if (a.length !== b.length)
+                    return false;
+                return a.every(function (v, i) { return equal(v, b[i]); });
+            }
+            if (a instanceof Date && b instanceof Date)
+                return a.getTime() === b.getTime();
+            if (a instanceof RegExp && b instanceof RegExp)
+                return a.toString() === b.toString();
+            var keys = Object.keys(a);
+            if (keys.length !== Object.keys(b).length)
+                return false;
+            return keys.every(function (key) { return b.hasOwnProperty(key) && equal(a[key], b[key]); });
+        }
+        return a !== a && b !== b;
+    }
+    exports.equal = equal;
+});
+define("node_modules/@ca0v/ceylon/ceylon/assertion-error", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    function default_1(_a) {
+        var message = _a.message, expected = _a.expected, actual = _a.actual, showDiff = _a.showDiff;
+        var error = new Error(message);
+        error["expected"] = expected;
+        error["actual"] = actual;
+        error["showDiff"] = showDiff;
+        error.name = "AssertionError";
+        return error;
+    }
+    exports.default = default_1;
+});
+define("node_modules/@ca0v/ceylon/ceylon/assert", ["require", "exports", "node_modules/@ca0v/ceylon/ceylon/assertion-error"], function (require, exports, assertion_error_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var assert = function (_a) {
+        var assertion = _a.assertion, message = _a.message, actual = _a.actual, expected = _a.expected;
+        if (!assertion) {
+            var error = assertion_error_1.default({
+                actual: actual,
+                expected: expected,
+                message: message,
+                showDiff: typeof actual !== "undefined" && typeof expected !== "undefined"
+            });
+            throw error;
+        }
+    };
+    exports.default = assert;
+});
+define("node_modules/@ca0v/ceylon/ceylon/expectation", ["require", "exports", "node_modules/@ca0v/ceylon/ceylon/fast-deep-equal", "node_modules/@ca0v/ceylon/ceylon/assert"], function (require, exports, fast_deep_equal_1, assert_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var Expectation = (function () {
+        function Expectation(actual) {
+            this.actual = actual;
+        }
+        Expectation.prototype.toExist = function (message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (Array.isArray(this.actual)) {
+                assert_1.default({
+                    assertion: this.actual.length !== 0,
+                    message: message || "Expected array to exist"
+                });
+            }
+            else if (typeof this.actual === "object" && this.actual !== null) {
+                assert_1.default({
+                    assertion: Object.getOwnPropertyNames(this.actual).length !== 0,
+                    message: message || "Expected object to exist"
+                });
+            }
+            else {
+                assert_1.default({
+                    assertion: typeof this.actual !== "undefined" && this.actual !== null && this.actual !== "",
+                    message: message || "Expected item to exist"
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toNotExist = function (message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (Array.isArray(this.actual)) {
+                assert_1.default({
+                    assertion: this.actual.length === 0,
+                    message: message || "Expected array to not exist"
+                });
+            }
+            else if (typeof this.actual === "object" && this.actual !== null) {
+                assert_1.default({
+                    assertion: Object.getOwnPropertyNames(this.actual).length === 0,
+                    message: message || "Expected object to not exist"
+                });
+            }
+            else {
+                assert_1.default({
+                    assertion: typeof this.actual === "undefined" || this.actual === null || this.actual === "",
+                    message: message || "Expected item to not exist"
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toBe = function (value, message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                actual: this.actual,
+                assertion: this.actual === value,
+                expected: value,
+                message: message || "Expected " + JSON.stringify(this.actual) + " to be " + JSON.stringify(value)
+            });
+            return this;
+        };
+        Expectation.prototype.toNotBe = function (value, message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                actual: this.actual,
+                assertion: this.actual !== value,
+                expected: value,
+                message: message || "Expected " + JSON.stringify(this.actual) + " to not be " + JSON.stringify(value)
+            });
+            return this;
+        };
+        Expectation.prototype.toEqual = function (value, message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                actual: this.actual,
+                assertion: fast_deep_equal_1.equal(this.actual, value),
+                expected: value,
+                message: message || "Expected " + JSON.stringify(this.actual) + " to equal " + JSON.stringify(value)
+            });
+            return this;
+        };
+        Expectation.prototype.toNotEqual = function (value, message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                actual: this.actual,
+                assertion: !fast_deep_equal_1.equal(this.actual, value),
+                expected: value,
+                message: message || "Expected " + JSON.stringify(this.actual) + " to not equal " + JSON.stringify(value)
+            });
+            return this;
+        };
+        Expectation.prototype.toBeTrue = function (message) {
+            return this.toBe(true, message);
+        };
+        Expectation.prototype.toBeFalse = function (message) {
+            return this.toBe(false, message);
+        };
+        Expectation.prototype.toBeLessThan = function (value, message) {
+            assert_1.default({
+                assertion: typeof value === "number",
+                message: "[value] argument should be a number"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "number") {
+                assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a number"
+                });
+            }
+            else {
+                assert_1.default({
+                    assertion: this.actual < value,
+                    message: message || "Expected " + this.actual + " to be less than " + value
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toBeFewerThan = function (value, message) {
+            return this.toBeLessThan(value, message);
+        };
+        Expectation.prototype.toBeLessThanOrEqualTo = function (value, message) {
+            assert_1.default({
+                assertion: typeof value === "number",
+                message: "[value] argument should be a number"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "number") {
+                throw assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a number"
+                });
+            }
+            assert_1.default({
+                assertion: this.actual <= value,
+                message: message || "Expected " + this.actual + " to be less than or equal to " + value
+            });
+            return this;
+        };
+        Expectation.prototype.toBeFewerThanOrEqualTo = function (value, message) {
+            return this.toBeLessThanOrEqualTo(value, message);
+        };
+        Expectation.prototype.toBeGreaterThan = function (value, message) {
+            assert_1.default({
+                assertion: typeof value === "number",
+                message: "[value] argument should be a number"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "number") {
+                throw assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a number"
+                });
+            }
+            assert_1.default({
+                assertion: this.actual > value,
+                message: message || "Expected " + this.actual + " to be greater than " + value
+            });
+            return this;
+        };
+        Expectation.prototype.toBeMoreThan = function (value, message) {
+            return this.toBeGreaterThan(value, message);
+        };
+        Expectation.prototype.toBeGreaterThanOrEqualTo = function (value, message) {
+            assert_1.default({
+                assertion: typeof value === "number",
+                message: "[value] argument should be a number"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "number") {
+                throw assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a number"
+                });
+            }
+            assert_1.default({
+                assertion: this.actual >= value,
+                message: message || "Expected " + this.actual + " to be greater than or equal to " + value
+            });
+            return this;
+        };
+        Expectation.prototype.toBeMoreThanOrEqualTo = function (value, message) {
+            return this.toBeGreaterThanOrEqualTo(value, message);
+        };
+        Expectation.prototype.toMatch = function (pattern, message) {
+            assert_1.default({
+                assertion: pattern instanceof RegExp,
+                message: "[pattern] argument should be a regular expression"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "string") {
+                throw assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a string"
+                });
+            }
+            assert_1.default({
+                assertion: pattern.test(this.actual),
+                message: message || "Expected " + this.actual + " to match " + pattern
+            });
+            return this;
+        };
+        Expectation.prototype.toNotMatch = function (pattern, message) {
+            assert_1.default({
+                assertion: pattern instanceof RegExp,
+                message: "[pattern] argument should be a regular expression"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "string") {
+                throw assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a string"
+                });
+            }
+            assert_1.default({
+                assertion: !pattern.test(this.actual),
+                message: message || "Expected " + this.actual + " to match " + pattern
+            });
+            return this;
+        };
+        Expectation.prototype.toInclude = function (value, message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                assertion: typeof this.actual === "string" || Array.isArray(this.actual) || typeof this.actual === "object",
+                message: "Item being tested should be a string, array, or object"
+            });
+            if (typeof this.actual === "string") {
+                assert_1.default({
+                    assertion: this.actual.indexOf(value) >= 0,
+                    message: message || "Expected " + this.actual + " to contain " + value
+                });
+            }
+            else if (Array.isArray(this.actual)) {
+                var included = false;
+                for (var i = 0; i < this.actual.length; i++) {
+                    if (fast_deep_equal_1.equal(this.actual[i], value)) {
+                        included = true;
+                        break;
+                    }
+                }
+                assert_1.default({
+                    assertion: included,
+                    message: message || "Expected " + JSON.stringify(this.actual) + " to contain " + JSON.stringify(value)
+                });
+            }
+            else if (typeof this.actual === "object") {
+                var included = true;
+                var valueProperties = Object.getOwnPropertyNames(value);
+                for (var i = 0; i < valueProperties.length; i++) {
+                    if (!this.actual.hasOwnProperty(valueProperties[i])) {
+                        included = false;
+                        break;
+                    }
+                    if (!fast_deep_equal_1.equal(this.actual[valueProperties[i]], value[valueProperties[i]])) {
+                        included = false;
+                    }
+                }
+                assert_1.default({
+                    assertion: included,
+                    message: message || "Expected " + JSON.stringify(this.actual) + " to contain " + JSON.stringify(value)
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toContain = function (value, message) {
+            return this.toInclude(value, message);
+        };
+        Expectation.prototype.toExclude = function (value, message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                assertion: typeof this.actual === "string" || Array.isArray(this.actual) || typeof this.actual === "object",
+                message: "Item being tested should be a string, array, or object"
+            });
+            if (typeof this.actual === "string") {
+                assert_1.default({
+                    assertion: this.actual.indexOf(value) === -1,
+                    message: message || "Expected " + this.actual + " to not contain " + value
+                });
+            }
+            else if (Array.isArray(this.actual)) {
+                var included = false;
+                for (var i = 0; i < this.actual.length; i++) {
+                    if (fast_deep_equal_1.equal(this.actual[i], value)) {
+                        included = true;
+                        break;
+                    }
+                }
+                assert_1.default({
+                    assertion: !included,
+                    message: message || "Expected " + JSON.stringify(this.actual) + " to not contain " + JSON.stringify(value)
+                });
+            }
+            else if (typeof this.actual === "object") {
+                var included = false;
+                var valueProperties = Object.getOwnPropertyNames(value);
+                for (var i = 0; i < valueProperties.length; i++) {
+                    if (this.actual.hasOwnProperty(valueProperties[i])) {
+                        if (fast_deep_equal_1.equal(this.actual[valueProperties[i]], value[valueProperties[i]])) {
+                            included = true;
+                            break;
+                        }
+                    }
+                }
+                assert_1.default({
+                    assertion: !included,
+                    message: message || "Expected " + JSON.stringify(this.actual) + " to not contain " + JSON.stringify(value)
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toNotInclude = function (value, message) {
+            return this.toExclude(value, message);
+        };
+        Expectation.prototype.toNotContain = function (value, message) {
+            return this.toExclude(value, message);
+        };
+        Expectation.prototype.toThrow = function (error, message) {
+            assert_1.default({
+                assertion: typeof error === "undefined" ||
+                    typeof error === "string" ||
+                    error instanceof RegExp ||
+                    typeof error === "function",
+                message: "[error] argument should be a string, regular expression, or function"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "function") {
+                throw assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a function"
+                });
+            }
+            if (typeof error === "undefined") {
+                var threw = false;
+                try {
+                    this.actual();
+                }
+                catch (e) {
+                    threw = true;
+                }
+                assert_1.default({
+                    assertion: threw,
+                    message: message || "Expected function to throw"
+                });
+            }
+            else if (typeof error === "string") {
+                try {
+                    this.actual();
+                }
+                catch (e) {
+                    assert_1.default({
+                        assertion: e.message === error,
+                        message: message || "Expected error message to be \"" + error + "\"\""
+                    });
+                }
+            }
+            else if (error instanceof RegExp) {
+                try {
+                    this.actual();
+                }
+                catch (e) {
+                    assert_1.default({
+                        assertion: error.test(e.message),
+                        message: message || "Expected error message to match " + error
+                    });
+                }
+            }
+            else if (typeof error === "function") {
+                try {
+                    this.actual();
+                }
+                catch (e) {
+                    assert_1.default({
+                        assertion: e instanceof error,
+                        message: message || "Expected error to be " + error
+                    });
+                }
+            }
+            return this;
+        };
+        Expectation.prototype.toNotThrow = function (message) {
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof this.actual !== "function") {
+                throw assert_1.default({
+                    assertion: false,
+                    message: "Item being tested should be a function"
+                });
+            }
+            var threw = false;
+            try {
+                this.actual();
+            }
+            catch (e) {
+                threw = true;
+            }
+            assert_1.default({
+                assertion: !threw,
+                message: message || "Expected function to not throw"
+            });
+            return this;
+        };
+        Expectation.prototype.toBeA = function (constructor, message) {
+            assert_1.default({
+                assertion: typeof constructor === "function" || typeof constructor === "string",
+                message: "[constructor] argument should be a function or string"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof constructor === "string") {
+                assert_1.default({
+                    actual: typeof this.actual,
+                    assertion: typeof this.actual === constructor,
+                    expected: constructor,
+                    message: message || "Expected item to be a " + constructor
+                });
+            }
+            else if (typeof constructor === "function") {
+                assert_1.default({
+                    actual: typeof this.actual,
+                    assertion: this.actual instanceof constructor,
+                    expected: constructor,
+                    message: message || "Expected item to be a " + constructor
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toBeAn = function (constructor, message) {
+            return this.toBeA(constructor, message);
+        };
+        Expectation.prototype.toNotBeA = function (constructor, message) {
+            assert_1.default({
+                assertion: typeof constructor === "function" || typeof constructor === "string",
+                message: "[constructor] argument should be a function or string"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            if (typeof constructor === "string") {
+                assert_1.default({
+                    assertion: !(typeof this.actual === constructor),
+                    message: message || "Expected item to not be a " + constructor
+                });
+            }
+            else if (typeof constructor === "function") {
+                assert_1.default({
+                    assertion: !(this.actual instanceof constructor),
+                    message: message || "Expected item to not be a " + constructor
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toNotBeAn = function (constructor, message) {
+            return this.toNotBeA(constructor, message);
+        };
+        Expectation.prototype.toIncludeKey = function (key, message) {
+            assert_1.default({
+                assertion: typeof key === "number" || typeof key === "string",
+                message: "[key] argument should be a number or string"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                assertion: typeof this.actual === "function" || Array.isArray(this.actual) || typeof this.actual === "object",
+                message: "Tested item should be a function, array, or object"
+            });
+            if (typeof this.actual === "function") {
+                assert_1.default({
+                    assertion: this.actual.hasOwnProperty(key),
+                    message: message || "Expected function to have key " + key
+                });
+            }
+            else if (Array.isArray(this.actual)) {
+                assert_1.default({
+                    assertion: this.actual.hasOwnProperty(key),
+                    message: message || "Expected array to have key " + key
+                });
+            }
+            else if (typeof this.actual === "object") {
+                assert_1.default({
+                    assertion: this.actual.hasOwnProperty(key),
+                    message: message || "Expected object to have key " + key
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toContainKey = function (key, message) {
+            return this.toIncludeKey(key, message);
+        };
+        Expectation.prototype.toIncludeKeys = function (keys, message) {
+            assert_1.default({
+                assertion: Array.isArray(keys) && keys.length > 0 && (typeof keys[0] === "number" || typeof keys[0] === "string"),
+                message: "[keys] argument should be an array of numbers or strings"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                assertion: typeof this.actual === "function" || Array.isArray(this.actual) || typeof this.actual === "object",
+                message: "Tested item should be a function, array, or object"
+            });
+            for (var i = 0; i < keys.length; i++) {
+                this.toIncludeKey(keys[i], message);
+            }
+            return this;
+        };
+        Expectation.prototype.toContainKeys = function (keys, message) {
+            return this.toIncludeKeys(keys, message);
+        };
+        Expectation.prototype.toExcludeKey = function (key, message) {
+            assert_1.default({
+                assertion: typeof key === "number" || typeof key === "string",
+                message: "[key] argument should be a number or string"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                assertion: typeof this.actual === "function" || Array.isArray(this.actual) || typeof this.actual === "object",
+                message: "Tested item should be a function, array, or object"
+            });
+            if (typeof this.actual === "function") {
+                assert_1.default({
+                    assertion: !this.actual.hasOwnProperty(key),
+                    message: message || "Expected function to not have key " + key
+                });
+            }
+            else if (Array.isArray(this.actual)) {
+                assert_1.default({
+                    assertion: !this.actual.hasOwnProperty(key),
+                    message: message || "Expected array to not have key " + key
+                });
+            }
+            else if (typeof this.actual === "object") {
+                assert_1.default({
+                    assertion: !this.actual.hasOwnProperty(key),
+                    message: message || "Expected object to not have key " + key
+                });
+            }
+            return this;
+        };
+        Expectation.prototype.toNotIncludeKey = function (key, message) {
+            return this.toExcludeKey(key, message);
+        };
+        Expectation.prototype.toNotContainKey = function (key, message) {
+            return this.toExcludeKey(key, message);
+        };
+        Expectation.prototype.toExcludeKeys = function (keys, message) {
+            assert_1.default({
+                assertion: Array.isArray(keys) && keys.length > 0 && (typeof keys[0] === "number" || typeof keys[0] === "string"),
+                message: "[key] argument should be an array of numbers or strings"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                assertion: typeof this.actual === "function" || Array.isArray(this.actual) || typeof this.actual === "object",
+                message: "Tested item should be a function, array, or object"
+            });
+            for (var i = 0; i < keys.length; i++) {
+                this.toExcludeKey(keys[i], message);
+            }
+            return this;
+        };
+        Expectation.prototype.toNotIncludeKeys = function (keys, message) {
+            return this.toExcludeKeys(keys, message);
+        };
+        Expectation.prototype.toNotContainKeys = function (keys, message) {
+            return this.toExcludeKeys(keys, message);
+        };
+        Expectation.prototype.toHaveLength = function (value, message) {
+            assert_1.default({
+                assertion: typeof value === "number",
+                message: "[value] argument should be a number"
+            });
+            assert_1.default({
+                assertion: typeof message === "undefined" || typeof message === "string",
+                message: "[message] argument should be a string"
+            });
+            assert_1.default({
+                assertion: typeof this.actual === "string" || Array.isArray(this.actual),
+                message: "Item being tested should be a string or an array"
+            });
+            if (typeof this.actual === "string") {
+                assert_1.default({
+                    assertion: this.actual.length === value,
+                    message: message || "Expected string to have length " + value
+                });
+            }
+            if (Array.isArray(this.actual)) {
+                assert_1.default({
+                    assertion: this.actual.length === value,
+                    message: message || "Expected array to have length " + value
+                });
+            }
+            return this;
+        };
+        return Expectation;
+    }());
+    exports.default = Expectation;
+});
+define("node_modules/@ca0v/ceylon/ceylon/index", ["require", "exports", "node_modules/@ca0v/ceylon/ceylon/expectation", "node_modules/@ca0v/ceylon/ceylon/assert"], function (require, exports, expectation_1, assert_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.assert = assert_2.default;
+    var expect = function (actual) {
+        return new expectation_1.default(actual);
+    };
+    exports.default = expect;
+});
+define("node_modules/@ca0v/ceylon/index", ["require", "exports", "node_modules/@ca0v/ceylon/ceylon/index", "node_modules/@ca0v/ceylon/ceylon/assert", "node_modules/@ca0v/ceylon/ceylon/fast-deep-equal", "node_modules/@ca0v/ceylon/ceylon/assertion-error", "node_modules/@ca0v/ceylon/ceylon/expectation"], function (require, exports, index_2, assert_3, fast_deep_equal_2, assertion_error_2, expectation_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.expect = index_2.default;
+    exports.assert = assert_3.default;
+    exports.deepEqual = fast_deep_equal_2.equal;
+    exports.AssertionError = assertion_error_2.default;
+    exports.Expectation = expectation_2.default;
+    exports.default = index_2.default;
+});
+define("tests/base", ["require", "exports", "ol3-fun/slowloop", "node_modules/@ca0v/ceylon/index"], function (require, exports, slowloop_2, index_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.slowloop = slowloop_2.slowloop;
+    exports.expect = index_3.expect;
+    exports.assert = index_3.assert;
+    exports.deepEqual = index_3.deepEqual;
     function describe(title, fn) {
         console.log(title || "undocumented test group");
         return window.describe(title, fn);
@@ -1327,7 +2119,7 @@ define("examples/extras/data/mapserver", ["require", "exports"], function (requi
     };
     return mapserver;
 });
-define("examples/jsondiff", ["require", "exports", "index", "tests/base", "examples/extras/data/featureserver", "examples/extras/data/mapserver"], function (require, exports, index_2, base_1, featureserver, mapserver) {
+define("examples/jsondiff", ["require", "exports", "index", "tests/base", "examples/extras/data/featureserver", "examples/extras/data/mapserver"], function (require, exports, index_4, base_1, featureserver, mapserver) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var css = "\ntextarea {\n    background: black;\n    color: white;\n    min-width: 400px;\n    min-height: 600px;\n    white-space: nowrap;  \n    overflow: auto;\n}\n";
@@ -1340,25 +2132,25 @@ define("examples/jsondiff", ["require", "exports", "index", "tests/base", "examp
     function diff(trace) {
         var result = {};
         trace.forEach(function (t) {
-            var path = t.path.reverse();
+            var path = t.path.slice();
             var key = path.pop();
             forcePath(result, path)[key] = t.value;
         });
         return result;
     }
     function run() {
-        index_2.cssin("jsondiff", css);
+        index_4.cssin("jsondiff", css);
         document.getElementById("map").remove();
-        document.body.appendChild(index_2.html(html));
+        document.body.appendChild(index_4.html(html));
         var left = document.getElementById("json1");
         var right = document.getElementById("json2");
         var target = document.getElementById("result");
         var trace = [];
-        var doit = index_2.debounce(function () {
+        var doit = index_4.debounce(function () {
             try {
                 var js1 = JSON.parse(left.value);
                 var js2 = JSON.parse(right.value);
-                index_2.deepExtend(js1, js2, (trace = []));
+                index_4.deepExtend(js1, js2, (trace = []));
                 target.value = base_1.stringify(diff(trace));
             }
             catch (ex) {
@@ -1366,7 +2158,7 @@ define("examples/jsondiff", ["require", "exports", "index", "tests/base", "examp
             }
         }, 200);
         left.addEventListener("keydown", function () { return doit(); });
-        right.addEventListener("keypress", function () { return doit(); });
+        right.addEventListener("keydown", function () { return doit(); });
         left.value = base_1.stringify(mapserver);
         right.value = base_1.stringify(featureserver);
         doit();

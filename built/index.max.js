@@ -426,6 +426,10 @@ define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], func
 define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    function isArrayLike(o) {
+        var keys = Object.keys(o);
+        return keys.every(function (k) { return k === parseInt(k, 10).toString(); });
+    }
     function extend(a, b, trace, history) {
         if (history === void 0) { history = []; }
         if (!b) {
@@ -468,7 +472,6 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             if (this.traceItems) {
                 this.traceItems.push(item);
             }
-            return item.path;
         };
         Merger.prototype.deepExtend = function (target, source, path) {
             var _this = this;
@@ -492,9 +495,11 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 return target;
             }
             else if (isArray(target)) {
-                throw "attempting to merge a non-array into an array";
+                if (!isArrayLike(source)) {
+                    throw "attempting to merge a non-array into an array";
+                }
             }
-            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k], [k].concat(path)); });
+            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k], path.slice()); });
             return target;
         };
         Merger.prototype.cloneArray = function (val, path) {
@@ -528,7 +533,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             if (sourceValue === targetValue)
                 return;
             if (is_primitive_2.isPrimitive(sourceValue)) {
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -540,7 +546,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             }
             if (canClone(sourceValue)) {
                 sourceValue = clone(sourceValue);
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -552,11 +559,12 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             }
             if (isArray(sourceValue)) {
                 if (isArray(targetValue)) {
-                    this.deepExtend(targetValue, sourceValue, path);
+                    this.deepExtendWithKey(targetValue, sourceValue, path, key);
                     return;
                 }
                 sourceValue = this.cloneArray(sourceValue, path);
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -572,7 +580,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             if (!isHash(targetValue)) {
                 var merger = new Merger(null, this.history);
                 sourceValue = merger.deepExtend({}, sourceValue, path);
-                path = this.trace({
+                path.push(key);
+                this.trace({
                     path: path,
                     key: key,
                     target: target,
@@ -582,8 +591,14 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 target[key] = sourceValue;
                 return;
             }
-            this.deepExtend(targetValue, sourceValue, path);
+            this.deepExtendWithKey(targetValue, sourceValue, path, key);
             return;
+        };
+        Merger.prototype.deepExtendWithKey = function (targetValue, sourceValue, path, key) {
+            var index = path.push(key);
+            this.deepExtend(targetValue, sourceValue, path);
+            if (index === path.length)
+                path.pop();
         };
         Merger.prototype.mergeArray = function (key, target, source, path) {
             var _this = this;
@@ -606,14 +621,14 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                     if (isHash(target[i]) && !!target[i][key]) {
                         throw "cannot replace an identified array item with a non-identified array item";
                     }
-                    _this.mergeChild(i, target, sourceItem, path);
+                    _this.mergeChild(i, target, sourceItem, path.slice());
                     return;
                 }
                 if (isUndefined(targetIndex)) {
-                    _this.mergeChild(target.length, target, sourceItem, path);
+                    _this.mergeChild(target.length, target, sourceItem, path.slice());
                     return;
                 }
-                _this.mergeChild(targetIndex, target, sourceItem, path);
+                _this.mergeChild(targetIndex, target, sourceItem, path.slice());
                 return;
             });
             return target;

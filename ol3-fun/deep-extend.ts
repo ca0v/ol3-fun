@@ -15,6 +15,11 @@ export interface TraceItem {
 	was: any;
 }
 
+function isArrayLike(o: any) {
+	let keys = Object.keys(o);
+	return keys.every(k => k === parseInt(k, 10).toString());
+}
+
 /**
  * Internally tracks visited objects for cycle detection
  */
@@ -70,7 +75,6 @@ class Merger {
 		if (this.traceItems) {
 			this.traceItems.push(item);
 		}
-		return item.path;
 	}
 
 	constructor(public traceItems: Array<TraceItem>, public history: History) {}
@@ -112,13 +116,15 @@ class Merger {
 			this.mergeArray("id", <Array<any>>(<any>target), <Array<any>>(<any>source), path);
 			return target;
 		} else if (isArray(target)) {
-			throw "attempting to merge a non-array into an array";
+			if (!isArrayLike(source)) {
+				throw "attempting to merge a non-array into an array";
+			}
 		}
 
 		/**
 		 * copy the values from source into the target
 		 */
-		Object.keys(source).forEach(k => this.mergeChild(k, target, source[k], [k].concat(path)));
+		Object.keys(source).forEach(k => this.mergeChild(k, target, source[k], path.slice()));
 
 		return target;
 	}
@@ -155,7 +161,8 @@ class Merger {
 		 */
 		if (isPrimitive(sourceValue)) {
 			// record change
-			path = this.trace({
+			path.push(key);
+			this.trace({
 				path: path,
 				key: key,
 				target: target,
@@ -171,7 +178,8 @@ class Merger {
 		if (canClone(sourceValue)) {
 			sourceValue = clone(sourceValue);
 			// record change
-			path = this.trace({
+			path.push(key);
+			this.trace({
 				path: path,
 				key: key,
 				target: target,
@@ -189,14 +197,15 @@ class Merger {
 			 * we're dealing with objects (two arrays) that deepExtend understands
 			 */
 			if (isArray(targetValue)) {
-				this.deepExtend(targetValue, sourceValue, path);
+				this.deepExtendWithKey(targetValue, sourceValue, path, key);
 				return;
 			}
 			/**
 			 * create/update the target with the source array
 			 */
 			sourceValue = this.cloneArray(sourceValue, path);
-			path = this.trace({
+			path.push(key);
+			this.trace({
 				path: path,
 				key: key,
 				target: target,
@@ -220,7 +229,8 @@ class Merger {
 			// clone the source
 			let merger = new Merger(null, this.history);
 			sourceValue = merger.deepExtend({}, sourceValue, path);
-			path = this.trace({
+			path.push(key);
+			this.trace({
 				path: path,
 				key: key,
 				target: target,
@@ -233,8 +243,15 @@ class Merger {
 		/**
 		 * Both source and target are known by deepExtend...
 		 */
-		this.deepExtend(targetValue, sourceValue, path);
+		this.deepExtendWithKey(targetValue, sourceValue, path, key);
 		return;
+	}
+
+	deepExtendWithKey(targetValue: any, sourceValue: any, path: any[], key: string | number): any {
+		let index = path.push(key);
+		this.deepExtend(targetValue, sourceValue, path);
+		// no changes, remove key from path
+		if (index === path.length) path.pop();
 	}
 
 	private mergeArray(key: string, target: Array<any>, source: Array<any>, path: Path) {
@@ -261,7 +278,7 @@ class Merger {
 				if (isHash(target[i]) && !!target[i][key]) {
 					throw "cannot replace an identified array item with a non-identified array item";
 				}
-				this.mergeChild(i, target, sourceItem, path);
+				this.mergeChild(i, target, sourceItem, path.slice());
 				return;
 			}
 
@@ -269,14 +286,14 @@ class Merger {
 			 * not target so add it to the end of the array
 			 */
 			if (isUndefined(targetIndex)) {
-				this.mergeChild(target.length, target, sourceItem, path);
+				this.mergeChild(target.length, target, sourceItem, path.slice());
 				return;
 			}
 
 			/**
 			 * The target item exists so need to merge the source item
 			 */
-			this.mergeChild(targetIndex, target, sourceItem, path);
+			this.mergeChild(targetIndex, target, sourceItem, path.slice());
 			return;
 		});
 

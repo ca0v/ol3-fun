@@ -55,7 +55,10 @@ export function run() {
 		}),
 		layers: [
 			new ol.layer.Tile({
-				source: new ol.source.OSM()
+				source: new ol.source.TileDebug({
+					projection: "EPSG:3857",
+					tileGrid: ol.tilegrid.createXYZ({ tileSize: 256 })
+				})
 			})
 		]
 	});

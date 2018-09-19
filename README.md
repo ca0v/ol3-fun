@@ -18,8 +18,7 @@ Collection of utility function oriented around OpenLayers
 
 ## Docs
 
--   [main](https://rawgit.com/ca0v/ol3-fun/v5.1.3/built/docs/index.html)
--   [index](https://rawgit.com/ca0v/ol3-fun/v5.1.3/built/docs/modules/_index_.html)
+-   [index](https://rawgit.com/ca0v/ol3-fun/v5.1.3/built/docs/index.html)
 
 ## Tests
 

@@ -133,8 +133,14 @@
 			}
 			if (!isRun && !isTest) {
 				let mids = Object.keys((<any>requirejs).s.contexts._.registry);
-				let examples = mids.filter(m => 0 === m.indexOf("examples/")).filter(n => -1 === n.indexOf("/extras/"));
-				let tests = mids.filter(m => 0 === m.indexOf("tests/")).filter(n => -1 === n.indexOf("/extras/"));
+				let examples = mids
+					.filter(m => 0 === m.indexOf("examples/"))
+					.filter(n => -1 === n.indexOf("/extras/"))
+					.sort();
+				let tests = mids
+					.filter(m => 0 === m.indexOf("tests/"))
+					.filter(n => -1 === n.indexOf("/extras/"))
+					.sort();
 				console.log(examples, tests);
 				examples = examples.map(n => `<a href="${location}${location.search ? "&" : "?"}run=${n}">${n}</a>`);
 				tests = tests.map(n => `<a href="${location}${location.search ? "&" : "?"}test=${n}">${n}</a>`);

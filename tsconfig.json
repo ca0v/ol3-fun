@@ -9,8 +9,8 @@
 		"noImplicitThis": true,
 		"sourceMap": true,
 		"outFile": "./built/index.max.js",
-		"moduleResolution": "node",
-		"baseUrl": "./",
+		"moduleResolution": "classic",
+		"baseUrl": "./node_modules",
 		"lib": ["dom", "esnext"],
 		"types": ["requirejs", "ol", "jquery"]
 	},

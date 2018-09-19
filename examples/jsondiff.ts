@@ -38,7 +38,7 @@ function forcePath(o: any, path: Array<string>) {
 function diff(trace: Array<{ path: Array<string>; value: any }>) {
 	let result = <any>{};
 	trace.forEach(t => {
-		let path = t.path.reverse();
+		let path = t.path.slice();
 		let key = path.pop();
 		forcePath(result, path)[key] = t.value;
 	});
@@ -64,7 +64,7 @@ export function run() {
 		}
 	}, 200);
 	left.addEventListener("keydown", () => doit());
-	right.addEventListener("keypress", () => doit());
+	right.addEventListener("keydown", () => doit());
 	left.value = stringify(mapserver);
 	right.value = stringify(featureserver);
 	doit();

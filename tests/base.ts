@@ -1,5 +1,6 @@
 import { slowloop } from "../ol3-fun/slowloop";
 import { Suite, Func, AsyncFunc } from "mocha";
+import { expect, assert, deepEqual } from "@ca0v/ceylon/index";
 
 // (title: string, fn: (this: Suite) => void): Suite
 export function describe(title: string, fn: (this: Suite) => void): Suite {
@@ -41,4 +42,4 @@ export function stringify(o: Object) {
 	return JSON.stringify(o, null, "\t");
 }
 
-export { slowloop };
+export { slowloop, expect, assert, deepEqual };

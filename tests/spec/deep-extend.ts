@@ -1,4 +1,4 @@
-﻿import { should, shouldEqual, stringify, shouldThrow } from "../base";
+﻿import { should, shouldEqual, stringify, shouldThrow, deepEqual } from "../base";
 import { extend as deepExtend, TraceItem } from "../../ol3-fun/deep-extend";
 import { range } from "ol3-fun/common";
 
@@ -6,6 +6,7 @@ describe("utils/deep-extend", () => {
 	it("trivial merges", () => {
 		shouldEqual(stringify(deepExtend({}, {})), stringify({}), "empty objects");
 		shouldEqual(stringify(deepExtend([], [])), stringify([]), "empty arrays");
+		shouldEqual(stringify(deepExtend([], {})), stringify([]), "empty arrays with empty object");
 		shouldEqual(stringify(deepExtend([,], [, ,])), stringify([,]), "arrays with empty items");
 		let o = { a: 1 };
 		shouldEqual(o, deepExtend(o, o), "merges same object");
@@ -13,8 +14,9 @@ describe("utils/deep-extend", () => {
 	});
 
 	it("invalid merges", () => {
-		shouldThrow(() => deepExtend({}, []), "{} and []");
-		shouldThrow(() => deepExtend(<any>[], {}), "[] and {}");
+		shouldThrow(() => deepExtend(<any>{}, []), "array->object considered an error");
+		shouldThrow(() => deepExtend(<any>{ a: 1 }, []), "{a:1} and []");
+		shouldThrow(() => deepExtend(<any>[], { a: 1 }), "[] and {a:1}");
 		shouldThrow(() => deepExtend(<any>1, <any>2), "primitives");
 		shouldThrow(() => deepExtend(new Date(2000, 1, 1), new Date(2000, 1, 2)), "clonable primitives");
 		let a = { a: 1 };
@@ -41,15 +43,12 @@ describe("utils/deep-extend", () => {
 
 	it("simple array merges", () => {
 		shouldEqual(stringify(deepExtend([1], [])), stringify([1]), "[1] + []");
-		shouldEqual(stringify(deepExtend([1], [2])), stringify([2]), "[1] + [2]");
-		shouldEqual(stringify(deepExtend([1, 2, 3], [2])), stringify([2, 2, 3]), "[1,2,3] + [2]");
-		shouldEqual(stringify(deepExtend([2], [1, 2, 3])), stringify([1, 2, 3]), "[2] + [1,2,3]");
+		shouldEqual(stringify(deepExtend([1], [2])), stringify([2]), "[1<-2]");
+		shouldEqual(stringify(deepExtend([1, 2, 3], [2])), stringify([2, 2, 3]), "[1<-2,2,3]]");
+		shouldEqual(stringify(deepExtend([2], [1, 2, 3])), stringify([1, 2, 3]), "[2<-1, 2, 3]");
 		shouldEqual(stringify(deepExtend([, , , 4], [1, 2, 3])), stringify([1, 2, 3, 4]), "array can have empty items");
-		shouldEqual(
-			stringify(deepExtend([{ id: 1 }], [{ id: 2 }])),
-			stringify([{ id: 1 }, { id: 2 }]),
-			"[1] + [2] with ids"
-		);
+		should(deepEqual(deepExtend([1, 2, 3], { 1: 100 }), [1, 100, 3]), "array<-object");
+		should(deepEqual(deepExtend([{ id: 1 }], [{ id: 2 }]), [{ id: 1 }, { id: 2 }]), "[1] + [2] with ids");
 	});
 
 	it("preserves array ordering", () => {
@@ -152,6 +151,29 @@ describe("utils/deep-extend", () => {
 		shouldEqual(xfoo, z.foo, "reference foo preserved");
 	});
 
+	it("confirms trace on simple array merging", () => {
+		let trace: Array<TraceItem> = [];
+		let result = deepExtend([1, 2, 5], [, 3], trace);
+		shouldEqual(stringify(result), stringify([1, 3, 5]), "confirm array extended");
+		shouldEqual(trace.length, 1, "length: 2<-3");
+		shouldEqual(stringify(trace[0].path), stringify([1]), "path: target[1]");
+		shouldEqual(trace[0].key, 1, "key: target[*1*] was 2 and is now 3");
+		shouldEqual(trace[0].was, 2, "was: target[1] was *2* and is now 3");
+		shouldEqual(trace[0].value, 3, "value: target[1] was 2 and is now *3*");
+	});
+
+	it("confirms trace diff on simple array", () => {
+		let trace: Array<TraceItem> = [];
+		deepExtend([1, 2, 5], [, 3], trace);
+		shouldEqual(stringify(diff(trace)), stringify({ 1: 3 }), "simple array trace diff");
+	});
+
+	it("confirms trace diff on simple array against array-like object", () => {
+		let trace: Array<TraceItem> = [];
+		deepExtend([1, 2, 5], { 1: 3 }, trace);
+		shouldEqual(stringify(diff(trace)), stringify({ 1: 3 }), "simple array trace diff");
+	});
+
 	it("confirms trace is empty when merging duplicate objects", () => {
 		let trace: Array<TraceItem> = [];
 		deepExtend({}, {}, trace);
@@ -196,6 +218,29 @@ describe("utils/deep-extend", () => {
 		shouldEqual(trace.length, 2, "1->10, 3->30");
 		deepExtend({ a: [1, 2, [3]] }, { a: [1, 2, [3, 4], 5] }, (trace = []));
 		shouldEqual(trace.length, 2, "[3]->[3,4], 4 added");
+	});
+
+	it("confirms trace diff when exactly one change is made", () => {
+		let trace: Array<TraceItem> = [];
+		deepExtend({ a: 1, b: [1], c: { d: 1 } }, { a: 2, b: [1], c: { d: 1 } }, (trace = []));
+		shouldEqual(stringify(diff(trace)), stringify({ a: 2 }), "a:1->2");
+		deepExtend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [2], c: { d: 1 } }, (trace = []));
+		shouldEqual(stringify(diff(trace)), stringify({ b: { 0: 2 } }), "b:1->2");
+		deepExtend({ a: 1, b: [1], c: { d: 1 } }, { a: 1, b: [1], c: { d: 2 } }, (trace = []));
+		shouldEqual(stringify(diff(trace)), stringify({ c: { d: 2 } }), "d:1->2");
+		deepExtend({ a: [1, 2, 3] }, { a: [1, 2, 30] }, (trace = []));
+		shouldEqual(stringify(diff(trace)), stringify({ a: { 2: 30 } }), "a[2]:3->30");
+		deepExtend({ a: [1, 2, [3]] }, { a: [1, 2, [3, 4]] }, (trace = []));
+		shouldEqual(stringify(diff(trace)), stringify({ a: { 2: { 1: 4 } } }), "[3]->[3,4]");
+	});
+
+	it("confirms trace diff when exactly two changes are made", () => {
+		let trace: Array<TraceItem> = [];
+		deepExtend({ a: [1, 2, ["3"]] }, { a: [1, 2, ["A", "B"]] }, (trace = []));
+		// this should not pass..a[2][0]<-A, A[2][1]<-B is {a: {2: {0: "A", 1: "B"}}}
+		//shouldEqual(stringify(diff(trace)), stringify({ a: { 2: { 0: { 0: "A", 1: "B" } } } }), "a[2]:[3]<-[A,B]");
+		// this should not fail...
+		shouldEqual(stringify(diff(trace)), stringify({ a: { 2: { 0: "A", 1: "B" } } }), "a[2]:[3]<-[A,B]");
 	});
 
 	it("confirms trace content", () => {
@@ -298,8 +343,9 @@ function forcePath(o: any, path: Array<string>) {
 function diff(trace: Array<TraceItem>) {
 	let result = <any>{};
 	trace.forEach(t => {
-		let path = t.path.reverse();
-		let key = path.pop();
+		let path = t.path.slice();
+		let key = t.key;
+		console.assert(key === path.pop());
 		forcePath(result, path)[key] = t.value;
 	});
 	return result;

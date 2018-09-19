@@ -119,8 +119,14 @@
             }
             if (!isRun && !isTest) {
                 var mids = Object.keys(requirejs.s.contexts._.registry);
-                var examples = mids.filter(function (m) { return 0 === m.indexOf("examples/"); }).filter(function (n) { return -1 === n.indexOf("/extras/"); });
-                var tests = mids.filter(function (m) { return 0 === m.indexOf("tests/"); }).filter(function (n) { return -1 === n.indexOf("/extras/"); });
+                var examples = mids
+                    .filter(function (m) { return 0 === m.indexOf("examples/"); })
+                    .filter(function (n) { return -1 === n.indexOf("/extras/"); })
+                    .sort();
+                var tests = mids
+                    .filter(function (m) { return 0 === m.indexOf("tests/"); })
+                    .filter(function (n) { return -1 === n.indexOf("/extras/"); })
+                    .sort();
                 console.log(examples, tests);
                 examples = examples.map(function (n) { return "<a href=\"" + location + (location.search ? "&" : "?") + "run=" + n + "\">" + n + "</a>"; });
                 tests = tests.map(function (n) { return "<a href=\"" + location + (location.search ? "&" : "?") + "test=" + n + "\">" + n + "</a>"; });

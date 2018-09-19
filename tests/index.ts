@@ -1,3 +1,4 @@
+import "./spec/packages";
 import "./spec/api";
 import "./spec/common";
 import "./spec/slowloop";
