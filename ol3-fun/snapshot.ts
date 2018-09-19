@@ -1,7 +1,12 @@
 import ol = require("openlayers");
 
 function getStyle(feature: ol.Feature) {
-	let style = feature.getStyle();
+	let style = feature.getStyle() as
+		| ol.style.Style
+		| ol.style.Style[]
+		| ol.FeatureStyleFunction
+		| ol.StyleFunction
+		| null;
 	if (!style) {
 		let styleFn = feature.getStyleFunction();
 		if (styleFn) {
