@@ -35,9 +35,10 @@ export function cssin(name: string, css: string) {
 }
 
 export function loadCss(options: { name: string; url?: string; css?: string }) {
-	if (!options.url && !options.css) throw "must provide either a url or css option";
+	if (!options.name) throw "must provide a name to prevent css duplication";
 	if (options.url && options.css) throw "cannot provide both a url and a css";
-	if (options.name && options.css) return cssin(options.name, options.css);
+	if (options.css) return cssin(options.name, options.css);
+	if (!options.url) throw "must provide either a url or css option";
 
 	let id = `style-${options.name}`;
 	let head = document.getElementsByTagName("head")[0];

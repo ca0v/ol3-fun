@@ -42,9 +42,9 @@ class Snapshot {
 		geom.scale(scale, -scale); // fill the canvas, flipping the y axis
 		geom.translate(Math.ceil((ff * canvas.width) / 2), Math.ceil((ff * canvas.height) / 2)); // move center to center of canvas
 
-		console.log(scale, cx, cy, w, h, geom.getCoordinates());
-
-		let vtx = ol.render.toContext(canvas.getContext("2d"));
+		let ctx = canvas.getContext("2d");
+		if (!ctx) throw "unable to get canvas context";
+		let vtx = ol.render.toContext(ctx);
 		let styles = <ol.style.Style[]>(<any>getStyle(feature));
 		if (!Array.isArray(styles)) styles = <any>[styles];
 		styles.forEach(style => vtx.drawFeature(feature, style));

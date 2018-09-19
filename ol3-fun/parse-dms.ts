@@ -77,7 +77,7 @@ function fromDmsToLonLat(dmsString: string): { lon: number; lat: number } | numb
 	// If dmsString starts with a hemisphere letter, then the regex can also capture the
 	// hemisphere letter for the second coordinate pair if also in the string
 	if (m1[1]) {
-		m1[6] = undefined;
+		m1[6] = <any>undefined;
 		dmsString2 = dmsString.substr(m1[0].length - 1).trim();
 	} else {
 		dmsString2 = dmsString.substr(m1[0].length).trim();

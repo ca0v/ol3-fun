@@ -2,6 +2,7 @@
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
 		"declaration": false,
+		"strict": false,
 		"outFile": "../built/tests.max.js",
 		"paths": {
 			"ol3-fun": ["./ol3-fun"]

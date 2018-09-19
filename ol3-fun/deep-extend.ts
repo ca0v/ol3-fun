@@ -77,7 +77,7 @@ class Merger {
 		}
 	}
 
-	constructor(public traceItems: Array<TraceItem>, public history: History) {}
+	constructor(public traceItems: Array<TraceItem> | null | undefined, public history: History) {}
 
 	/**
 	 * @param target Object to be extended

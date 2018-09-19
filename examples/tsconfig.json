@@ -1,6 +1,7 @@
 {
 	"extends": "../tsconfig",
 	"compilerOptions": {
+		"strict": false,
 		"declaration": false,
 		"outFile": "../built/examples.max.js"
 	},

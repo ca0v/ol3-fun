@@ -13,7 +13,7 @@ import { defaults } from "./common";
 export function zoomToFeature(
 	map: ol.Map,
 	feature: ol.Feature,
-	options?: {
+	ops?: {
 		// animation duration in milliseconds
 		duration?: number;
 		// number of pixels to pad around final extent
@@ -23,7 +23,7 @@ export function zoomToFeature(
 	}
 ) {
 	let promise = $.Deferred();
-	options = defaults(options || {}, {
+	let options = defaults(ops || {}, {
 		duration: 1000,
 		padding: 256,
 		minResolution: 2 * map.getView().getMinResolution()
