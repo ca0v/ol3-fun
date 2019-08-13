@@ -2,7 +2,7 @@
 // // Type definitions for Expect 1.20, expect.version = '0.3.1' so I might be loading the wrong defs!
 //import expect from "expect";
 //import * as expect from "expect"; // only works when using karma+webpack
-import {should} from "../base";
+import { should, shouldEqual } from "../base";
 
 import {
     asArray,
@@ -12,7 +12,11 @@ import {
     shuffle,
     html,
     toggle,
-    uuid
+    uuid,
+    doif,
+    mixin,
+    defaults,
+    cssin
 } from "../../ol3-fun/common";
 
 function sum(list: number[]) {
@@ -146,25 +150,60 @@ describe("getParameterByName tests", () => {
 
 describe("doif tests", () => {
 
+    it("tests false, null and undefined", () => {
+        let run = false;
+        let yes = () => run = true;
+        let no = () => run = false;
+        no(); doif(false, yes); should(run, "false is a value");
+        no(); doif(null, yes); should(!run, "null is a not a value");
+        no(); doif(undefined, yes); should(!run, "undefined is not a value");
+    });
 });
 
 describe("mixin tests", () => {
-
+    it("tests mixin of mixin", () => {
+        let a = { a: "a" };
+        let b = { b: "b" };
+        let c = { c: "c" };
+        let ab = mixin(a, b);
+        let bc = mixin(b, c);
+        bc.b = "bc.b";
+        let abc = mixin(ab, bc);
+        should(abc.a === ab.a, "abc.a");
+        should(abc.b === bc.b, "abc.b");
+        should(abc.c === bc.c, "abc.c");
+    });
 });
 
 describe("defaults tests", () => {
-
+    it("tests defaults", () => {
+        let initialOptions = { color: "blue" };
+        let defaultOptions = { color: "red", volume: 10 };
+        let finalOptions = defaults(initialOptions, defaultOptions);
+        should(finalOptions.color === "blue", "blue was provided as initial option");
+        should(finalOptions.volume === 10, "volume was not initially provided so uses the default");
+    });
 });
 
 
 describe("cssin tests", () => {
-
+    let originalBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
+    it("paint background red", done => {
+        let css = `body { background-color: red}`;
+        let dispose = cssin("spec-common-cssin-1", css);
+        let backgroundColor = window.getComputedStyle(document.body).backgroundColor;
+        should(backgroundColor === "rgb(255, 0, 0)", "body is red");
+        dispose();
+        backgroundColor = window.getComputedStyle(document.body).backgroundColor;
+        should(backgroundColor === originalBackgroundColor, "body is restored");
+        done();
+    })
 });
 
 
 describe("html tests", () => {
 
-    it("", () => {
+    it("creates markup from strings", () => {
         let markup = "<tr>A<td>B</td></tr>";
         let tr = <HTMLTableRowElement>html(markup);
         should(tr.nodeValue === "AB", "setting innerHTML on a 'div' will not assign tr elements");

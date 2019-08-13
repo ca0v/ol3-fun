@@ -25,7 +25,7 @@ export function asArray<T extends HTMLInputElement>(list: NodeList) {
  * @param force true to add specified class value, false to remove it.
  * @returns true if className exists.
  */
-export function toggle(e: HTMLElement, className: string, force? : boolean) {
+export function toggle(e: HTMLElement, className: string, force?: boolean) {
     let exists = e.classList.contains(className);
     if (exists && force !== true) {
         e.classList.remove(className);
@@ -72,13 +72,13 @@ export function doif<T>(v: T, cb: (v: T) => void) {
 }
 
 export function mixin<A extends any, B extends any>(a: A, b: B) {
-    Object.keys(b).forEach(k => a[k] = b[k]);
+    Object.keys(<Object>b).forEach(k => a[k] = b[k]);
     return <A & B>a;
 }
 
 export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B {
     b.forEach(b => {
-        Object.keys(b).filter(k => a[k] === undefined).forEach(k => a[k] = b[k]);
+        Object.keys(<Object>b).filter(k => a[k] === undefined).forEach(k => a[k] = b[k]);
     });
     return <A & B>a;
 }
@@ -89,6 +89,7 @@ export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B {
  * Note the css will not be removed until the dependency count reaches
  * 0 meaning the number of calls to cssin('id') must match the number
  * of times the destructor is invoked.
+ * ```
  * let d1 = cssin('foo', '.foo { background: white }');
  * let d2 = cssin('foo', '.foo { background: white }');
  * d1(); // reduce dependency count
@@ -96,6 +97,7 @@ export function defaults<A extends any, B extends any>(a: A, ...b: B[]): A & B {
  * @param name unique id for this style tag
  * @param css css content
  * @returns destructor
+ * ```
  */
 export function cssin(name: string, css: string) {
     let id = `style-${name}`;
