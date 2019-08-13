@@ -22,6 +22,11 @@ Collection of utility function oriented around OpenLayers
 * [v3.20.1](https://rawgit.com/ca0v/ol3-fun/v3.20.1/rawgit.html)
 * [master](https://rawgit.com/ca0v/ol3-fun/master/rawgit.html)
 
+## Develop
+* `git clone https://github.com/ca0v/ol3-fun.git`
+* `cd ol3-fun`
+* `npm install`
+
 ## Develop Tests
 
 * `>npm run dev-for-tests`
