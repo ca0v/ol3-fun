@@ -1,17 +1,9 @@
 {
-    "compilerOptions": {
-        "removeComments": true,
-        "declaration": false,
-        "module": "amd",
-        "target": "es3",
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "sourceMap": true,
-        "outFile": "../built/examples.max.js",
-        "moduleResolution": "node"
-    },
-    "include": [
-        "index.ts"
-    ]
+	"extends": "../tsconfig",
+	"compilerOptions": {
+		"strict": false,
+		"declaration": false,
+		"outFile": "../built/examples.max.js"
+	},
+	"include": ["**/*.ts"]
 }

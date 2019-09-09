@@ -1,21 +1,17 @@
 {
-    "compilerOptions": {
-        "removeComments": true,
-        "declaration": true,
-        "module": "amd",
-        "target": "es5",
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "sourceMap": true,
-        "outFile": "./built/index.max.js",
-        "moduleResolution": "node"
-    },
-    "include": [
-        "index.ts"
-    ],
-    "exclude": [
-        "ol3-fun/examples",
-        "ol3-fun/tests"
-    ]
+	"compilerOptions": {
+		"removeComments": true,
+		"declaration": true,
+		"module": "amd",
+		"target": "es5",
+		"strict": true,
+		"sourceMap": true,
+		"outFile": "./built/index.max.js",
+		"moduleResolution": "classic",
+		"baseUrl": "./node_modules",
+		"lib": ["dom", "esnext"],
+		"types": ["requirejs", "ol", "jquery"]
+	},
+	"include": ["index.ts", "ol3-fun/**/*.ts"],
+	"exclude": ["ol3-fun/examples", "ol3-fun/tests"]
 }

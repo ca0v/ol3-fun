@@ -4,6 +4,5 @@ typings
 *.js
 *.js.map
 *.d.ts
-!built/**/*.js
-!built/**/*.map
-!static/**
+static/**
+built/**
