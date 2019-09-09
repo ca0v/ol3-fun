@@ -4,10 +4,10 @@
   "description": "OpenLayers Functions",
   "main": "built/index.js",
   "scripts": {
-    "ol": "pushd ./node_modules/ol && npm install && npm run build-legacy && popd",
+    "ol": "cd ./node_modules/ol && npm install && npm run build-legacy",
     "clean": "rm -r ./built",
     "before-push": "npm run clean && npm run build && npm run test && start npm run live-for-tests && npm run live-for-examples",
-    "uglify-for-amd": "pushd built && uglifyjs index.max.js --source-map \"content='index.max.js.map',url='index.js.map'\" --output=index.js --compress --mangle && popd",
+    "uglify-for-amd": "cd built && uglifyjs index.max.js --source-map \"content='index.max.js.map',url='index.js.map'\" --output=index.js --compress --mangle",
     "build-for-amd": "tsc -p tsconfig.json",
     "build-for-examples": "tsc -p examples/tsconfig.json --outFile ./built/examples.max.js",
     "live-for-examples": "live-server --port=5001 --wait=200 --watch=./built/examples.max.js --open=loaders/examples.html",
@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/ca0v/ol3-fun/blob/v5.1.3/README.md",
   "dependencies": {
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.1",
     "ol": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
     "requirejs": "^2.3.5"
   },
@@ -47,7 +47,7 @@
     "buble-loader": "^0.5.1",
     "expect": "^23.5.0",
     "karma-chrome-launcher": "^2.2.0",
-    "live-server": "^1.2.0",
+    "live-server": "^1.2.1",
     "mocha": "^5.2.0",
     "npm-watch": "^0.3.0",
     "typescript": "^3.0.1",
