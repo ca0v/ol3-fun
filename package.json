@@ -43,7 +43,7 @@
 	"devDependencies": {
 		"@types/mocha": "^5.2.5",
 		"ceylon": "https://github.com/ca0v/ceylon/tarball/v1.0.1",
-		"jquery": "^3.3.1",
+		"jquery": "^3.5.0",
 		"live-server": "^1.2.0",
 		"mocha": "^5.2.0",
 		"ol": "git+https://github.com/openlayers/openlayers.git#v5.1.3",
