@@ -1,15 +1,18 @@
 define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.shuffle = exports.range = exports.pair = exports.html = exports.debounce = exports.defaults = exports.mixin = exports.doif = exports.getParameterByName = exports.getQueryParameters = exports.parse = exports.toggle = exports.asArray = exports.uuid = void 0;
     function uuid() {
         return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-            var r = (Math.random() * 16) | 0, v = c == "x" ? r : (r & 0x3) | 0x8;
+            var r = (Math.random() * 16) | 0, v = c == "x"
+                ? r
+                : (r & 0x3) | 0x8;
             return v.toString(16);
         });
     }
     exports.uuid = uuid;
     function asArray(list) {
-        var result = new Array(list.length);
+        var result = (new Array(list.length));
         for (var i = 0; i < list.length; i++) {
             result[i] = list[i];
         }
@@ -35,9 +38,13 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         if (typeof type === "number")
             return parseFloat(v);
         if (typeof type === "boolean")
-            return (v === "1" || v === "true");
+            return ((v === "1" || v === "true"));
         if (Array.isArray(type)) {
-            return v.split(",").map(function (v) { return parse(v, type[0]); });
+            return (v
+                .split(",")
+                .map(function (v) {
+                return parse(v, type[0]);
+            }));
         }
         throw "unknown type: " + type;
     }
@@ -57,7 +64,9 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     function getParameterByName(name, url) {
         if (url === void 0) { url = window.location.href; }
         name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
+        var regex = new RegExp("[?&]" +
+            name +
+            "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
         if (!results)
             return null;
         if (!results[2])
@@ -104,7 +113,7 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
                 args[_i] = arguments[_i];
             }
             var later = function () {
-                timeout = null;
+                timeout = NaN;
                 if (!immediate)
                     func.apply({}, args);
             };
@@ -119,13 +128,16 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
     function html(html) {
         var a = document.createElement("div");
         a.innerHTML = html;
-        return (a.firstElementChild || a.firstChild);
+        return ((a.firstElementChild ||
+            a.firstChild));
     }
     exports.html = html;
     function pair(a1, a2) {
         var result = new Array(a1.length * a2.length);
         var i = 0;
-        a1.forEach(function (v1) { return a2.forEach(function (v2) { return (result[i++] = [v1, v2]); }); });
+        a1.forEach(function (v1) {
+            return a2.forEach(function (v2) { return (result[i++] = [v1, v2]); });
+        });
         return result;
     }
     exports.pair = pair;
@@ -143,8 +155,10 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
         while (0 !== currentIndex) {
             randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex -= 1;
-            temporaryValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
+            temporaryValue =
+                array[currentIndex];
+            array[currentIndex] =
+                array[randomIndex];
             array[randomIndex] = temporaryValue;
         }
         return array;
@@ -154,6 +168,7 @@ define("ol3-fun/common", ["require", "exports"], function (require, exports) {
 define("ol3-fun/css", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.loadCss = exports.cssin = void 0;
     function cssin(name, css) {
         var id = "style-" + name;
         var styleTag = document.getElementById(id);
@@ -175,12 +190,14 @@ define("ol3-fun/css", ["require", "exports"], function (require, exports) {
     }
     exports.cssin = cssin;
     function loadCss(options) {
-        if (!options.url && !options.css)
-            throw "must provide either a url or css option";
+        if (!options.name)
+            throw "must provide a name to prevent css duplication";
         if (options.url && options.css)
             throw "cannot provide both a url and a css";
-        if (options.name && options.css)
+        if (options.css)
             return cssin(options.name, options.css);
+        if (!options.url)
+            throw "must provide either a url or css option";
         var id = "style-" + options.name;
         var head = document.getElementsByTagName("head")[0];
         var link = document.getElementById(id);
@@ -206,9 +223,10 @@ define("ol3-fun/css", ["require", "exports"], function (require, exports) {
 define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3-fun/common"], function (require, exports, ol, $, common_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    function zoomToFeature(map, feature, options) {
+    exports.zoomToFeature = void 0;
+    function zoomToFeature(map, feature, ops) {
         var promise = $.Deferred();
-        options = common_1.defaults(options || {}, {
+        var options = (0, common_1.defaults)(ops || {}, {
             duration: 1000,
             padding: 256,
             minResolution: 2 * map.getView().getMinResolution()
@@ -252,6 +270,7 @@ define("ol3-fun/navigation", ["require", "exports", "openlayers", "jquery", "ol3
 define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.parse = void 0;
     function decDegFromMatch(m) {
         var signIndex = {
             "-": -1,
@@ -350,6 +369,7 @@ define("ol3-fun/parse-dms", ["require", "exports"], function (require, exports) 
 define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.slowloop = void 0;
     function slowloop(functions, interval, cycles) {
         if (interval === void 0) { interval = 1000; }
         if (cycles === void 0) { cycles = 1; }
@@ -385,6 +405,7 @@ define("ol3-fun/slowloop", ["require", "exports"], function (require, exports) {
 define("ol3-fun/is-primitive", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.isPrimitive = void 0;
     function isPrimitive(a) {
         switch (typeof a) {
             case "boolean":
@@ -408,11 +429,12 @@ define("ol3-fun/is-primitive", ["require", "exports"], function (require, export
 define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], function (require, exports, is_primitive_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.isCyclic = void 0;
     function isCyclic(a) {
-        if (is_primitive_1.isPrimitive(a))
+        if ((0, is_primitive_1.isPrimitive)(a))
             return false;
         var test = function (o, history) {
-            if (is_primitive_1.isPrimitive(o))
+            if ((0, is_primitive_1.isPrimitive)(o))
                 return false;
             if (0 <= history.indexOf(o)) {
                 return true;
@@ -426,9 +448,12 @@ define("ol3-fun/is-cyclic", ["require", "exports", "ol3-fun/is-primitive"], func
 define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-fun/is-primitive"], function (require, exports, is_cyclic_1, is_primitive_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.extend = void 0;
     function isArrayLike(o) {
         var keys = Object.keys(o);
-        return keys.every(function (k) { return k === parseInt(k, 10).toString(); });
+        return keys.every(function (k) {
+            return k === parseInt(k, 10).toString();
+        });
     }
     function extend(a, b, trace, history) {
         if (history === void 0) { history = []; }
@@ -447,7 +472,9 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
         return Array.isArray(val);
     }
     function isHash(val) {
-        return !is_primitive_2.isPrimitive(val) && !canClone(val) && !isArray(val);
+        return (!(0, is_primitive_2.isPrimitive)(val) &&
+            !canClone(val) &&
+            !isArray(val));
     }
     function canClone(val) {
         if (val instanceof Date)
@@ -477,10 +504,14 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             var _this = this;
             if (target === source)
                 return target;
-            if (!target || (!isHash(target) && !isArray(target))) {
+            if (!target ||
+                (!isHash(target) &&
+                    !isArray(target))) {
                 throw "first argument must be an object";
             }
-            if (!source || (!isHash(source) && !isArray(source))) {
+            if (!source ||
+                (!isHash(source) &&
+                    !isArray(source))) {
                 throw "second argument must be an object";
             }
             if (typeof source === "function") {
@@ -499,14 +530,16 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                     throw "attempting to merge a non-array into an array";
                 }
             }
-            Object.keys(source).forEach(function (k) { return _this.mergeChild(k, target, source[k], path.slice()); });
+            Object.keys(source).forEach(function (k) {
+                return _this.mergeChild(k, target, source[k], path.slice());
+            });
             return target;
         };
         Merger.prototype.cloneArray = function (val, path) {
             var _this = this;
             this.push(val);
             return val.map(function (v) {
-                if (is_primitive_2.isPrimitive(v))
+                if ((0, is_primitive_2.isPrimitive)(v))
                     return v;
                 if (isHash(v))
                     return _this.deepExtend({}, v, path);
@@ -518,10 +551,10 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             });
         };
         Merger.prototype.push = function (a) {
-            if (is_primitive_2.isPrimitive(a))
+            if ((0, is_primitive_2.isPrimitive)(a))
                 return;
             if (-1 < this.history.indexOf(a)) {
-                if (is_cyclic_1.isCyclic(a)) {
+                if ((0, is_cyclic_1.isCyclic)(a)) {
                     throw "circular reference detected";
                 }
             }
@@ -532,14 +565,14 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
             var targetValue = target[key];
             if (sourceValue === targetValue)
                 return;
-            if (is_primitive_2.isPrimitive(sourceValue)) {
+            if ((0, is_primitive_2.isPrimitive)(sourceValue)) {
                 path.push(key);
                 this.trace({
                     path: path,
                     key: key,
                     target: target,
                     was: targetValue,
-                    value: sourceValue
+                    value: sourceValue,
                 });
                 target[key] = sourceValue;
                 return;
@@ -552,7 +585,7 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                     key: key,
                     target: target,
                     was: targetValue,
-                    value: sourceValue
+                    value: sourceValue,
                 });
                 target[key] = sourceValue;
                 return;
@@ -569,7 +602,7 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                     key: key,
                     target: target,
                     was: targetValue,
-                    value: sourceValue
+                    value: sourceValue,
                 });
                 target[key] = sourceValue;
                 return;
@@ -586,7 +619,7 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                     key: key,
                     target: target,
                     was: targetValue,
-                    value: sourceValue
+                    value: sourceValue,
                 });
                 target[key] = sourceValue;
                 return;
@@ -618,7 +651,8 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
                 var sourceKey = sourceItem[key];
                 var targetIndex = hash[sourceKey];
                 if (isUndefined(sourceKey)) {
-                    if (isHash(target[i]) && !!target[i][key]) {
+                    if (isHash(target[i]) &&
+                        !!target[i][key]) {
                         throw "cannot replace an identified array item with a non-identified array item";
                     }
                     _this.mergeChild(i, target, sourceItem, path.slice());
@@ -639,6 +673,7 @@ define("ol3-fun/deep-extend", ["require", "exports", "ol3-fun/is-cyclic", "ol3-f
 define("ol3-fun/extensions", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Extensions = void 0;
     var Extensions = (function () {
         function Extensions() {
             this.hash = new WeakMap(null);
@@ -652,13 +687,17 @@ define("ol3-fun/extensions", ["require", "exports"], function (require, exports)
                 hashData = {};
                 this.hash.set(o, hashData);
             }
-            ext && Object.keys(ext).forEach(function (k) { return (hashData[k] = ext[k]); });
+            ext &&
+                Object.keys(ext).forEach(function (k) {
+                    return (hashData[k] = ext[k]);
+                });
             return hashData;
         };
         Extensions.prototype.bind = function (o1, o2) {
             if (this.isExtended(o1)) {
                 if (this.isExtended(o2)) {
-                    if (this.hash.get(o1) === this.hash.get(o2))
+                    if (this.hash.get(o1) ===
+                        this.hash.get(o2))
                         return;
                     throw "both objects already bound";
                 }
@@ -697,8 +736,8 @@ define("index", ["require", "exports", "ol3-fun/common", "ol3-fun/css", "ol3-fun
         slowloop: slowloop_1.slowloop,
         dms: {
             parse: parse_dms_1.parse,
-            fromDms: function (dms) { return parse_dms_1.parse(dms); },
-            fromLonLat: function (o) { return parse_dms_1.parse(o); }
+            fromDms: function (dms) { return (0, parse_dms_1.parse)(dms); },
+            fromLonLat: function (o) { return (0, parse_dms_1.parse)(o); }
         },
         navigation: {
             zoomToFeature: navigation_1.zoomToFeature
@@ -842,8 +881,10 @@ define("ol3-fun/snapshot", ["require", "exports", "openlayers"], function (requi
             geom.translate(-cx, -cy);
             geom.scale(scale, -scale);
             geom.translate(Math.ceil((ff * canvas.width) / 2), Math.ceil((ff * canvas.height) / 2));
-            console.log(scale, cx, cy, w, h, geom.getCoordinates());
-            var vtx = ol.render.toContext(canvas.getContext("2d"));
+            var ctx = canvas.getContext("2d");
+            if (!ctx)
+                throw "unable to get canvas context";
+            var vtx = ol.render.toContext(ctx);
             var styles = getStyle(feature);
             if (!Array.isArray(styles))
                 styles = [styles];

@@ -5,6 +5,7 @@
 		"module": "amd",
 		"target": "es5",
 		"strict": true,
+		"noImplicitAny": false,
 		"sourceMap": true,
 		"outFile": "./built/index.max.js",
 		"moduleResolution": "classic",
