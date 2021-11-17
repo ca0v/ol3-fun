@@ -7,7 +7,7 @@
     "ol": "pushd ./node_modules/ol && npm install && npm run build-legacy && popd",
     "clean": "rm -r ./built",
     "doc": "typedoc --out ./built/docs --tsconfig ./tsconfig.json --readme none --ignoreCompilerErrors --exclude ./node_modules/**",
-    "before-push": "npm run clean && npm run build && npm run test && npm run live-for-tests",
+    "before-push": "npm run clean && npm run build && npm run test",
     "build-for-amd": "tsc -p tsconfig.json",
     "build-for-examples": "tsc -p examples/tsconfig.json --outFile ./built/examples.max.js",
     "live-for-examples": "live-server --port=5001 --wait=200 --watch=./built/*.max.js --open=\"loaders/tests.html?debug=1&theme=dark\"",
@@ -34,9 +34,11 @@
   },
   "homepage": "https://github.com/ca0v/ol3-fun/blob/v5.1.3/README.md",
   "dependencies": {
+    "@ca0v/ceylon": "file:../ceylon",
     "@types/jquery": "^3.5.8",
     "@types/ol": "^4.6.5",
     "@types/requirejs": "^2.1.34",
+    "live-server": "^1.2.1",
     "typescript": "^4.4.4"
   },
   "devDependencies": {
