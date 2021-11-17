@@ -96,6 +96,7 @@
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.html#clone" class="tsd-kind-icon">clone</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_ol3_fun_deep_extend_.html#extend" class="tsd-kind-icon">extend</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.html#isarray" class="tsd-kind-icon">is<wbr>Array</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.html#isarraylike" class="tsd-kind-icon">is<wbr>Array<wbr>Like</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.html#ishash" class="tsd-kind-icon">is<wbr>Hash</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_ol3_fun_deep_extend_.html#isundefined" class="tsd-kind-icon">is<wbr>Undefined</a></li>
 							</ul>
@@ -111,14 +112,9 @@
 					<div class="tsd-signature tsd-kind-icon">History<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L21">ol3-fun/deep-extend.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L29">ol3-fun/deep-extend.ts:29</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Internally tracks visited objects for cycle detection</p>
-						</div>
-					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported">
 					<a name="path" class="tsd-anchor"></a>
@@ -126,7 +122,7 @@
 					<div class="tsd-signature tsd-kind-icon">Path<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L22">ol3-fun/deep-extend.ts:22</a></li>
+							<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L30">ol3-fun/deep-extend.ts:30</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -143,7 +139,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L53">ol3-fun/deep-extend.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L75">ol3-fun/deep-extend.ts:75</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -166,7 +162,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L59">ol3-fun/deep-extend.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L82">ol3-fun/deep-extend.ts:82</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -189,15 +185,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L32">ol3-fun/deep-extend.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L40">ol3-fun/deep-extend.ts:40</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>deep mixin, replacing items in a with items in b
-									array items with an &quot;id&quot; are used to identify pairs, otherwise b overwrites a</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -208,27 +198,15 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>a: <span class="tsd-signature-type">A</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>object to extend</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> b: <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>data to inject into the object</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> trace: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_ol3_fun_deep_extend_.traceitem.html" class="tsd-signature-type">TraceItem</a><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>optional change tracking</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> history: <a href="_ol3_fun_deep_extend_.html#history" class="tsd-signature-type">History</a><span class="tsd-signature-symbol"> =&nbsp;[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>object added here are not visited</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">A</span></h4>
@@ -245,13 +223,36 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L45">ol3-fun/deep-extend.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L63">ol3-fun/deep-extend.ts:63</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>val: <span class="tsd-signature-type">any</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="isarraylike" class="tsd-anchor"></a>
+					<h3>is<wbr>Array<wbr>Like</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+						<li class="tsd-signature tsd-kind-icon">is<wbr>Array<wbr>Like<span class="tsd-signature-symbol">(</span>o<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L18">ol3-fun/deep-extend.ts:18</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>o: <span class="tsd-signature-type">any</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -268,7 +269,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L49">ol3-fun/deep-extend.ts:49</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L67">ol3-fun/deep-extend.ts:67</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -291,7 +292,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/deep-extend.ts#L41">ol3-fun/deep-extend.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/deep-extend.ts#L59">ol3-fun/deep-extend.ts:59</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -378,6 +379,9 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_ol3_fun_deep_extend_.html#isarray" class="tsd-kind-icon">is<wbr>Array</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_ol3_fun_deep_extend_.html#isarraylike" class="tsd-kind-icon">is<wbr>Array<wbr>Like</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_ol3_fun_deep_extend_.html#ishash" class="tsd-kind-icon">is<wbr>Hash</a>

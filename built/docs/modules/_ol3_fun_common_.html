@@ -104,14 +104,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L20">ol3-fun/common.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L26">ol3-fun/common.ts:26</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Converts a GetElementsBy* to a classic array</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -122,9 +117,6 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>list: <span class="tsd-signature-type">NodeList</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">HTMLCollectionOf</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Element</span><span class="tsd-signature-symbol">&gt;</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>HTML collection to be converted to standard array</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -142,14 +134,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L133">ol3-fun/common.ts:133</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L201">ol3-fun/common.ts:201</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>delay execution of a method</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -160,18 +147,12 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>func: <span class="tsd-signature-type">T</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>invoked after @param wait milliseconds</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> wait: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;50</span></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> immediate: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>true to invoke @param func before waiting</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
@@ -188,14 +169,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L119">ol3-fun/common.ts:119</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L184">ol3-fun/common.ts:184</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>shallow copies b into a, preserving any existing values in a</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -209,15 +185,9 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>a: <span class="tsd-signature-type">A</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>target</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>b: <span class="tsd-signature-type">B</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>values to copy into target if they are not already present</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">A</span>
@@ -231,20 +201,15 @@
 					<a name="doif" class="tsd-anchor"></a>
 					<h3>doif</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">doif&lt;T&gt;<span class="tsd-signature-symbol">(</span>v<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, cb<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">doif&lt;T&gt;<span class="tsd-signature-symbol">(</span>v<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, cb<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L98">ol3-fun/common.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L154">ol3-fun/common.ts:154</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Only execute callback when @param v is truthy</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -254,16 +219,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>v: <span class="tsd-signature-type">T</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>passing a non-trivial value will invoke the callback with this as the sole argument</p>
-									</div>
+									<h5>v: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 								<li>
 									<h5>cb: <span class="tsd-signature-type">function</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>callback to execute when the value is non-trivial (not null, not undefined)</p>
-									</div>
 									<ul class="tsd-parameters">
 										<li class="tsd-parameter-siganture">
 											<ul class="tsd-signatures tsd-kind-type-literal tsd-is-not-exported">
@@ -292,36 +251,28 @@
 					<a name="getparameterbyname" class="tsd-anchor"></a>
 					<h3>get<wbr>Parameter<wbr>ByName</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Parameter<wbr>ByName<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, url<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Parameter<wbr>ByName<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, url<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L84">ol3-fun/common.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L128">ol3-fun/common.ts:128</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Returns individual query string value from a url</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>name: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Extract parameter of this name from the query string</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> url: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;window.location.href</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Search this url</p>
-									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">null</span>
+								<span class="tsd-signature-symbol"> | </span>
+								<span class="tsd-signature-type">string</span>
+							</h4>
 							<p>parameter value</p>
 						</li>
 					</ul>
@@ -336,27 +287,16 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L68">ol3-fun/common.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L105">ol3-fun/common.ts:105</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Replaces the options elements with the actual query string parameter values (e.g. {a: 0, &quot;?a=10&quot;} becomes {a: 10})</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>options: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Attributes on this object with be assigned the value of the matching parameter in the query string</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> url: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;window.location.href</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The url to scan</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -373,15 +313,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L152">ol3-fun/common.ts:152</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L230">ol3-fun/common.ts:230</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>poor $(html) substitute due to being
-									unable to create <td>, <tr> elements</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -402,14 +336,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L107">ol3-fun/common.ts:107</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L167">ol3-fun/common.ts:167</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>shallow copies b into a, replacing any existing values in a</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -423,15 +352,9 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>a: <span class="tsd-signature-type">A</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>target</p>
-									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>b: <span class="tsd-signature-type">B</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>values to shallow copy into target</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">A</span>
@@ -451,14 +374,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L164">ol3-fun/common.ts:164</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L245">ol3-fun/common.ts:245</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>returns all combinations of a1 with a2 (a1 X a2 pairs)</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -472,15 +390,9 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>a1: <span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>1xN matrix of first elements</p>
-									</div>
 								</li>
 								<li>
 									<h5>a2: <span class="tsd-signature-type">B</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>1xN matrix of second elements</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -498,14 +410,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L53">ol3-fun/common.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L76">ol3-fun/common.ts:76</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Converts a string representation of a value to it&#39;s desired type (e.g. parse(&quot;1&quot;, 0) returns 1)</p>
-								</div>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -516,15 +423,9 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>v: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>string representation of desired return value</p>
-									</div>
 								</li>
 								<li>
 									<h5>type: <span class="tsd-signature-type">T</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>desired type</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
@@ -542,21 +443,13 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L175">ol3-fun/common.ts:175</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L265">ol3-fun/common.ts:265</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Returns an array [0..n)</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>n: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>number of elements</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -573,19 +466,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L186">ol3-fun/common.ts:186</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L277">ol3-fun/common.ts:277</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>in-place shuffling of an array</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p><a href="http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array">http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array</a></p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
@@ -596,9 +479,6 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>array: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>array to randomize</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -609,21 +489,15 @@
 					<a name="toggle" class="tsd-anchor"></a>
 					<h3>toggle</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">toggle<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, className<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, force<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">toggle<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, className<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, force<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L34">ol3-fun/common.ts:34</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L52">ol3-fun/common.ts:52</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>ie11 compatible version of e.classList.toggle
-									if class exists then remove it and return false, if not, then add it and return true.</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -633,10 +507,7 @@
 									<h5>className: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> force: <span class="tsd-signature-type">boolean</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>true to add specified class value, false to remove it.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> force: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -654,14 +525,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/common.ts#L7">ol3-fun/common.ts:7</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/common.ts#L7">ol3-fun/common.ts:7</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Generate a UUID</p>
-								</div>
-							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 							<p>UUID</p>
 							<p>Adapted from <a href="http://stackoverflow.com/a/2117523/526860">http://stackoverflow.com/a/2117523/526860</a></p>

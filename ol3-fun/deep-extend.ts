@@ -88,7 +88,7 @@ function clone(val: any): any {
 }
 
 /**
- * Hepler class for managing the trace
+ * Helper class for managing the trace
  */
 class Merger {
   private trace(item: TraceItem) {

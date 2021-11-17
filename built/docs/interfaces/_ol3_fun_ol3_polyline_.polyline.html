@@ -117,7 +117,7 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Polyline<span class="tsd-signature-symbol">(</span>opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">PolylineOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_ol3_fun_ol3_polyline_.polyline.html" class="tsd-signature-type">Polyline</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Polyline<span class="tsd-signature-symbol">(</span>opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">olx.format.PolylineOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_ol3_fun_ol3_polyline_.polyline.html" class="tsd-signature-type">Polyline</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -128,26 +128,10 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3194</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<dl class="tsd-comment-tags">
-									<dt>classdesc</dt>
-									<dd><p>Feature format for reading and writing data in the Encoded
-										Polyline Algorithm Format.</p>
-									</dd>
-									<dt>api</dt>
-									<dd><p>stable</p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">PolylineOptions</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<pre><code>Optional configuration <span class="hljs-selector-tag">object</span>.</code></pre>
-										</div>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">olx.format.PolylineOptions</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="_ol3_fun_ol3_polyline_.polyline.html" class="tsd-signature-type">Polyline</a></h4>
@@ -167,7 +151,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/ol3-polyline.ts#L8">ol3-fun/ol3-polyline.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/ol3-polyline.ts#L8">ol3-fun/ol3-polyline.ts:8</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -196,7 +180,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/81230ef/ol3-fun/ol3-polyline.ts#L9">ol3-fun/ol3-polyline.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/ca0v/ol3-fun/blob/dc59b04/ol3-fun/ol3-polyline.ts#L9">ol3-fun/ol3-polyline.ts:9</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -219,7 +203,7 @@
 					<a name="readfeature" class="tsd-anchor"></a>
 					<h3>read<wbr>Feature</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">read<wbr>Feature<span class="tsd-signature-symbol">(</span>source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ReadOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Feature</span></li>
+						<li class="tsd-signature tsd-kind-icon">read<wbr>Feature<span class="tsd-signature-symbol">(</span>source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">olx.format.ReadOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Feature</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -229,30 +213,13 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3268</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Read the feature from the Polyline source. The coordinates are assumed to be
-									in two dimensions and in latitude, longitude order.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd><p>stable</p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>source: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Source.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">ReadOptions</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Read options.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">olx.format.ReadOptions</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Feature</span></h4>
@@ -264,7 +231,7 @@
 					<a name="readfeatures" class="tsd-anchor"></a>
 					<h3>read<wbr>Features</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">read<wbr>Features<span class="tsd-signature-symbol">(</span>source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ReadOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Feature</span><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">read<wbr>Features<span class="tsd-signature-symbol">(</span>source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">olx.format.ReadOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Feature</span><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -274,30 +241,13 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3279</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Read the feature from the source. As Polyline sources contain a single
-									feature, this will return the feature in an array.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd><p>stable</p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>source: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Source.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">ReadOptions</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Read options.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">olx.format.ReadOptions</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Feature</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -309,7 +259,7 @@
 					<a name="readgeometry" class="tsd-anchor"></a>
 					<h3>read<wbr>Geometry</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">read<wbr>Geometry<span class="tsd-signature-symbol">(</span>source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ReadOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Geometry</span></li>
+						<li class="tsd-signature tsd-kind-icon">read<wbr>Geometry<span class="tsd-signature-symbol">(</span>source<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">olx.format.ReadOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Geometry</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -319,29 +269,13 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3289</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Read the geometry from the source.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd><p>stable</p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>source: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Source.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">ReadOptions</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Read options.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">olx.format.ReadOptions</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Geometry</span></h4>
@@ -363,23 +297,10 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3298</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Read the projection from a Polyline source.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd><p>stable</p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>source: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Document</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">GlobalObject</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Source.</p>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Projection</span></h4>
@@ -391,7 +312,7 @@
 					<a name="writegeometry" class="tsd-anchor"></a>
 					<h3>write<wbr>Geometry</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">write<wbr>Geometry<span class="tsd-signature-symbol">(</span>geometry<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Geometry</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">WriteOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">write<wbr>Geometry<span class="tsd-signature-symbol">(</span>geometry<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Geometry</span>, opt_options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">olx.format.WriteOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -401,29 +322,13 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3308</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Write a single geometry in Polyline format.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd><p>stable</p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>geometry: <span class="tsd-signature-type">Geometry</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Geometry.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">WriteOptions</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Write options.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_options: <span class="tsd-signature-type">olx.format.WriteOptions</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -435,7 +340,7 @@
 					<a name="decodedeltas-1" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> decode<wbr>Deltas</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-static tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">decode<wbr>Deltas<span class="tsd-signature-symbol">(</span>encoded<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, stride<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">decode<wbr>Deltas<span class="tsd-signature-symbol">(</span>encoded<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, stride<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -445,36 +350,16 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3232</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Decode a list of n-dimensional points from an encoded string</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd></dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>encoded: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>An encoded string.</p>
-									</div>
 								</li>
 								<li>
 									<h5>stride: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The number of dimension of the points in the
-										encoded string.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The factor by which the resulting numbers will
-										be divided. Default is <code>1e5</code>.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -486,7 +371,7 @@
 					<a name="decodefloats" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> decode<wbr>Floats</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-static tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">decode<wbr>Floats<span class="tsd-signature-symbol">(</span>encoded<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">decode<wbr>Floats<span class="tsd-signature-symbol">(</span>encoded<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -496,29 +381,13 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3257</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Decode a list of floating point numbers from an encoded string</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd></dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>encoded: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>An encoded string.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The factor by which the result will be divided.
-										Default is <code>1e5</code>.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -530,7 +399,7 @@
 					<a name="encodedeltas-1" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> encode<wbr>Deltas</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-static tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">encode<wbr>Deltas<span class="tsd-signature-symbol">(</span>numbers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, stride<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">encode<wbr>Deltas<span class="tsd-signature-symbol">(</span>numbers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, stride<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -540,37 +409,16 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3219</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Encode a list of n-dimensional points and return an encoded string</p>
-								</div>
-								<p>Attention: This function will modify the passed array!</p>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd></dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>numbers: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>A list of n-dimensional points.</p>
-									</div>
 								</li>
 								<li>
 									<h5>stride: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The number of dimension of the points in the list.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The factor by which the numbers will be
-											multiplied. The remaining decimal places will get rounded away.
-										Default is <code>1e5</code>.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -582,7 +430,7 @@
 					<a name="encodefloats" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> encode<wbr>Floats</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-static tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">encode<wbr>Floats<span class="tsd-signature-symbol">(</span>numbers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">encode<wbr>Floats<span class="tsd-signature-symbol">(</span>numbers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, opt_factor<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -592,31 +440,13 @@
 									<li>Defined in node_modules/@types/openlayers/index.d.ts:3246</li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Encode a list of floating point numbers and return an encoded string</p>
-								</div>
-								<p>Attention: This function will modify the passed array!</p>
-								<dl class="tsd-comment-tags">
-									<dt>api</dt>
-									<dd></dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>numbers: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>A list of floating point numbers.</p>
-									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The factor by which the numbers will be
-											multiplied. The remaining decimal places will get rounded away.
-										Default is <code>1e5</code>.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> opt_factor: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
