@@ -6,9 +6,9 @@
   "main": "built/index.js",
   "scripts": {
     "before-push": "npm-run-all clean lint build test",
-    "build:examples": "tsc examples/index.ts",
+    "build:examples": "esbuild examples/index.ts --outfile=examples/index.js --bundle --minify --sourcemap",
     "build:it": "esbuild index.ts --outfile=index.js --bundle --minify --sourcemap",
-    "build:tests": "tsc tests/index.ts",
+    "build:tests": "esbuild tests/index.ts --outfile=tests/index.js --bundle --sourcemap",
     "build": "npm-run-all -p build:it build:examples build:tests",
     "clean": "rm -r ./built",
     "dev:examples": "npm run build:examples && start npm run live:examples && npm run build:examples -- -w",
@@ -43,6 +43,7 @@
     "esbuild": "^0.13.14",
     "live-server": "^1.2.1",
     "npm-run-all": "^4.1.5",
+    "ol": "^6.9.0",
     "typescript": "^4.4.4",
     "vite": "^2.6.14"
   },
@@ -50,7 +51,6 @@
     "@types/mocha": "^5.2.7",
     "jquery": "^3.6.0",
     "mocha": "^9.1.3",
-    "ol": "github:openlayers/openlayers#v6.9.0",
     "typedoc": "^0.12.0"
   }
 }

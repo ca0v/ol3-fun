@@ -17,7 +17,9 @@
 		"paths": {
 			"ol3-fun/*": ["./*"],
 			"@ol3-fun/*": ["./*"],
-			"#ol3-fun/*": ["./*"]
+			"#ol3-fun/*": ["./*"],
+			"ol": ["./node_modules/src/ol/index.js"],
+			"ol/*": ["./node_modules/src/ol/*"]
 		}
 	},
 }
