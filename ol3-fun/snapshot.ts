@@ -10,7 +10,9 @@ import Geometry from "ol/geom/Geometry";
 import Polygon from "ol/geom/Polygon";
 import { toContext } from "ol/render";
 
-function getStyle(feature: Feature) {
+function getStyle(
+  feature: Feature<Geometry>
+) {
   let style = feature.getStyle() as
     | Style
     | Style[]
@@ -20,7 +22,7 @@ function getStyle(feature: Feature) {
     let styleFn =
       feature.getStyleFunction();
     if (styleFn) {
-      style = styleFn(feature, 0);
+      style = <any>styleFn(feature, 0);
     }
   }
   if (!style) {
@@ -45,7 +47,7 @@ class Snapshot {
    */
   static render(
     canvas: HTMLCanvasElement,
-    feature: Feature
+    feature: Feature<Geometry>
   ) {
     // clone the feature to the geometry can be modified
     feature = feature.clone();
@@ -98,7 +100,7 @@ class Snapshot {
    * @return convert features into data:image/png;base64;
    */
   static snapshot(
-    feature: Feature,
+    feature: Feature<Geometry>,
     size = 128
   ) {
     let canvas =

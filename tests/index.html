@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Mocha Tests</title>
     <meta charset="utf-8" />
+    <title>Mocha Tests</title>
     <link
       rel="stylesheet"
       type="text/css"
@@ -26,21 +26,21 @@
   <script src="https://unpkg.com/mocha/mocha.js"></script>
 
   <script type="module">
-    setTimeout(() => {
-      mocha.setup("bdd");
-      describe("My Test", () => {
-        it("Does nothing", () => {
-          //
-        });
+    mocha.setup("bdd");
+    describe("My Test", () => {
+      it("Does nothing", () => {
+        //
       });
+    });
+
+    setTimeout(() => {
       //mocha.checkLeaks();
-      false &&
-        import("./index.js").then(
-          () => {
-            mocha.run();
-          }
-        );
-      mocha.run();
+      debugger;
+      import("./index.js").then(() => {
+        debugger;
+        console.log("index loaded");
+        mocha.run();
+      });
     }, 1000);
   </script>
 </html>

@@ -18,6 +18,7 @@ import {
   Style,
 } from "ol/style";
 import {
+  Geometry,
   Point,
   Polygon,
 } from "ol/geom";
@@ -41,7 +42,7 @@ export function run() {
   let vectors = new VectorLayer({
     source: new Vector(),
     style: (
-      feature: Feature,
+      feature: Feature<Geometry> | any,
       resolution: number
     ) => {
       let style = new Style({});
@@ -122,7 +123,10 @@ export function run() {
     return feature;
   });
 
-  let geoms = [].concat(points, polys);
+  let geoms = [
+    ...points,
+    ...polys,
+  ] as Array<Feature<Geometry>>;
   shuffle(geoms);
 
   vectors
@@ -130,7 +134,9 @@ export function run() {
     .addFeatures(geoms);
 
   let select = new Select({
-    style: (feature: Feature) => {
+    style: (
+      feature: Feature<Geometry> | any
+    ) => {
       let style = new Style({
         text: new Text({
           text:

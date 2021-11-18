@@ -5,8 +5,8 @@ import {
   deepExtend,
 } from "../index";
 import { stringify } from "../../ol3-fun/tests/base";
-import featureserver = require("./extras/data/featureserver");
-import mapserver = require("./extras/data/mapserver");
+import featureserver from "./extras/data/featureserver";
+import mapserver from "./extras/data/mapserver";
 
 const css = `
 textarea {
@@ -56,7 +56,7 @@ function diff(
   let result = <any>{};
   trace.forEach((t) => {
     let path = t.path.slice();
-    let key = path.pop();
+    let key = path.pop()!;
     forcePath(result, path)[key] =
       t.value;
   });
@@ -66,7 +66,7 @@ function diff(
 export function run() {
   cssin("jsondiff", css);
   document
-    .getElementById("map")
+    .getElementById("map")!
     .remove();
   document.body.appendChild(
     toDom(html)
@@ -94,7 +94,7 @@ export function run() {
         diff(trace)
       );
     } catch (ex) {
-      target.value = ex;
+      target.value = <any>ex;
     }
   }, 200);
   left.addEventListener("keydown", () =>

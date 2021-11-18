@@ -6,6 +6,7 @@ import {
   extend,
   getWidth,
 } from "ol/extent";
+import { Geometry } from "ol/geom";
 
 /**
  * A less disorienting way of changing the maps extent (maybe!)
@@ -17,7 +18,7 @@ import {
  */
 export async function zoomToFeature(
   map: Map,
-  feature: Feature,
+  feature: Feature<Geometry>,
   ops?: {
     // animation duration in milliseconds
     duration?: number;

@@ -25,6 +25,7 @@ export function it(
   title: string,
   fn: Func | AsyncFunc
 ) {
+  debugger;
   console.log(
     title || "undocumented test"
   );

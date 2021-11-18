@@ -1,25 +1,7 @@
-/**
- * Use [ol.format.Polyline](http://openlayers.org/en/master/apidoc/ol.format.Polyline.html)
- */
-
-import { Polyline as olPolyline } from "ol/format";
-
-interface Polyline extends olPolyline {
-  decodeDeltas(
-    code: string,
-    stride: number,
-    factor: number
-  ): number[];
-  encodeDeltas(
-    points: number[],
-    stride: number,
-    factor: number
-  ): string;
-}
-
-const Polyline = <Polyline>(
-  (<any>olPolyline)
-);
+import {
+  decodeDeltas,
+  encodeDeltas,
+} from "ol/format/Polyline";
 
 class PolylineEncoder {
   constructor(
@@ -69,7 +51,7 @@ class PolylineEncoder {
   }
 
   decode(str: string) {
-    let nums = Polyline.decodeDeltas(
+    let nums = decodeDeltas(
       str,
       this.stride,
       Math.pow(10, this.precision)
@@ -80,7 +62,7 @@ class PolylineEncoder {
   }
 
   encode(points: number[][]) {
-    return Polyline.encodeDeltas(
+    return encodeDeltas(
       this.flatten(points),
       this.stride,
       Math.pow(10, this.precision)
