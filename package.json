@@ -4,15 +4,19 @@
   "description": "OpenLayers Functions",
   "main": "built/index.js",
   "scripts": {
-    "before-push": "npm-run-all clean build test",
+    "before-push": "npm-run-all clean lint build test",
     "build:examples": "tsc examples/index.ts",
-    "build:it": "tsc index.ts",
+    "build:it": "esbuild index.ts --outfile=index.js --bundle --minify --sourcemap",
     "build:tests": "tsc tests/index.ts",
     "build": "npm-run-all -p build:it build:examples build:tests",
     "clean": "rm -r ./built",
     "dev:examples": "npm run build:examples && start npm run live:examples && npm run build:examples -- -w",
     "dev:tests": "npm-run-all -p build:tests live:tests build:tests -- -w",
     "doc": "typedoc --out ./built/docs --tsconfig ./tsconfig.json --readme none --ignoreCompilerErrors --exclude ./node_modules/**",
+    "lint:examples": "tsc examples/index.ts",
+    "lint:it": "tsc index.ts",
+    "lint:tests": "tsc tests/index.ts",
+    "lint": "npm-run-all -p lint:it lint:tests lint:examples",
     "live:examples": "live-server --port=5001 --wait=200 --watch=./built/*.max.js --open=\"loaders/tests.html?debug=1&theme=dark\"",
     "live:tests": "live-server --port=5000 --wait=200 --watch=./built/*.max.js --open=\"./loaders/tests.html?debug=1&theme=dark&test=*\" --browser=CHROME",
     "postinstall2": "npm run build:it",
@@ -38,7 +42,8 @@
     "esbuild": "^0.13.14",
     "live-server": "^1.2.1",
     "npm-run-all": "^4.1.5",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "vite": "^2.6.14"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.7",
