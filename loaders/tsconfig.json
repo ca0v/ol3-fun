@@ -8,6 +8,6 @@ builds requirejs configurations for examples and tests
 		"strict": true,
 		"noImplicitAny": false,
 		"outDir": "../built/loaders",
-		"types": ["requirejs", "mocha"]
+		"types": ["mocha"]
 	}
 }

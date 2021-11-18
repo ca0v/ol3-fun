@@ -1,4 +1,9 @@
-import { html as toDom, cssin, debounce, deepExtend } from "../index";
+import {
+  html as toDom,
+  cssin,
+  debounce,
+  deepExtend,
+} from "../index";
 import { stringify } from "../../ol3-fun/tests/base";
 import featureserver = require("./extras/data/featureserver");
 import mapserver = require("./extras/data/mapserver");
@@ -29,43 +34,79 @@ const html = `
 </div>
 `;
 
-function forcePath(o: any, path: Array<string>) {
-	let node = o;
-	path.forEach(n => (node = node[n] = node[n] || <any>{}));
-	return node;
+function forcePath(
+  o: any,
+  path: Array<string>
+) {
+  let node = o;
+  path.forEach(
+    (n) =>
+      (node = node[n] =
+        node[n] || <any>{})
+  );
+  return node;
 }
 
-function diff(trace: Array<{ path: Array<string>; value: any }>) {
-	let result = <any>{};
-	trace.forEach(t => {
-		let path = t.path.slice();
-		let key = path.pop();
-		forcePath(result, path)[key] = t.value;
-	});
-	return result;
+function diff(
+  trace: Array<{
+    path: Array<string>;
+    value: any;
+  }>
+) {
+  let result = <any>{};
+  trace.forEach((t) => {
+    let path = t.path.slice();
+    let key = path.pop();
+    forcePath(result, path)[key] =
+      t.value;
+  });
+  return result;
 }
 
 export function run() {
-	cssin("jsondiff", css);
-	document.getElementById("map").remove();
-	document.body.appendChild(toDom(html));
-	let left = document.getElementById("json1") as HTMLTextAreaElement;
-	let right = document.getElementById("json2") as HTMLTextAreaElement;
-	let target = document.getElementById("result") as HTMLTextAreaElement;
-	let trace = <any>[];
-	let doit = debounce(() => {
-		try {
-			let js1 = JSON.parse(left.value);
-			let js2 = JSON.parse(right.value);
-			deepExtend(js1, js2, (trace = []));
-			target.value = stringify(diff(trace));
-		} catch (ex) {
-			target.value = ex;
-		}
-	}, 200);
-	left.addEventListener("keydown", () => doit());
-	right.addEventListener("keydown", () => doit());
-	left.value = stringify(mapserver);
-	right.value = stringify(featureserver);
-	doit();
+  cssin("jsondiff", css);
+  document
+    .getElementById("map")
+    .remove();
+  document.body.appendChild(
+    toDom(html)
+  );
+  let left = document.getElementById(
+    "json1"
+  ) as HTMLTextAreaElement;
+  let right = document.getElementById(
+    "json2"
+  ) as HTMLTextAreaElement;
+  let target = document.getElementById(
+    "result"
+  ) as HTMLTextAreaElement;
+  let trace = <any>[];
+  let doit = debounce(() => {
+    try {
+      let js1 = JSON.parse(left.value);
+      let js2 = JSON.parse(right.value);
+      deepExtend(
+        js1,
+        js2,
+        (trace = [])
+      );
+      target.value = stringify(
+        diff(trace)
+      );
+    } catch (ex) {
+      target.value = ex;
+    }
+  }, 200);
+  left.addEventListener("keydown", () =>
+    doit()
+  );
+  right.addEventListener(
+    "keydown",
+    () => doit()
+  );
+  left.value = stringify(mapserver);
+  right.value = stringify(
+    featureserver
+  );
+  doit();
 }

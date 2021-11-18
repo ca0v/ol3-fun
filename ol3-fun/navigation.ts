@@ -1,6 +1,11 @@
-import * as ol from "openlayers";
-import * as $ from "jquery";
+import { Feature, Map } from "ol";
 import { defaults } from "./common";
+import {
+  containsExtent,
+  createEmpty,
+  extend,
+  getWidth,
+} from "ol/extent";
 
 /**
  * A less disorienting way of changing the maps extent (maybe!)
@@ -10,59 +15,113 @@ import { defaults } from "./common";
  * @param feature The feature to zoom to
  * @param options Animation constraints
  */
-export function zoomToFeature(
-	map: ol.Map,
-	feature: ol.Feature,
-	ops?: {
-		// animation duration in milliseconds
-		duration?: number;
-		// number of pixels to pad around final extent
-		padding?: number;
-		// maximum zoom level as a resolution
-		minResolution?: number;
-	}
+export async function zoomToFeature(
+  map: Map,
+  feature: Feature,
+  ops?: {
+    // animation duration in milliseconds
+    duration?: number;
+    // number of pixels to pad around final extent
+    padding?: number;
+    // maximum zoom level as a resolution
+    minResolution?: number;
+  }
 ) {
-	let promise = $.Deferred();
-	let options = defaults(ops || {}, {
-		duration: 1000,
-		padding: 256,
-		minResolution: 2 * map.getView().getMinResolution()
-	});
+  return new Promise<void>(
+    (good, bad) => {
+      let options = defaults(
+        ops || {},
+        {
+          duration: 1000,
+          padding: 256,
+          minResolution:
+            2 *
+            map
+              .getView()
+              .getMinResolution(),
+        }
+      );
 
-	let view = map.getView();
-	let currentExtent = view.calculateExtent(map.getSize());
-	let targetExtent = feature.getGeometry().getExtent();
+      let view = map.getView();
+      let currentExtent =
+        view.calculateExtent(
+          map.getSize()
+        );
+      let targetExtent = feature
+        ?.getGeometry()
+        ?.getExtent();
 
-	let doit = (duration: number) => {
-		view.fit(targetExtent, {
-			size: map.getSize(),
-			padding: [options.padding, options.padding, options.padding, options.padding],
-			minResolution: options.minResolution,
-			duration: duration,
-			callback: () => promise.resolve()
-		});
-	};
+      let doit = (duration: number) => {
+        view.fit(targetExtent!, {
+          size: map.getSize(),
+          padding: [
+            options.padding,
+            options.padding,
+            options.padding,
+            options.padding,
+          ],
+          minResolution:
+            options.minResolution,
+          duration: duration,
+          callback: () => good(),
+        });
+      };
 
-	if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-		// new extent is contained within current extent, pan and zoom in
-		doit(options.duration);
-	} else if (ol.extent.containsExtent(currentExtent, targetExtent)) {
-		// new extent is contained within current extent, pan and zoom out
-		doit(options.duration);
-	} else {
-		// zoom out until target extent is in view
-		let fullExtent = ol.extent.createEmpty();
-		ol.extent.extend(fullExtent, currentExtent);
-		ol.extent.extend(fullExtent, targetExtent);
-		let dscale = ol.extent.getWidth(fullExtent) / ol.extent.getWidth(currentExtent);
-		let duration = 0.5 * options.duration;
-		view.fit(fullExtent, {
-			size: map.getSize(),
-			padding: [options.padding, options.padding, options.padding, options.padding],
-			minResolution: options.minResolution,
-			duration: duration
-		});
-		setTimeout(() => doit(0.5 * options.duration), duration);
-	}
-	return promise;
+      if (
+        targetExtent &&
+        containsExtent(
+          currentExtent,
+          targetExtent
+        )
+      ) {
+        // new extent is contained within current extent, pan and zoom in
+        doit(options.duration);
+      } else if (
+        targetExtent &&
+        containsExtent(
+          currentExtent,
+          targetExtent
+        )
+      ) {
+        // new extent is contained within current extent, pan and zoom out
+        doit(options.duration);
+      } else {
+        // zoom out until target extent is in view
+        let fullExtent = createEmpty();
+        extend(
+          fullExtent,
+          currentExtent
+        );
+        targetExtent &&
+          extend(
+            fullExtent,
+            targetExtent
+          );
+        let dscale =
+          getWidth(fullExtent) /
+          getWidth(currentExtent);
+        let duration =
+          0.5 * options.duration;
+        view.fit(fullExtent, {
+          size: map.getSize(),
+          padding: [
+            options.padding,
+            options.padding,
+            options.padding,
+            options.padding,
+          ],
+          minResolution:
+            options.minResolution,
+          duration: duration,
+        });
+        setTimeout(
+          () =>
+            doit(
+              0.5 * options.duration
+            ),
+          duration
+        );
+      }
+    }
+  );
 }

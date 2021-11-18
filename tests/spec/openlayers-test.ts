@@ -1,8 +1,8 @@
 import { should } from "../base";
-import * as ol from "openlayers";
+import { Map } from "ol";
 
 describe("ol/Map", () => {
-    it("ol/Map", () => {
-        should(!!ol.Map, "Map");
-    });
+  it("ol/Map", () => {
+    should(!!Map, "Map");
+  });
 });

@@ -1,18 +1,23 @@
 {
 	"compilerOptions": {
-		"baseUrl": "./node_modules",
+		"allowJs": true,
+		"checkJs": false,
 		"declaration": true,
+		"esModuleInterop": true,
 		"lib": ["dom", "esnext"],
-		"module": "amd",
-		"moduleResolution": "classic",
+		"module": "es2015",
+		"moduleResolution": "node",
+		"noEmit": true,
 		"noImplicitAny": false,
-		"outFile": "./built/index.max.js",
 		"removeComments": true,
 		"sourceMap": true,
 		"strict": true,
 		"target": "es2015",
-		"types": ["requirejs", "ol", "jquery"]
+		"baseUrl": ".",
+		"paths": {
+			"ol3-fun/*": ["./*"],
+			"@ol3-fun/*": ["./*"],
+			"#ol3-fun/*": ["./*"]
+		}
 	},
-	"include": ["index.ts", "ol3-fun/**/*.ts"],
-	"exclude": ["ol3-fun/examples", "ol3-fun/tests"]
 }

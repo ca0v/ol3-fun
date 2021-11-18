@@ -9,7 +9,7 @@ import {
   extend as deepExtend,
   TraceItem,
 } from "../../ol3-fun/deep-extend";
-import { range } from "ol3-fun/common";
+import { range } from "../../ol3-fun/common";
 
 describe("utils/deep-extend", () => {
   it("trivial merges", () => {
