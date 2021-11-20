@@ -10,7 +10,6 @@ import {
   range,
 } from "../../ol3-fun/common";
 
-debugger;
 describe("GooglePolylineEncoder", () => {
   it("GooglePolylineEncoder", () => {
     should(

@@ -1,36 +1,9 @@
 import { slowloop } from "../ol3-fun/slowloop";
 import {
-  Suite,
-  Func,
-  AsyncFunc,
-} from "mocha";
-import {
   expect,
   assert,
   deepEqual,
 } from "@ca0v/ceylon/index";
-
-// (title: string, fn: (this: Suite) => void): Suite
-export function describe(
-  title: string,
-  fn: (this: Suite) => void
-): Suite {
-  console.log(
-    title || "undocumented test group"
-  );
-  return window.describe(title, fn);
-}
-
-export function it(
-  title: string,
-  fn: Func | AsyncFunc
-) {
-  debugger;
-  console.log(
-    title || "undocumented test"
-  );
-  return window.it(title, fn);
-}
 
 // can't figure out how to load "should" library (index.js seems amd compliant..should work)
 export function should(
@@ -55,7 +28,7 @@ export function shouldEqual<T>(
       msg;
     console.warn(msg);
   }
-  should(a == b, message);
+  should(a == b, message!);
 }
 
 export function shouldThrow(
@@ -65,7 +38,7 @@ export function shouldThrow(
   try {
     fn();
   } catch (ex) {
-    should(!!ex, ex);
+    should(!!ex, <string>ex);
     return ex;
   }
   should(

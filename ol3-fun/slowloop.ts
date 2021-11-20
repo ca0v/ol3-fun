@@ -5,36 +5,49 @@
  * @param cycles number of types to run each function
  * @returns promise indicating the process is complete
  */
-export function slowloop(
+export async function slowloop(
   functions: Array<Function>,
   interval = 1000,
-  cycles = 1
+  cycles = 1,
+  notify?: (args: {
+    index: number;
+    cycle: number;
+  }) => void
 ) {
-  let d = $.Deferred();
   let index = 0;
   let cycle = 0;
 
   if (!functions || 0 >= cycles) {
-    d.resolve();
-    return d;
+    return;
   }
 
-  let h = setInterval(() => {
-    if (index === functions.length) {
-      index = 0;
-      if (++cycle === cycles) {
-        d.resolve();
-        clearInterval(h);
-        return;
-      }
+  return new Promise<void>(
+    (good, bad) => {
+      const h = setInterval(() => {
+        try {
+          if (
+            index === functions.length
+          ) {
+            index = 0;
+            if (++cycle === cycles) {
+              clearInterval(h);
+              good();
+              return;
+            }
+          }
+          try {
+            notify &&
+              notify({ index, cycle });
+            functions[index++]();
+          } catch (ex) {
+            clearInterval(h);
+            bad(ex);
+            return;
+          }
+        } catch (ex) {
+          bad(ex);
+        }
+      }, interval);
     }
-    try {
-      d.notify({ index, cycle });
-      functions[index++]();
-    } catch (ex) {
-      clearInterval(h);
-      d.reject(ex);
-    }
-  }, interval);
-  return d;
+  );
 }

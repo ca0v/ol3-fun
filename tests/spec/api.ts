@@ -1,6 +1,4 @@
 import {
-  describe,
-  it,
   should,
   shouldEqual,
   assert,

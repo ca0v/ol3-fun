@@ -34,10 +34,7 @@
     });
 
     setTimeout(() => {
-      //mocha.checkLeaks();
-      debugger;
       import("./index.js").then(() => {
-        debugger;
         console.log("index loaded");
         mocha.run();
       });

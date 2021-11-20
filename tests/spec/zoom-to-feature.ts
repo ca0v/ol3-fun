@@ -2,37 +2,61 @@ import { Feature, Map, View } from "ol";
 import { should } from "../base";
 import { zoomToFeature } from "../../ol3-fun/navigation";
 import Point from "ol/geom/Point";
+import { cssin } from "ol3-fun/index";
 
 describe("zoomToFeature", () => {
+  const un = [] as Array<() => void>;
+
+  after(() => {
+    un.forEach((f) => f());
+  });
+
+  before(() => {
+    const div =
+      document.createElement("div");
+    div.id = "map";
+    document.body.appendChild(div);
+    un.push(() => div.remove());
+    un.push(
+      cssin(
+        "zoom-to-feature",
+        `#map {width:20em;height:20em;border:1px solid red}`
+      )
+    );
+  });
+
   it("zoomToFeature", (done) => {
     should(
       !!zoomToFeature,
       "zoomToFeature"
     );
-    let map = new Map({
+    const map = new Map({
       view: new View({
         zoom: 0,
         center: [0, 0],
       }),
+      target: "map",
     });
-    let feature = new Feature();
-    let geom = new Point([100, 100]);
+    const feature = new Feature();
+    const geom = new Point([100, 100]);
     feature.setGeometry(geom);
 
     map.once("postrender", () => {
-      let res = map
+      const res = map
         .getView()
-        .getResolution();
-      let zoom = map
+        .getResolution()!;
+
+      const zoom = map
         .getView()
-        .getZoom();
+        .getZoom()!;
+
       zoomToFeature(map, feature, {
         duration: 200,
         minResolution: res / 4,
       }).then(() => {
         let [cx, cy] = map
           .getView()
-          .getCenter();
+          .getCenter()!;
         should(
           map.getView().getZoom() ===
             zoom + 2,
@@ -41,6 +65,8 @@ describe("zoomToFeature", () => {
         should(cx === 100, "center-x");
         should(cy === 100, "center-y");
         done();
+
+        map.dispose();
       });
     });
   });

@@ -12,7 +12,7 @@
     "clean": "rm -r ./built",
     "dev:examples": "npm-run-all watch:build:examples watch:examples",
     "dev:tests": "npm-run-all -p watch:build:tests watch:tests",
-    "dev": "npm-run-all dev:examples dev:tests lint",
+    "dev": "npm-run-all -p dev:examples dev:tests lint",
     "doc": "typedoc --out ./built/docs --tsconfig ./tsconfig.json --readme none --ignoreCompilerErrors --exclude ./node_modules/**",
     "lint:examples": "tsc examples/index.ts --watch --noEmit --allowJs --skipLibCheck",
     "lint:it": "tsc index.ts --watch --noEmit --allowJs --skipLibCheck",
@@ -21,6 +21,7 @@
     "postinstall2": "npm run build:it",
     "precommit": "npm-run-all clean lint build test",
     "watch:build:examples": "npm run build:examples -- --watch",
+    "watch:build:tests": "npm run build:tests -- --watch",
     "watch:examples": "live-server --port=5001 --wait=200 --watch=./built/*.max.js --open=\"loaders/tests.html?debug=1&theme=dark\"",
     "watch:tests": "live-server --port=5000 --wait=200 --watch=./built/*.max.js --open=\"./loaders/tests.html?debug=1&theme=dark&test=*\" --browser=CHROME",
     "test": "npm run watch:tests"

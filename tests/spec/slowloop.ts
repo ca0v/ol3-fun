@@ -1,6 +1,4 @@
 import {
-  describe,
-  it,
   should,
   shouldEqual,
   slowloop,
@@ -10,7 +8,7 @@ import { range } from "../../ol3-fun/common";
 describe("slowloop", () => {
   it("slowloop empty", (done) => {
     try {
-      slowloop(null);
+      slowloop(<any>null);
       should(
         false,
         "slowloop requires an array"
@@ -20,24 +18,19 @@ describe("slowloop", () => {
     }
   });
 
-  it("slowloop with progress", () => {
+  it("slowloop with progress", async () => {
     let progressCount = 0;
-    return slowloop(
+    await slowloop(
       range(7).map((n) => () => {}),
       0,
-      5
-    )
-      .progress((args) => {
-        console.log(args);
-        progressCount++;
-      })
-      .then(() => {
-        shouldEqual(
-          progressCount,
-          7 * 5,
-          "progress callbacks"
-        );
-      });
+      5,
+      () => progressCount++
+    );
+    shouldEqual(
+      progressCount,
+      7 * 5,
+      "progress callbacks"
+    );
   });
 
   it("slowloop with exceptions", () => {
@@ -55,26 +48,30 @@ describe("slowloop", () => {
       .catch((ex) => should(!!ex, ex));
   });
 
-  it("slowloop with abort", () => {
-    return slowloop(
-      [
+  it("slowloop with abort", async () => {
+    try {
+      await slowloop(
+        [
+          () => {
+            should(
+              false,
+              "aborted from inside"
+            );
+          },
+        ],
+        10,
+        1,
         () => {
-          should(
-            false,
-            "aborted from inside"
-          );
-        },
-      ],
-      10
-    )
-      .reject("aborted from outside")
-      .catch((ex) =>
-        shouldEqual(
-          ex,
-          "aborted from outside",
-          "aborted from outside"
-        )
+          throw "aborted from outside";
+        }
       );
+    } catch (ex) {
+      shouldEqual(
+        ex,
+        "aborted from outside",
+        "aborted from outside"
+      );
+    }
   });
 
   it("slowloop fast", (done) => {
@@ -97,7 +94,7 @@ describe("slowloop", () => {
   it("slowloop iterations", (done) => {
     let count = 0;
     let inc = () => count++;
-    slowloop([inc]).then(() => {
+    slowloop([inc], 0).then(() => {
       shouldEqual(
         count,
         1,
