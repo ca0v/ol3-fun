@@ -2,7 +2,7 @@ import { Feature, Map, View } from "ol";
 import { should } from "../base";
 import { zoomToFeature } from "../../ol3-fun/navigation";
 import Point from "ol/geom/Point";
-import { cssin } from "ol3-fun/index";
+import { cssin } from "../../index";
 
 describe("zoomToFeature", () => {
   const un = [] as Array<() => void>;
