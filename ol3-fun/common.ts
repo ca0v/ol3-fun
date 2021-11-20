@@ -102,10 +102,10 @@ export function parse<T>(
  * @param options Attributes on this object with be assigned the value of the matching parameter in the query string
  * @param url The url to scan
  */
-export function getQueryParameters(
-  options: any,
+export function getQueryParameters<T>(
+  options: T,
   url = window.location.href
-): void {
+) {
   let opts = <any>options;
   Object.keys(opts).forEach((k) => {
     doif(
@@ -117,6 +117,7 @@ export function getQueryParameters(
       }
     );
   });
+  return options;
 }
 
 /**

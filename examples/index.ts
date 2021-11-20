@@ -1,22 +1,35 @@
-import "./debounce";
-import "./goto";
-import "./polyline";
-import "./zoomToFeature";
-import "./jsondiff";
+import { run as debounce } from "./debounce";
+import { run as goto } from "./goto";
+import { run as polyline } from "./polyline";
+import { run as zoomToFeature } from "./zoomToFeature";
+import { run as jsondiff } from "./jsondiff";
+import { getQueryParameters } from "ol3-fun/ol3-fun/common";
 
-export function run() {
-  let l = window.location;
-  let path = `${l.origin}${l.pathname}?run=examples/`;
-  let labs = `
-    debounce
-    goto
-    jsondiff
-    polyline
-    zoomToFeature
-    index
-    `;
+const examples = {
+  debounce,
+  goto,
+  polyline,
+  zoomToFeature,
+  jsondiff,
+};
 
-  let styles =
+export async function run() {
+  const l = window.location;
+
+  const query = getQueryParameters(
+    { run: "examples/index" },
+    l.search
+  );
+
+  if (query.run) {
+    if (examples[query.run]) {
+      examples[query.run]();
+      return;
+    }
+  }
+  const path = `${l.origin}${l.pathname}?run=`;
+
+  const styles =
     document.createElement("style");
   document.head.appendChild(styles);
 
@@ -29,12 +42,13 @@ export function run() {
     }
     `;
 
-  let labDiv =
+  const labDiv =
     document.createElement("div");
   document.body.appendChild(labDiv);
 
-  labDiv.innerHTML = labs
-    .split(/ /)
+  labDiv.innerHTML = Object.keys(
+    examples
+  )
     .map((v) => v.trim())
     .filter((v) => !!v)
     //.sort()
