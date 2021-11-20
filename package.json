@@ -26,6 +26,16 @@
     "watch:tests": "live-server --port=5000 --wait=200 --watch=./built/*.max.js --open=\"./loaders/tests.html?debug=1&theme=dark&test=*\" --browser=CHROME",
     "test": "npm run watch:tests"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.ts": [
+      "npm run lint"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ca0v/ol3-fun.git"
@@ -43,6 +53,8 @@
     "@ca0v/ceylon": "github:ca0v/ceylon#v1.0.2",
     "@types/jquery": "^3.5.8",
     "esbuild": "^0.13.14",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.0.3",
     "live-server": "^1.2.1",
     "npm-run-all": "^4.1.5",
     "ol": "^6.9.0",
