@@ -17,6 +17,7 @@
     "lint:examples": "tsc examples/index.ts --noEmit --allowJs --skipLibCheck",
     "lint:it": "tsc index.ts --noEmit --allowJs --skipLibCheck",
     "lint:tests": "tsc tests/index.ts --noEmit --allowJs --skipLibCheck",
+    "lint:all": "tsc index tests/index.ts examples/index.ts --noEmit --allowJs --skipLibCheck",
     "lint": "npm-run-all -p lint:it lint:tests lint:examples",
     "postinstall2": "npm run build:it",
     "precommit": "npm-run-all clean lint build test",
