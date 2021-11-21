@@ -3,7 +3,7 @@ import { run as goto } from "./goto";
 import { run as polyline } from "./polyline";
 import { run as zoomToFeature } from "./zoomToFeature";
 import { run as jsondiff } from "./jsondiff";
-import { getQueryParameters } from "ol3-fun/ol3-fun/common";
+import { getQueryParameters } from "../ol3-fun/common";
 
 const examples = {
   debounce,
